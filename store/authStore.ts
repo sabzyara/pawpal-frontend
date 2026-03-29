@@ -97,7 +97,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   
   logout: () => {
     set({ user: null, token: null });
-    router.replace('/(auth)/login');
+    router.replace('/(tabs)/login');
   },
   
   clearError: () => set({ error: null }),
