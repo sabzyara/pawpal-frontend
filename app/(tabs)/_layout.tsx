@@ -1,38 +1,41 @@
 import { Tabs } from "expo-router";
-import React from "react";
-
-import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { TouchableOpacity, Platform, Text } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: '#FFFFFF',
+          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+          paddingTop: 10,
+          height: Platform.OS === 'ios' ? 85 : 65,
+        },
+        tabBarActiveTintColor: '#9AAB63',
+        tabBarInactiveTintColor: '#999999',
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Pets",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="pawprint.fill" color={color} />
+          title: "Главная",
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 24, color }}>
+              {focused ? '🏠' : '🏠'}
+            </Text>
           ),
         }}
       />
 
       <Tabs.Screen
-        name="add"
+        name="profile"
         options={{
-          title: "Add",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="plus.circle.fill" color={color} />
+          title: "Профиль",
+          tabBarIcon: ({ color, focused }) => (
+            <Text style={{ fontSize: 24, color }}>
+              {focused ? '👤' : '👤'}
+            </Text>
           ),
         }}
       />
