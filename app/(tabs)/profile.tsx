@@ -46,21 +46,21 @@ export default function ProfileScreen() {
     );
   };
 
-//  const handleEditProfile = () => {
-//     router.push("/edit-profile");
-//   };
+ const handleEditProfile = () => {
+    router.push("/edit_profile");
+  };
 
-//   const handleMyPets = () => {
-//     router.push("/my-pets");
-//   };
+  const handleMyPets = () => {
+    router.push("/my_pets");
+  };
 
-//   const handleMyAppointments = () => {
-//     router.push("/my-appointments");
-//   };
+  const handleMyAppointments = () => {
+    router.push("/my_appointments");
+  };
 
-//   const handleSettings = () => {
-//     router.push("/settings");
-//   };
+  const handleSettings = () => {
+    router.push("/settings");
+  };
 
   const renderOwnerProfile = () => {
     const owner = profile?.petOwner;
