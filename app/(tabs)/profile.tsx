@@ -7,11 +7,16 @@ import {
   Image,
   Alert,
   RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useProfileStore } from '@/store/profileStore';
 import { Role } from '@/types/profile';
 import { profileStyles } from '@/styles/profileScreenStyles';
+
+const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -30,12 +35,12 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      "Выход из аккаунта",
-      "Вы уверены, что хотите выйти?",
+      "Logout",
+      "Are you sure you want to logout?",
       [
-        { text: "Отмена", style: "cancel" },
+        { text: "Cancel", style: "cancel" },
         { 
-          text: "Выйти", 
+          text: "Logout", 
           style: "destructive",
           onPress: () => {
             logout();
@@ -46,7 +51,7 @@ export default function ProfileScreen() {
     );
   };
 
- const handleEditProfile = () => {
+  const handleEditProfile = () => {
     router.push("/edit_profile");
   };
 
@@ -62,140 +67,267 @@ export default function ProfileScreen() {
     router.push("/settings");
   };
 
-  const renderOwnerProfile = () => {
-    const owner = profile?.petOwner;
-    return (
-      <View style={profileStyles.infoSection}>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>👤 Имя пользователя</Text>
-          <Text style={profileStyles.infoValue}>{owner?.username || "Не указано"}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>📞 Телефон</Text>
-          <Text style={profileStyles.infoValue}>{owner?.phoneNumber || "Не указан"}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>📍 Адрес</Text>
-          <Text style={profileStyles.infoValue}>{owner?.address || "Не указан"}</Text>
-        </View>
-      </View>
-    );
-  };
-
-  const renderVetProfile = () => {
-    const vet = profile?.veterinarian;
-    return (
-      <View style={profileStyles.infoSection}>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>👨‍⚕️ Имя</Text>
-          <Text style={profileStyles.infoValue}>{vet?.firstName} {vet?.lastName}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>📞 Телефон</Text>
-          <Text style={profileStyles.infoValue}>{vet?.phoneNumber || "Не указан"}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>🔬 Лицензия</Text>
-          <Text style={profileStyles.infoValue}>{vet?.licenseNumber || "Не указана"}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>🏥 Клиника</Text>
-          <Text style={profileStyles.infoValue}>{vet?.clinicName || "Не указана"}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>📅 Опыт работы</Text>
-          <Text style={profileStyles.infoValue}>{vet?.experienceYears || 0} лет</Text>
-        </View>
-      </View>
-    );
-  };
-
-  const renderServiceProfile = () => {
-    const service = profile?.serviceProvider;
-    return (
-      <View style={profileStyles.infoSection}>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>👤 Имя</Text>
-          <Text style={profileStyles.infoValue}>{service?.firstName} {service?.lastName}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>📞 Телефон</Text>
-          <Text style={profileStyles.infoValue}>{service?.phoneNumber || "Не указан"}</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>🛠️ Услуга</Text>
-          <Text style={profileStyles.infoValue}>{service?.serviceCategory || "Не указана"}</Text>
-        </View>
-      </View>
-    );
-  };
-
-  const renderAdminProfile = () => {
-    return (
-      <View style={profileStyles.infoSection}>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>👑 Роль</Text>
-          <Text style={profileStyles.infoValue}>Администратор</Text>
-        </View>
-        <View style={profileStyles.infoRow}>
-          <Text style={profileStyles.infoLabel}>📧 Email</Text>
-          <Text style={profileStyles.infoValue}>{profile?.user.email}</Text>
-        </View>
-      </View>
-    );
-  };
-
-  const renderProfileContent = () => {
-    if (!profile) return null;
-
-    switch (profile.user.role) {
+  const getRoleIcon = (): string => {
+    switch (profile?.user.role) {
       case Role.OWNER:
-        return renderOwnerProfile();
+        return "paw";
       case Role.VET:
-        return renderVetProfile();
+        return "stethoscope";
       case Role.SERVICE:
-        return renderServiceProfile();
+        return "tools";
       case Role.ADMIN:
-        return renderAdminProfile();
+        return "crown";
+      default:
+        return "user";
+    }
+  };
+
+  const getRoleName = (): string => {
+    switch (profile?.user.role) {
+      case Role.OWNER:
+        return "Pet Owner";
+      case Role.VET:
+        return "Veterinarian";
+      case Role.SERVICE:
+        return "Service Provider";
+      case Role.ADMIN:
+        return "Administrator";
+      default:
+        return "User";
+    }
+  };
+
+  const getDisplayName = (): string => {
+    if (profile?.petOwner?.username) return profile.petOwner.username;
+    if (profile?.veterinarian?.firstName) {
+      return `${profile.veterinarian.firstName} ${profile.veterinarian.lastName}`;
+    }
+    if (profile?.serviceProvider?.firstName) {
+      return `${profile.serviceProvider.firstName} ${profile.serviceProvider.lastName}`;
+    }
+    return profile?.user.email?.split('@')[0] || "User";
+  };
+
+  const getAvatarUrl = (): string => {
+    
+    const seed = getDisplayName() || "user";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
+  };
+
+  const getStats = () => {
+    switch (profile?.user.role) {
+      case Role.OWNER:
+        return [
+          { value: "12", label: "Pets", icon: "paw" },
+          { value: "24", label: "Appointments", icon: "calendar" },
+          { value: "4.8", label: "Rating", icon: "star" },
+        ];
+      case Role.VET:
+        return [
+          { value: "156", label: "Patients", icon: "users" },
+          { value: "8", label: "Years", icon: "clock" },
+          { value: "4.9", label: "Rating", icon: "star" },
+        ];
+      case Role.SERVICE:
+        return [
+          { value: "45", label: "Services", icon: "briefcase" },
+          { value: "98%", label: "Satisfaction", icon: "thumbs-up" },
+          { value: "4.7", label: "Rating", icon: "star" },
+        ];
+      default:
+        return [
+          { value: "1", label: "Role", icon: "shield" },
+          { value: "100%", label: "Access", icon: "check-circle" },
+          { value: "5.0", label: "Rating", icon: "star" },
+        ];
+    }
+  };
+
+  const renderOwnerInfo = () => {
+    const owner = profile?.petOwner;
+    const infoItems = [
+      { icon: "user", label: "Username", value: owner?.username || "Not specified" },
+      { icon: "phone", label: "Phone", value: owner?.phoneNumber || "Not specified" },
+      { icon: "map-pin", label: "Address", value: owner?.address || "Not specified" },
+    ];
+
+    return (
+      <View style={profileStyles.infoSection}>
+        <Text style={profileStyles.sectionTitle}>Personal Information</Text>
+        {infoItems.map((item, index) => (
+          <View key={index} style={profileStyles.infoCard}>
+            <View style={profileStyles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color="#FF6B6B" />
+            </View>
+            <View style={profileStyles.infoContent}>
+              <Text style={profileStyles.infoLabel}>{item.label}</Text>
+              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const renderVetInfo = () => {
+    const vet = profile?.veterinarian;
+    const infoItems = [
+      { icon: "user", label: "Full Name", value: `${vet?.firstName || ''} ${vet?.lastName || ''}`.trim() || "Not specified" },
+      { icon: "phone", label: "Phone", value: vet?.phoneNumber || "Not specified" },
+      { icon: "award", label: "License Number", value: vet?.licenseNumber || "Not specified" },
+      { icon: "home", label: "Clinic", value: vet?.clinicName || "Not specified" },
+      { icon: "clock", label: "Experience", value: `${vet?.experienceYears || 0} years` },
+    ];
+
+    return (
+      <View style={profileStyles.infoSection}>
+        <Text style={profileStyles.sectionTitle}>Professional Information</Text>
+        {infoItems.map((item, index) => (
+          <View key={index} style={profileStyles.infoCard}>
+            <View style={profileStyles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color="#4ECDC4" />
+            </View>
+            <View style={profileStyles.infoContent}>
+              <Text style={profileStyles.infoLabel}>{item.label}</Text>
+              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const renderServiceInfo = () => {
+    const service = profile?.serviceProvider;
+    const infoItems = [
+      { icon: "user", label: "Full Name", value: `${service?.firstName || ''} ${service?.lastName || ''}`.trim() || "Not specified" },
+      { icon: "phone", label: "Phone", value: service?.phoneNumber || "Not specified" },
+      { icon: "briefcase", label: "Service Category", value: service?.serviceCategory || "Not specified" },
+    ];
+
+    return (
+      <View style={profileStyles.infoSection}>
+        <Text style={profileStyles.sectionTitle}>Service Information</Text>
+        {infoItems.map((item, index) => (
+          <View key={index} style={profileStyles.infoCard}>
+            <View style={profileStyles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color="#FFE66D" />
+            </View>
+            <View style={profileStyles.infoContent}>
+              <Text style={profileStyles.infoLabel}>{item.label}</Text>
+              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const renderAdminInfo = () => {
+    const infoItems = [
+      { icon: "shield", label: "Role", value: "Administrator" },
+      { icon: "mail", label: "Email", value: profile?.user.email || "Not specified" },
+    ];
+
+    return (
+      <View style={profileStyles.infoSection}>
+        <Text style={profileStyles.sectionTitle}>Admin Information</Text>
+        {infoItems.map((item, index) => (
+          <View key={index} style={profileStyles.infoCard}>
+            <View style={profileStyles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color="#A8E6CF" />
+            </View>
+            <View style={profileStyles.infoContent}>
+              <Text style={profileStyles.infoLabel}>{item.label}</Text>
+              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
+  const renderRoleSpecificActions = () => {
+    switch (profile?.user.role) {
+      case Role.OWNER:
+        return (
+          <View style={profileStyles.actionsSection}>
+            <Text style={profileStyles.sectionTitle}>My Pets</Text>
+            <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyPets}>
+              <LinearGradient
+                colors={["#FF6B6B", "#FF8E8E"]}
+                style={profileStyles.actionGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={profileStyles.actionLeft}>
+                  <MaterialCommunityIcons name="paw" size={24} color="#FFF" />
+                  <View style={profileStyles.actionTextContainer}>
+                    <Text style={profileStyles.actionTitle}>My Pets</Text>
+                    <Text style={profileStyles.actionSubtitle}>Manage your furry friends</Text>
+                  </View>
+                </View>
+                <Feather name="chevron-right" size={20} color="#FFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyAppointments}>
+              <LinearGradient
+                colors={["#4ECDC4", "#6BE4DC"]}
+                style={profileStyles.actionGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={profileStyles.actionLeft}>
+                  <Feather name="calendar" size={24} color="#FFF" />
+                  <View style={profileStyles.actionTextContainer}>
+                    <Text style={profileStyles.actionTitle}>Appointments</Text>
+                    <Text style={profileStyles.actionSubtitle}>View your booking history</Text>
+                  </View>
+                </View>
+                <Feather name="chevron-right" size={20} color="#FFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        );
+      
+      case Role.VET:
+      case Role.SERVICE:
+        return (
+          <View style={profileStyles.actionsSection}>
+            <Text style={profileStyles.sectionTitle}>Work</Text>
+            <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyAppointments}>
+              <LinearGradient
+                colors={["#667EEA", "#764BA2"]}
+                style={profileStyles.actionGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <View style={profileStyles.actionLeft}>
+                  <Feather name="briefcase" size={24} color="#FFF" />
+                  <View style={profileStyles.actionTextContainer}>
+                    <Text style={profileStyles.actionTitle}>My Schedule</Text>
+                    <Text style={profileStyles.actionSubtitle}>Manage client appointments</Text>
+                  </View>
+                </View>
+                <Feather name="chevron-right" size={20} color="#FFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        );
+      
       default:
         return null;
-    }
-  };
-
-  const getRoleIcon = () => {
-    switch (profile?.user.role) {
-      case Role.OWNER:
-        return "🐾";
-      case Role.VET:
-        return "👨‍⚕️";
-      case Role.SERVICE:
-        return "🛠️";
-      case Role.ADMIN:
-        return "👑";
-      default:
-        return "👤";
-    }
-  };
-
-  const getRoleName = () => {
-    switch (profile?.user.role) {
-      case Role.OWNER:
-        return "Владелец питомца";
-      case Role.VET:
-        return "Ветеринар";
-      case Role.SERVICE:
-        return "Сервис-провайдер";
-      case Role.ADMIN:
-        return "Администратор";
-      default:
-        return "Пользователь";
     }
   };
 
   if (loading && !profile) {
     return (
       <View style={profileStyles.centerContainer}>
-        <Text style={profileStyles.loadingText}>Загрузка профиля...</Text>
+        <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.loadingGradient}>
+          <MaterialCommunityIcons name="paw" size={48} color="#FFF" />
+          <Text style={profileStyles.loadingText}>Loading profile...</Text>
+        </LinearGradient>
       </View>
     );
   }
@@ -203,157 +335,127 @@ export default function ProfileScreen() {
   if (error) {
     return (
       <View style={profileStyles.centerContainer}>
-        <Text style={profileStyles.errorText}>{error}</Text>
-        <TouchableOpacity style={profileStyles.retryButton} onPress={fetchProfile}>
-          <Text style={profileStyles.retryButtonText}>Повторить</Text>
-        </TouchableOpacity>
+        <View style={profileStyles.errorContainer}>
+          <Feather name="alert-circle" size={64} color="#FF6B6B" />
+          <Text style={profileStyles.errorText}>{error}</Text>
+          <TouchableOpacity style={profileStyles.retryButton} onPress={fetchProfile}>
+            <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.retryGradient}>
+              <Feather name="refresh-cw" size={20} color="#FFF" />
+              <Text style={profileStyles.retryButtonText}>Try Again</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 
+  const stats = getStats();
+
   return (
     <ScrollView 
       style={profileStyles.container}
+      showsVerticalScrollIndicator={false}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FF6B6B" />
       }
     >
-      {/* Header с аватаром */}
-      <View style={profileStyles.header}>
-        <View style={profileStyles.avatarContainer}>
-          <Image
-            source={{ uri: "https://i.pravatar.cc/150" }}
-            style={profileStyles.avatar}
-          />
+      {/* Header with Cover Photo */}
+      <View style={profileStyles.headerContainer}>
+        <LinearGradient
+          colors={["#FF6B6B", "#FF8E8E", "#FFB88C"]}
+          style={profileStyles.coverPhoto}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+        
+        <View style={profileStyles.avatarWrapper}>
+          <View style={profileStyles.avatarContainer}>
+            <Image
+              source={{ uri: getAvatarUrl() }}
+              style={profileStyles.avatar}
+            />
+            <View style={profileStyles.statusBadge}>
+              <View style={profileStyles.statusDot} />
+            </View>
+          </View>
           <View style={profileStyles.roleBadge}>
-            <Text style={profileStyles.roleIcon}>{getRoleIcon()}</Text>
+            <MaterialCommunityIcons name={getRoleIcon() as any} size={16} color="#FFF" />
           </View>
         </View>
-        <Text style={profileStyles.userName}>
-          {profile?.petOwner?.username || 
-           profile?.veterinarian?.firstName + " " + profile?.veterinarian?.lastName ||
-           profile?.serviceProvider?.firstName + " " + profile?.serviceProvider?.lastName ||
-           profile?.user.email}
-        </Text>
+
+        <Text style={profileStyles.userName}>{getDisplayName()}</Text>
         <Text style={profileStyles.userRole}>{getRoleName()}</Text>
         <Text style={profileStyles.userEmail}>{profile?.user.email}</Text>
       </View>
 
-      {/* Статистика */}
+      {/* Stats Cards */}
       <View style={profileStyles.statsContainer}>
-        <View style={profileStyles.statItem}>
-          <Text style={profileStyles.statNumber}>12</Text>
-          <Text style={profileStyles.statLabel}>Питомцев</Text>
-        </View>
-        <View style={profileStyles.statDivider} />
-        <View style={profileStyles.statItem}>
-          <Text style={profileStyles.statNumber}>24</Text>
-          <Text style={profileStyles.statLabel}>Записей</Text>
-        </View>
-        <View style={profileStyles.statDivider} />
-        <View style={profileStyles.statItem}>
-          <Text style={profileStyles.statNumber}>4.8</Text>
-          <Text style={profileStyles.statLabel}>Рейтинг</Text>
-        </View>
+        {stats.map((stat, index) => (
+          <View key={index} style={profileStyles.statCard}>
+            <LinearGradient
+              colors={["#FFFFFF", "#F8F9FA"]}
+              style={profileStyles.statGradient}
+            >
+              <View style={profileStyles.statIcon}>
+                <Feather name={stat.icon as any} size={24} color="#FF6B6B" />
+              </View>
+              <Text style={profileStyles.statNumber}>{stat.value}</Text>
+              <Text style={profileStyles.statLabel}>{stat.label}</Text>
+            </LinearGradient>
+          </View>
+        ))}
       </View>
 
-      {/* Информация о пользователе */}
-      {renderProfileContent()}
+      {/* Role Specific Information */}
+      {profile?.user.role === Role.OWNER && renderOwnerInfo()}
+      {profile?.user.role === Role.VET && renderVetInfo()}
+      {profile?.user.role === Role.SERVICE && renderServiceInfo()}
+      {profile?.user.role === Role.ADMIN && renderAdminInfo()}
 
-      {/* Кнопки для владельца питомца */}
-      {profile?.user.role === Role.OWNER && (
-        <View style={profileStyles.actionsSection}>
-          <Text style={profileStyles.sectionTitle}>Мои питомцы</Text>
-          
-          <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyPets}>
-            <View style={profileStyles.actionIcon}>
-              <Text style={profileStyles.actionIconText}>🐕</Text>
-            </View>
-            <View style={profileStyles.actionContent}>
-              <Text style={profileStyles.actionTitle}>Мои питомцы</Text>
-              <Text style={profileStyles.actionSubtitle}>
-                Просмотр и управление питомцами
-              </Text>
-            </View>
-            <Text style={profileStyles.actionArrow}>→</Text>
-          </TouchableOpacity>
+      {/* Role Specific Actions */}
+      {renderRoleSpecificActions()}
 
-          <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyAppointments}>
-            <View style={profileStyles.actionIcon}>
-              <Text style={profileStyles.actionIconText}>📅</Text>
-            </View>
-            <View style={profileStyles.actionContent}>
-              <Text style={profileStyles.actionTitle}>Записи</Text>
-              <Text style={profileStyles.actionSubtitle}>
-                История записей к специалистам
-              </Text>
-            </View>
-            <Text style={profileStyles.actionArrow}>→</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Кнопки для специалистов */}
-      {(profile?.user.role === Role.VET || profile?.user.role === Role.SERVICE) && (
-        <View style={profileStyles.actionsSection}>
-          <Text style={profileStyles.sectionTitle}>Работа</Text>
-          
-          <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyAppointments}>
-            <View style={profileStyles.actionIcon}>
-              <Text style={profileStyles.actionIconText}>📋</Text>
-            </View>
-            <View style={profileStyles.actionContent}>
-              <Text style={profileStyles.actionTitle}>Мои записи</Text>
-              <Text style={profileStyles.actionSubtitle}>
-                Расписание и записи клиентов
-              </Text>
-            </View>
-            <Text style={profileStyles.actionArrow}>→</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Общие настройки */}
+      {/* Settings Section */}
       <View style={profileStyles.actionsSection}>
-        <Text style={profileStyles.sectionTitle}>Настройки</Text>
+        <Text style={profileStyles.sectionTitle}>Settings</Text>
         
-        <TouchableOpacity style={profileStyles.actionCard} onPress={handleEditProfile}>
-          <View style={profileStyles.actionIcon}>
-            <Text style={profileStyles.actionIconText}>✏️</Text>
+        <TouchableOpacity style={profileStyles.settingItem} onPress={handleEditProfile}>
+          <View style={profileStyles.settingLeft}>
+            <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.settingIcon}>
+              <Feather name="edit-2" size={18} color="#FFF" />
+            </LinearGradient>
+            <View>
+              <Text style={profileStyles.settingTitle}>Edit Profile</Text>
+              <Text style={profileStyles.settingSubtitle}>Update your personal information</Text>
+            </View>
           </View>
-          <View style={profileStyles.actionContent}>
-            <Text style={profileStyles.actionTitle}>Редактировать профиль</Text>
-            <Text style={profileStyles.actionSubtitle}>
-              Изменить личную информацию
-            </Text>
-          </View>
-          <Text style={profileStyles.actionArrow}>→</Text>
+          <Feather name="chevron-right" size={20} color="#CCC" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={profileStyles.actionCard} onPress={handleSettings}>
-          <View style={profileStyles.actionIcon}>
-            <Text style={profileStyles.actionIconText}>⚙️</Text>
+        <TouchableOpacity style={profileStyles.settingItem} onPress={handleSettings}>
+          <View style={profileStyles.settingLeft}>
+            <LinearGradient colors={["#4ECDC4", "#6BE4DC"]} style={profileStyles.settingIcon}>
+              <Feather name="settings" size={18} color="#FFF" />
+            </LinearGradient>
+            <View>
+              <Text style={profileStyles.settingTitle}>Settings</Text>
+              <Text style={profileStyles.settingSubtitle}>Notifications, language & more</Text>
+            </View>
           </View>
-          <View style={profileStyles.actionContent}>
-            <Text style={profileStyles.actionTitle}>Настройки</Text>
-            <Text style={profileStyles.actionSubtitle}>
-              Уведомления, язык и другое
-            </Text>
-          </View>
-          <Text style={profileStyles.actionArrow}>→</Text>
+          <Feather name="chevron-right" size={20} color="#CCC" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={[profileStyles.actionCard, profileStyles.logoutCard]} onPress={handleLogout}>
-          <View style={profileStyles.actionIcon}>
-            <Text style={profileStyles.actionIconText}>🚪</Text>
+        <TouchableOpacity style={[profileStyles.settingItem, profileStyles.logoutItem]} onPress={handleLogout}>
+          <View style={profileStyles.settingLeft}>
+            <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.settingIcon}>
+              <Feather name="log-out" size={18} color="#FFF" />
+            </LinearGradient>
+            <View>
+              <Text style={[profileStyles.settingTitle, profileStyles.logoutText]}>Logout</Text>
+              <Text style={profileStyles.settingSubtitle}>Sign out from your account</Text>
+            </View>
           </View>
-          <View style={profileStyles.actionContent}>
-            <Text style={[profileStyles.actionTitle, profileStyles.logoutText]}>Выйти</Text>
-            <Text style={profileStyles.actionSubtitle}>
-              Выйти из аккаунта
-            </Text>
-          </View>
-          <Text style={profileStyles.actionArrow}>→</Text>
+          <Feather name="chevron-right" size={20} color="#CCC" />
         </TouchableOpacity>
       </View>
 
