@@ -1,12 +1,12 @@
-// app/(tabs)/my_pets.tsx
+// app/(tabs)/notifications.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { ThemedView } from '@/components/themed-view';
 
-export default function MyPetsScreen() {
+export default function NotificationsScreen() {
   return (
     <ThemedView style={styles.container}>
-      <Text>My Pets Screen</Text>
+      <Text>Notifications Screen</Text>
     </ThemedView>
   );
 }
