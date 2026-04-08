@@ -1,240 +1,305 @@
-import { StyleSheet, Platform } from "react-native";
+import { StyleSheet, Platform, Dimensions } from "react-native";
 
-export const colors = {
-  primary: "#9AAB63",
-  secondary: "#F5B8DB",
-  tertiary: "#B6CAEB",
-  accent: "#F5D867",
-  background: "#FBF4E6",
-  white: "#FFFFFF",
-  black: "#333333",
-  gray: "#999999",
-  lightGray: "#F0F0F0",
-  error: "#FF6B6B",
-  success: "#9AAB63",
-};
+const { width, height } = Dimensions.get("window");
 
 export const profileStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: "#F8F9FA",
   },
+
+  // Loading & Error States
   centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    backgroundColor: "#F8F9FA",
   },
-  
-  // Header
-  header: {
-    backgroundColor: colors.primary,
+  loadingGradient: {
+    padding: 32,
+    borderRadius: 24,
     alignItems: "center",
-    paddingTop: 40,
-    paddingBottom: 30,
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: "#FFF",
+    fontWeight: "600",
+  },
+  errorContainer: {
+    alignItems: "center",
+    gap: 16,
+    padding: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
+  retryButton: {
+    marginTop: 8,
+  },
+  retryGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  retryButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  // Header Section
+  headerContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  coverPhoto: {
+    width: width,
+    height: 150,
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
+  avatarWrapper: {
+    marginTop: -50,
+    marginBottom: 12,
+  },
   avatarContainer: {
     position: "relative",
-    marginBottom: 15,
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 3,
-    borderColor: colors.white,
+    borderWidth: 4,
+    borderColor: "#FFF",
+    backgroundColor: "#FFF",
+  },
+  statusBadge: {
+    position: "absolute",
+    bottom: 5,
+    right: 5,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#4ECDC4",
+    borderWidth: 2,
+    borderColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#FFF",
   },
   roleBadge: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: colors.accent,
-    borderRadius: 20,
-    width: 36,
-    height: 36,
+    bottom: -5,
+    right: -5,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FF6B6B",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: colors.white,
-  },
-  roleIcon: {
-    fontSize: 20,
+    borderColor: "#FFF",
   },
   userName: {
     fontSize: 24,
-    fontWeight: "bold",
-    color: colors.white,
-    marginBottom: 5,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginTop: 8,
   },
   userRole: {
     fontSize: 14,
-    color: colors.white,
-    opacity: 0.9,
-    marginBottom: 3,
+    color: "#FF6B6B",
+    fontWeight: "600",
+    marginTop: 4,
   },
   userEmail: {
     fontSize: 12,
-    color: colors.white,
-    opacity: 0.8,
+    color: "#999",
+    marginTop: 4,
   },
-  
-  // Stats
+
+  // Stats Section
   statsContainer: {
     flexDirection: "row",
-    backgroundColor: colors.white,
-    marginHorizontal: 20,
-    marginTop: -20,
-    borderRadius: 16,
-    paddingVertical: 15,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
+    justifyContent: "space-around",
+    paddingHorizontal: 20,
+    marginBottom: 28,
+    gap: 12,
   },
-  statItem: {
+  statCard: {
     flex: 1,
+  },
+  statGradient: {
     alignItems: "center",
+    padding: 16,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  statIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#FFF0F0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 8,
   },
   statNumber: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: colors.primary,
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1A1A1A",
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: colors.gray,
-  },
-  statDivider: {
-    width: 1,
-    backgroundColor: colors.lightGray,
-  },
-  
-  // Info Section
-  infoSection: {
-    backgroundColor: colors.white,
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 16,
-    padding: 16,
-  },
-  infoRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.lightGray,
-  },
-  infoLabel: {
-    fontSize: 14,
-    color: colors.gray,
-  },
-  infoValue: {
-    fontSize: 14,
+    color: "#666",
     fontWeight: "500",
-    color: colors.black,
   },
-  
-  // Actions Section
-  actionsSection: {
-    marginHorizontal: 20,
-    marginTop: 20,
+
+  // Information Sections
+  infoSection: {
+    paddingHorizontal: 20,
+    marginBottom: 28,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: colors.black,
-    marginBottom: 12,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 16,
     paddingLeft: 4,
   },
-  actionCard: {
+  infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.white,
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 1,
-      },
-    }),
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  actionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.tertiary + "30",
+  infoIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#F8F9FA",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 12,
   },
-  actionIconText: {
-    fontSize: 22,
-  },
-  actionContent: {
+  infoContent: {
     flex: 1,
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: "#999",
+    marginBottom: 2,
+  },
+  infoValue: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1A1A1A",
+  },
+
+  // Action Cards
+  actionsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 28,
+  },
+  actionCard: {
+    marginBottom: 12,
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  actionGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+  },
+  actionLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  actionTextContainer: {
+    gap: 4,
   },
   actionTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: colors.black,
-    marginBottom: 2,
+    fontWeight: "700",
+    color: "#FFF",
   },
   actionSubtitle: {
     fontSize: 12,
-    color: colors.gray,
+    color: "#FFF",
+    opacity: 0.9,
   },
-  actionArrow: {
-    fontSize: 18,
-    color: colors.gray,
+
+  // Settings Items
+  settingItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFF",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  logoutCard: {
-    backgroundColor: colors.error + "10",
+  settingLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
   },
-  logoutText: {
-    color: colors.error,
+  settingIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  
-  // Loading & Error
-  loadingText: {
-    fontSize: 16,
-    color: colors.gray,
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    marginBottom: 15,
-    textAlign: "center",
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: colors.white,
+  settingTitle: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#1A1A1A",
+    marginBottom: 2,
   },
-  
+  settingSubtitle: {
+    fontSize: 12,
+    color: "#999",
+  },
+  logoutItem: {
+    backgroundColor: "#FFF5F5",
+  },
+  logoutText: {
+    color: "#FF6B6B",
+  },
+
+  // Bottom Spacing
   bottomSpacing: {
-    height: 30,
+    height: 40,
   },
 });
