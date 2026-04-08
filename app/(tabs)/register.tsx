@@ -111,7 +111,7 @@ export default function RegisterScreen() {
       Alert.alert(
         'Успешно!',
         'Регистрация прошла успешно',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+        [{ text: 'OK', onPress: () => router.replace('/(tabs)/home_page') }]
       );
     }
   };
