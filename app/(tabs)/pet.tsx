@@ -123,10 +123,12 @@ export default function PetProfileScreen() {
   });
 
   useEffect(() => {
-    // Fetch pet data based on id
-    console.log("Fetching pet data for id:", id);
-  }, [id]);
+  if (!id) return; 
 
+  console.log("Fetching pet data for id:", id);
+
+  // потом тут будет реальный fetch
+}, [id]);
   const onRefresh = async () => {
     setRefreshing(true);
     // Simulate data fetch
