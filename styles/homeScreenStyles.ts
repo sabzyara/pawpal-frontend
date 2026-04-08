@@ -1,241 +1,346 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform, Dimensions } from "react-native";
 
-export const colors = {
-  primary: "#4CAF50",
-  primaryDark: "#388E3C",
-  accent: "#ff9800",
-  background: "#f5f5f5",
-  white: "#fff",
-  black: "#000",
-  gray: "#gray",
-  grayLight: "#555",
-  grayMedium: "#e3f2fd",
-  success: "#4CAF50",
-  warning: "#ff9800",
-  textPrimary: "#000",
-  textSecondary: "#555",
-  textLight: "#fff",
-  border: "#e0e0e0",
-};
+const { width, height } = Dimensions.get("window");
 
-export const spacing = {
-  xs: 4,
-  sm: 6,
-  md: 10,
-  lg: 12,
-  xl: 15,
-  xxl: 20,
-  xxxl: 30,
-  tiny: 10,
-  small: 14,
-  medium: 16, // для средних отступов
-  large: 18, // для больших отступов
-};
-
-export const typography = {
-  title: {
-    fontSize: 20,
-    fontWeight: "600" as const,
+export const styles = StyleSheet.create({
+  // Container
+  safe: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "600" as const,
-  },
-  body: {
-    fontSize: 16,
-    fontWeight: "500" as const,
-  },
-  small: {
-    fontSize: 14,
-  },
-  extraSmall: {
-    fontSize: 12,
-  },
-  tiny: {
-    fontSize: 11,
-  },
-};
-
-export const borderRadius = {
-  sm: 8,
-  md: 12,
-  lg: 20,
-  xl: 30,
-  round: 999,
-};
-
-export const shadows = {
-  small: {
-    elevation: 2,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-  medium: {
-    elevation: 3,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-};
-
-export const homeScreenStyles = StyleSheet.create({
-  // Контейнеры
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-  },
-  contentContainer: {
-    padding: spacing.xxl,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
   },
 
-  // Профиль пользователя
-  userSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: spacing.xxl,
-  },
-  userAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: borderRadius.xl,
-  },
-  userName: {
-    marginLeft: spacing.xl,
-    fontSize: typography.title.fontSize,
-    fontWeight: typography.title.fontWeight,
-  },
-
-  // Секции
-  sectionTitle: {
-    fontSize: typography.subtitle.fontSize,
-    fontWeight: typography.subtitle.fontWeight,
-    marginBottom: spacing.md,
-  },
-  sectionTitleWithMargin: {
-    fontSize: typography.subtitle.fontSize,
-    fontWeight: typography.subtitle.fontWeight,
-    marginTop: spacing.xxl,
-    marginBottom: spacing.md,
-  },
-
-  // Питомцы
-  petsList: {
-    marginBottom: spacing.sm,
-  },
-  petCard: {
-    backgroundColor: colors.white,
-    padding: spacing.xl,
-    borderRadius: borderRadius.md,
-    marginRight: spacing.md,
-    minWidth: 100,
-    alignItems: "center",
-    ...shadows.medium,
-  },
-  petCardSelected: {
-    backgroundColor: colors.primary,
-  },
-  petEmoji: {
-    fontSize: 24,
-    marginBottom: spacing.xs,
-  },
-  petName: {
-    fontWeight: "normal",
-    color: colors.black,
-  },
-  petNameSelected: {
-    fontWeight: "bold",
-    color: colors.textLight,
-  },
-  selectedBadge: {
-    fontSize: spacing.tiny,
-    color: colors.textLight,
-    marginTop: spacing.xs,
-  },
-
-  // Кнопка сброса фильтра
-  resetFilterButton: {
-    marginTop: spacing.md,
-    alignSelf: "flex-start",
-    backgroundColor: colors.warning,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.lg,
-  },
-  resetFilterText: {
-    color: colors.textLight,
-    fontSize: spacing.tiny,
-  },
-
-  // Карточки событий
-  eventCard: {
-    backgroundColor: colors.white,
-    padding: spacing.xl,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
+  // Header Section
+  headerSection: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    ...shadows.small,
+    marginTop: Platform.OS === "ios" ? 10 : 20,
+    marginBottom: 24,
   },
-  eventTitle: {
-    fontSize: typography.body.fontSize,
-    fontWeight: typography.body.fontWeight,
+  greeting: {
+    fontSize: 14,
+    color: "#666",
+    fontFamily: Platform.OS === "ios" ? "SF Pro Text" : "Roboto",
   },
-  eventTime: {
-    color: colors.gray,
-    marginTop: spacing.xs,
+  userName: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginTop: 4,
+    fontFamily: Platform.OS === "ios" ? "SF Pro Display" : "Roboto",
   },
-  eventPetName: {
-    color: colors.primary,
-    fontSize: typography.extraSmall.fontSize,
-    marginTop: spacing.xs,
+  notificationIcon: {
+    position: "relative",
+    padding: 8,
+    backgroundColor: "#FFF",
+    borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  eventIcon: {
-    fontSize: 24,
+  notificationBadge: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: "#FFF",
+  },
+  badgeText: {
+    color: "#FFF",
+    fontSize: 10,
+    fontWeight: "700",
   },
 
-  // Пустое состояние
-  emptyState: {
-    backgroundColor: colors.white,
-    padding: spacing.xxxl,
-    borderRadius: borderRadius.md,
+  // Stats Cards
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 28,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    borderRadius: 20,
+    padding: 16,
     alignItems: "center",
-    ...shadows.small,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#FFF",
+    marginTop: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#FFF",
+    marginTop: 4,
+    opacity: 0.9,
+    fontWeight: "500",
+  },
+
+  // Section Common
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: "#FF6B6B",
+    fontWeight: "600",
+  },
+
+  // Calendar Section
+  calendarSection: {
+    marginBottom: 28,
+  },
+  calendarRow: {
+    flexDirection: "row",
+    gap: 12,
+    paddingVertical: 4,
+  },
+  dayCard: {
+    width: 70,
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 20,
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  dayCardActive: {
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  dayText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 4,
+  },
+  dayTextActive: {
+    color: "#FFF",
+  },
+  dateText: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  dateTextActive: {
+    color: "#FFF",
+  },
+  activeIndicator: {
+    position: "absolute",
+    bottom: -8,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#FF6B6B",
+  },
+
+  // Pets Section
+  petsSection: {
+    marginBottom: 28,
+  },
+  petCard: {
+    width: 110,
+    alignItems: "center",
+    padding: 12,
+    borderRadius: 24,
+    marginRight: 12,
+    backgroundColor: "#FFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  petImageContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    overflow: "hidden",
+    marginBottom: 8,
+    borderWidth: 3,
+    borderColor: "#FF6B6B",
+  },
+  petImage: {
+    width: "100%",
+    height: "100%",
+  },
+  petName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    marginBottom: 4,
+  },
+  petStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#4ECDC4",
+  },
+  petStatusText: {
+    fontSize: 10,
+    color: "#999",
+  },
+
+  // Schedule Section
+  scheduleSection: {
+    marginBottom: 28,
+  },
+  scheduleCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  completedCard: {
+    opacity: 0.7,
+  },
+  scheduleLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxActive: {
+    backgroundColor: "#FFF",
+  },
+  scheduleIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scheduleInfo: {
+    flex: 1,
+  },
+  scheduleTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFF",
+    marginBottom: 4,
+  },
+  completedText: {
+    textDecorationLine: "line-through",
+  },
+  scheduleTime: {
+    fontSize: 12,
+    color: "#FFF",
+    opacity: 0.9,
+    marginBottom: 2,
+  },
+  schedulePet: {
+    fontSize: 12,
+    color: "#FFF",
+    opacity: 0.8,
+  },
+  chevron: {
+    opacity: 0.8,
+  },
+
+  // Empty State
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: 48,
+    backgroundColor: "#FFF",
+    borderRadius: 24,
+    gap: 12,
   },
   emptyStateText: {
-    fontSize: typography.small.fontSize,
-    color: colors.gray,
+    fontSize: 16,
+    color: "#999",
+    fontWeight: "500",
+  },
+  addTaskButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#FF6B6B",
+    borderRadius: 20,
+  },
+  addTaskText: {
+    color: "#FFF",
+    fontWeight: "600",
   },
 
-  // Специалисты
-  specialistsGrid: {
+  // Learn Card
+  learnCard: {
+    borderRadius: 24,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  learnContent: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.md,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  specialistCard: {
-    backgroundColor: colors.grayMedium,
-    padding: spacing.lg,
-    borderRadius: borderRadius.md,
-    width: "48%",
-    marginBottom: spacing.md,
-    ...shadows.small,
+  learnTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#FFF",
+    marginBottom: 4,
   },
-  specialistName: {
-    fontSize: typography.body.fontSize,
-    marginBottom: spacing.xs,
-  },
-  specialistDescription: {
-    fontSize: typography.tiny.fontSize,
-    color: colors.grayLight,
-    marginTop: spacing.xs,
-  },
-
-  // Дополнительные
-  bottomSpacing: {
-    height: spacing.xxl,
+  learnSubtitle: {
+    fontSize: 12,
+    color: "#FFF",
+    opacity: 0.9,
   },
 });

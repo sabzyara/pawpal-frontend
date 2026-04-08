@@ -2,237 +2,275 @@ import { StyleSheet, Platform, Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-export const colors = {
-  primary: "#9AAB63",
-  secondary: "#F5B8DB",
-  tertiary: "#B6CAEB",
-  accent: "#F5D867",
-  background: "#FBF4E6",
-  white: "#FFFFFF",
-  black: "#333333",
-  gray: "#999999",
-  error: "#FF6B6B",
-  success: "#9AAB63",
-  overlay: "rgba(0, 0, 0, 0.5)",
-};
-
-export const addScreenStyles = StyleSheet.create({
-  // Затемненный фон
-  overlay: {
+export const addPetStyles = StyleSheet.create({
+  container: {
     flex: 1,
-    backgroundColor: colors.overlay,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "#F8F9FA",
   },
   keyboardView: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
+    flex: 1,
   },
-  
-  // Центральная карточка
-  modalCard: {
-    width: width * 0.9,
-    maxWidth: 400,
-    maxHeight: height * 0.85,
-    backgroundColor: colors.background,
-    borderRadius: 24,
-    overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.25,
-        shadowRadius: 20,
-      },
-      android: {
-        elevation: 10,
-      },
-    }),
+  safeArea: {
+    flex: 1,
   },
-  
-  // Кнопка закрытия
-  closeIcon: {
-    position: "absolute",
-    top: 15,
-    right: 15,
-    zIndex: 10,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.white,
-    justifyContent: "center",
-    alignItems: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.black,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  closeIconText: {
-    fontSize: 18,
-    color: colors.gray,
-    fontWeight: "600",
-  },
-  
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
-  },
-  
-  // Header внутри карточки
+
+  // Header
   header: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingTop: 30,
-    paddingBottom: 20,
+    justifyContent: "space-between",
     paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 10 : 20,
+    paddingBottom: 16,
+    backgroundColor: "#F8F9FA",
     borderBottomWidth: 1,
-    borderBottomColor: colors.tertiary,
-    backgroundColor: colors.white,
+    borderBottomColor: "#F0F0F0",
   },
-  headerEmoji: {
-    fontSize: 48,
-    marginBottom: 10,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  placeholder: {
+    width: 40,
+  },
+
+  scrollContent: {
+    paddingBottom: 40,
+  },
+
+  // Avatar Section
+  avatarSection: {
+    alignItems: "center",
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  avatarContainer: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  avatarGradient: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: "#FFF",
+  },
+  avatar: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+  },
+  avatarText: {
+    fontSize: 12,
+    color: "#FFF",
+    marginTop: 4,
+    fontWeight: "500",
+  },
+
+  // Welcome Card
+  welcomeCard: {
+    marginHorizontal: 20,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 24,
+    alignItems: "center",
+    shadowColor: "#667EEA",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  welcomeTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#FFF",
+    marginTop: 12,
     marginBottom: 8,
   },
-  headerSubtitle: {
+  welcomeSubtitle: {
     fontSize: 14,
-    color: colors.gray,
+    color: "#FFF",
+    opacity: 0.9,
     textAlign: "center",
   },
-  
-  // Form
-  form: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+
+  // Form Section
+  formSection: {
+    backgroundColor: "#FFF",
+    marginHorizontal: 20,
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  inputGroup: {
-    marginBottom: 16,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 20,
+  },
+
+  inputWrapper: {
+    marginBottom: 20,
+  },
+  inputHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
   },
   label: {
     fontSize: 14,
     fontWeight: "600",
-    color: colors.black,
-    marginBottom: 8,
+    color: "#1A1A1A",
   },
   required: {
-    color: colors.error,
-    fontSize: 14,
+    color: "#FF6B6B",
   },
   input: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.tertiary,
-    borderRadius: 12,
-    paddingHorizontal: 15,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 15,
-    color: colors.black,
+    fontSize: 16,
+    color: "#1A1A1A",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
   },
   textArea: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.tertiary,
-    borderRadius: 12,
-    paddingHorizontal: 15,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    fontSize: 15,
-    color: colors.black,
-    minHeight: 80,
+    fontSize: 16,
+    color: "#1A1A1A",
+    minHeight: 100,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
     textAlignVertical: "top",
   },
-  
-  // Gender
+
+  row: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
+
+  // Gender Selection
   genderContainer: {
     flexDirection: "row",
     gap: 12,
   },
   genderButton: {
     flex: 1,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.tertiary,
-    borderRadius: 12,
-    paddingVertical: 10,
-    alignItems: "center",
+    overflow: "hidden",
+    borderRadius: 16,
   },
-  genderButtonActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
+  genderGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+    position: "relative",
+  },
+  genderEmoji: {
+    fontSize: 20,
   },
   genderText: {
     fontSize: 14,
-    color: colors.black,
+    fontWeight: "600",
+    color: "#666",
   },
   genderTextActive: {
-    color: colors.white,
-    fontWeight: "600",
+    color: "#FFF",
   },
-  
-  // Row
-  row: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 0,
+  genderButtonActive: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  halfWidth: {
-    flex: 1,
+  checkmark: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  
+
   // Buttons
   buttonContainer: {
     flexDirection: "row",
-    paddingHorizontal: 20,
-    marginTop: 20,
-    marginBottom: 10,
     gap: 12,
+    marginHorizontal: 20,
+    marginBottom: 20,
   },
   cancelButton: {
     flex: 1,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.gray,
-    borderRadius: 12,
-    paddingVertical: 12,
+    backgroundColor: "#FFF",
+    paddingVertical: 14,
+    borderRadius: 16,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FF6B6B",
   },
   cancelButtonText: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "600",
-    color: colors.gray,
+    color: "#FF6B6B",
   },
   saveButton: {
-    flex: 1,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 12,
+    flex: 2,
+    overflow: "hidden",
+    borderRadius: 16,
+    shadowColor: "#FF6B6B",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveGradient: {
+    flexDirection: "row",
     alignItems: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.primary,
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    justifyContent: "center",
+    paddingVertical: 14,
+    gap: 8,
   },
   saveButtonText: {
-    fontSize: 15,
-    fontWeight: "bold",
-    color: colors.white,
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFF",
   },
 });
