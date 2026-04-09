@@ -16,6 +16,7 @@ import { ScheduleSection } from '@/components/home/ScheduleSection';
 import { LearnCard } from '@/components/home/LearnCard';
 import { createHomeStyles } from '@/styles/homeStyles';
 import { ScheduleItem, SCHEDULE_TYPES_CONFIG } from '@/types/home_index';
+import { FloatingChatButton } from '@/components/home/FloatingChatButton';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
@@ -109,6 +110,9 @@ export default function HomeScreen() {
           <LearnCard onPress={() => router.push("/learn")} />
         </View>
       </ScrollView>
+
+      <FloatingChatButton />
+      
     </SafeAreaView>
   );
 }
