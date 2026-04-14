@@ -8,17 +8,22 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  StyleSheet,
+  Image,
   Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/authStore';
-import { loginStyles } from '@/styles/loginStyles';
+import { styles } from '@/styles/loginStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async () => {
@@ -26,42 +31,56 @@ export default function LoginScreen() {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
       return;
     }
-    
+
     const success = await login({ email, password });
     if (success) {
       router.replace('/(tabs)');
     }
   };
 
-  const handleRegister = () => {
-    router.push('/(tabs)/register');
-  };
-
   return (
+    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
     <KeyboardAvoidingView
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={loginStyles.container}
     >
-      <ScrollView contentContainerStyle={loginStyles.scrollContent}>
-        <View style={loginStyles.header}>
-          <Text style={loginStyles.logo}>🐾</Text>
-          <Text style={loginStyles.title}>PawPal</Text>
-          <Text style={loginStyles.subtitle}>Ваш помощник в уходе за питомцами</Text>
-        </View>
+      <View style={{ flex: 1, backgroundColor: '#F5F6FA' }}>
 
-        <View style={loginStyles.form}>
-          {error && (
-            <View style={loginStyles.errorContainer}>
-              <Text style={loginStyles.errorText}>{error}</Text>
-            </View>
-          )}
+        {/* 🔮 HEADER */}
+     <LinearGradient
+  colors={['#7A2E4D', '#E06387']}
+  style={styles.header}
+>
+  <View style={styles.logoWrapper}>
+    <Image
+      source={require('@/assets/images/logo.png')}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  </View>
 
-          <View style={loginStyles.inputGroup}>
-            <Text style={loginStyles.label}>Email</Text>
+  <Text style={styles.title}>PawPal</Text>
+  <Text style={styles.subtitle}>
+    Ваш помощник в уходе за питомцами
+  </Text>
+</LinearGradient>
+
+        {/* 🧾 CARD */}
+        <ScrollView contentContainerStyle={styles.card}>
+          <View style={styles.form}>
+
+            {/* ERROR */}
+            {error && (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            )}
+
+            {/* EMAIL */}
             <TextInput
-              style={loginStyles.input}
-              placeholder="example@mail.com"
-              placeholderTextColor="#B6CAEB"
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#999"
               value={email}
               onChangeText={(text) => {
                 clearError();
@@ -70,15 +89,13 @@ export default function LoginScreen() {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-          </View>
 
-          <View style={loginStyles.inputGroup}>
-            <Text style={loginStyles.label}>Пароль</Text>
-            <View style={loginStyles.passwordContainer}>
+            {/* PASSWORD */}
+            <View style={styles.passwordContainer}>
               <TextInput
-                style={[loginStyles.input, loginStyles.passwordInput]}
-                placeholder="••••••••"
-                placeholderTextColor="#B6CAEB"
+                style={styles.input}
+                placeholder="Пароль"
+                placeholderTextColor="#999"
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={(text) => {
@@ -86,35 +103,41 @@ export default function LoginScreen() {
                   setPassword(text);
                 }}
               />
+
               <TouchableOpacity
-                style={loginStyles.eyeButton}
+                style={styles.eye}
                 onPress={() => setShowPassword(!showPassword)}
               >
                 <Text>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
               </TouchableOpacity>
             </View>
-          </View>
 
-          <TouchableOpacity
-            style={loginStyles.loginButton}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={loginStyles.loginButtonText}>Войти</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={loginStyles.registerContainer}>
-            <Text style={loginStyles.registerText}>Нет аккаунта? </Text>
-            <TouchableOpacity onPress={handleRegister}>
-              <Text style={loginStyles.registerLink}>Зарегистрироваться</Text>
+            {/* BUTTON */}
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Войти</Text>
+              )}
             </TouchableOpacity>
+
+            {/* REGISTER */}
+            <View style={styles.registerRow}>
+              <Text style={styles.registerText}>Нет аккаунта? </Text>
+              <TouchableOpacity onPress={() => router.push('/(tabs)/register')}>
+                <Text style={styles.registerLink}>Зарегистрироваться</Text>
+              </TouchableOpacity>
+            </View>
+
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+
+      </View>
     </KeyboardAvoidingView>
+  </SafeAreaView>
   );
 }

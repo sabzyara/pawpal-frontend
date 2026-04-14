@@ -3,139 +3,134 @@ import { StyleSheet, Platform, Dimensions } from "react-native";
 const { width, height } = Dimensions.get("window");
 
 export const colors = {
-  primary: "#9AAB63",
-  secondary: "#F5B8DB",
-  tertiary: "#B6CAEB",
-  accent: "#F5D867",
-  background: "#FBF4E6",
-  white: "#FFFFFF",
-  black: "#333333",
-  gray: "#999999",
-  lightGray: "#F0F0F0",
+  primary: "#7A2E4D",      // бордовый (главный)
+  secondary: "#E06387",    // розовый (акцент)
+  background: "#FDF7F9",   // светлый розоватый
+  card: "#FFFFFF",
+  text: "#2A1A22",
+  gray: "#9A8A92",
+  border: "#F1D6DF",
   error: "#FF6B6B",
-  success: "#9AAB63",
+  button: "#7A2E4D",
 };
 
-export const loginStyles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-  },
-  
-  // Header
+ export const styles = StyleSheet.create({
   header: {
-    alignItems: "center",
-    marginBottom: 48,
+    height: 260,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 20,
   },
-  logo: {
-    fontSize: 80,
-    marginBottom: 16,
-  },
+
+  logoWrapper: {
+  width: 110,
+  height: 110,
+  borderRadius: 55,
+  backgroundColor: '#FFFFFF', // 💥 ВАЖНО
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginBottom: 16,
+
+  shadowColor: '#000',
+  shadowOpacity: 0.15,
+  shadowRadius: 15,
+  elevation: 6,
+},
+
+logo: {
+  width: 70,
+  height: 70,
+},
+
   title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 8,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
   },
+
   subtitle: {
     fontSize: 14,
-    color: colors.gray,
-    textAlign: "center",
+    color: '#E0E0FF',
+    textAlign: 'center',
   },
-  
-  // Form
+
+  card: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+    marginTop: -60,
+  },
+
   form: {
-    width: "100%",
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 6,
   },
-  errorContainer: {
-    backgroundColor: colors.error + "20",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: colors.error,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 14,
-    textAlign: "center",
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.black,
-    marginBottom: 8,
-  },
+
   input: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.tertiary,
+    backgroundColor: '#F5F6FA',
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    padding: 15,
+    marginBottom: 15,
     fontSize: 16,
-    color: colors.black,
   },
+
   passwordContainer: {
-    position: "relative",
+    position: 'relative',
   },
-  passwordInput: {
-    paddingRight: 50,
+
+  eye: {
+    position: 'absolute',
+    right: 15,
+    top: 15,
   },
-  eyeButton: {
-    position: "absolute",
-    right: 16,
-    top: 14,
-  },
-  
-  // Button
-  loginButton: {
-    backgroundColor: colors.primary,
+
+  button: {
+    backgroundColor: '#7A2E4D',
+    padding: 16,
     borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: "center",
+    alignItems: 'center',
     marginTop: 10,
-    marginBottom: 24,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.primary,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
   },
-  loginButtonText: {
+
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: "bold",
-    color: colors.white,
+  },
+
+  registerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+
+  registerText: {
+    color: '#999',
+  },
+
+  registerLink: {
+    color: '#7A2E4D',
+    fontWeight: '600',
+  },
+
+  errorBox: {
+    backgroundColor: '#FF6B6B20',
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+
+  errorText: {
+    color: '#FF6B6B',
+    textAlign: 'center',
   },
   
-  // Register link
-  registerContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  registerText: {
-    fontSize: 14,
-    color: colors.gray,
-  },
-  registerLink: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.primary,
-  },
 });
