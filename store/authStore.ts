@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { RegisterData, LoginData, AuthResponse } from '@/types/auth';
 import { router } from 'expo-router';
 import api from '@/services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface AuthStore {
   user: AuthResponse['user'] | null;
@@ -13,6 +14,7 @@ interface AuthStore {
   login: (data: LoginData) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
+  loadUser: () => Promise<void>; // 👈 ДОБАВИЛИ
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -21,7 +23,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isLoading: false,
   error: null,
 
-  // 🔐 LOGIN (РЕАЛЬНЫЙ)
+  // 🔥 ЗАГРУЗКА TOKEN ПРИ СТАРТЕ
+  loadUser: async () => {
+    const token = await AsyncStorage.getItem("token");
+
+    if (token) {
+      set({ token });
+    }
+  },
+
+  // 🔐 LOGIN
   login: async (data: LoginData) => {
     set({ isLoading: true, error: null });
 
@@ -30,11 +41,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
       console.log("LOGIN RESPONSE:", response.data);
 
-      set({
-        user: response.data.user,
-        token: response.data.token,
-        isLoading: false,
-      });
+      const token = response.data; 
+
+  await AsyncStorage.setItem("token", token);
+
+  set({
+  user: null, // пока нет user
+  token: token,
+  isLoading: false,
+});
 
       return true;
     } catch (error: any) {
@@ -51,12 +66,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  // 📝 REGISTER (пока можно оставить мок или тоже подключить API)
+  // 📝 REGISTER
   register: async (data: RegisterData) => {
     set({ isLoading: true, error: null });
 
     try {
       const response = await api.post("/user-service/auth/register", data);
+
+      await AsyncStorage.setItem("token", response.data.token);
 
       set({
         user: response.data.user,
@@ -77,7 +94,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  logout: () => {
+  logout: async () => {
+    await AsyncStorage.removeItem("token"); // 👈 очистка
     set({ user: null, token: null });
     router.replace('/(tabs)/login');
   },

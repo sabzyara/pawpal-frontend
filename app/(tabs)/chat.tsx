@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuthStore } from '@/store/authStore';
 
 type Message = {
   id: string;
@@ -31,8 +32,15 @@ export default function ChatScreen() {
 
   const [input, setInput] = useState('');
 
+  const token = useAuthStore(state => state.token);
+
   const sendMessage = async () => {
   if (!input.trim()) return;
+
+   if (!token) {
+    console.log("NO TOKEN");
+    return;
+  }
 
   const userMessage: Message = {
     id: Date.now().toString(),
@@ -53,7 +61,7 @@ export default function ChatScreen() {
 
   try {
     const response = await fetch(
-      "https://pawpal-gateway.onrender.com/ai/chat",
+      "https://pawpal-ai-analytics.onrender.com/ai/chat",
       {
         method: "POST",
         headers: {
@@ -62,19 +70,29 @@ export default function ChatScreen() {
         body: JSON.stringify({
           message: userMessage.text,
           petId: "1",
-          token: "",
+          token: token,
         }),
       }
     );
+    console.log("STATUS:", response.status);
 
     const data = await response.json();
+    console.log("AI RESPONSE:", data);
 
     // ❗ удаляем loading
     setMessages(prev => prev.filter(m => m.id !== "loading"));
 
     const aiMessage: Message = {
       id: (Date.now() + 1).toString(),
-      text: data.response || data.answer || "No response 😢",
+      text:
+      typeof data === "string"
+    ? data
+    : data.response ||
+      data.answer ||
+      data.result ||
+      data.message ||
+      data.text ||
+      JSON.stringify(data),
       isUser: false,
     };
 
