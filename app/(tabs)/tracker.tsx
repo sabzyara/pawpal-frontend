@@ -4,6 +4,7 @@
 import { CalendarSection } from '@/components/home/Calendar';
 import Donut from '@/components/tracker/Donut';
 import { useTheme } from '@/hooks/useTheme';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -63,7 +64,10 @@ export default function TrackerScreen() {
         {/* CONTENT */}
         {tab === 'nutrition' ? (
           <>
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => router.push('/edit-nutrition')}
+            >
               <Text style={styles.cardTitle}>Kibble</Text>
               <View style={styles.innerCard}>
                 <View style={styles.innerCardTitle}>
@@ -72,41 +76,65 @@ export default function TrackerScreen() {
                   </View>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => router.push('/edit-nutrition')}
+            >
               <Text style={styles.cardTitle}>Kibble</Text>
               <View style={styles.innerCard}>
                 <View style={styles.innerCardTitle}>
                   <Text>30g</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.addButton}
+                onPress={() => router.push('/add-nutrition')}
+            >
+              <Text style={styles.addButtonText}>+ Add Nutrition</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <>
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => router.push('/edit-activity')}
+            >
               <Text style={styles.cardTitle}>Run</Text>
               <View style={styles.innerCard}>
                 <View style={styles.innerCardTitle}>
                   <Text>5 min</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
 
-            <View style={styles.card}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => router.push('/edit-activity')}
+            >
               <Text style={styles.cardTitle}>Play</Text>
               <View style={styles.innerCard}>
                 <View style={styles.innerCardTitle}>
                   <Text>10 min</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => router.push('/add-activity')}
+            >
+              <Text style={styles.addButtonText}>+ Add Activity</Text>
+            </TouchableOpacity>
           </>
         )}
-
+        
       </ScrollView>
     </SafeAreaView>
+
   );
 }
 const styles = StyleSheet.create({
@@ -188,4 +216,18 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     color: '#fff',
   },
+
+  addButton: {
+  backgroundColor: '#FF6B6B',
+  padding: 14,
+  borderRadius: 16,
+  alignItems: 'center',
+},
+
+addButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '700',
+},
+
 });
