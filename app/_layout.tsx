@@ -36,7 +36,7 @@ export default function RootLayout() {
           />
 
           <Stack.Screen
-            name="add-activity"
+            name="activity-form"
             options={{
               presentation: 'transparentModal', 
               headerShown: false,
@@ -44,11 +44,10 @@ export default function RootLayout() {
           />
 
           <Stack.Screen
-            name="add-nutrition"
+            name="nutrition-form"
             options={{
               presentation: 'transparentModal',
               headerShown: false,
-              // animation: 'none',
             }}
           />
 
