@@ -25,12 +25,10 @@ export default function TrackerScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <ScrollView contentContainerStyle={styles.content}>
 
-        {/* TITLE */}
         <Text style={[styles.title, { color: colors.text.primary }]}>
           {tab === 'nutrition' ? 'Nutrition Tracker' : 'Activity Tracker'}
         </Text>
 
-        {/* TABS (без Appointment) */}
         <View style={styles.tabs}>
           <TouchableOpacity
             style={[styles.tab, tab === 'nutrition' && styles.activeTab]}
@@ -47,13 +45,11 @@ export default function TrackerScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* DAY SWITCH */}
         <CalendarSection
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
         />
 
-        {/* CIRCLE */}
         <View style={{ marginBottom: 20 }}>
           <Donut
             value={tab === 'nutrition' ? 1250 : 75}
@@ -61,12 +57,16 @@ export default function TrackerScreen() {
           />
         </View>
 
-        {/* CONTENT */}
         {tab === 'nutrition' ? (
           <>
             <TouchableOpacity
               style={styles.card}
-              onPress={() => router.push('/edit-nutrition')}
+              onPress={() => router.push({pathname: '/nutrition-form', 
+                params: {
+                  mode: 'edit',
+                  id: 1,
+                  meal: 'Kibble',
+                  calories: '120',},})}
             >
               <Text style={styles.cardTitle}>Kibble</Text>
               <View style={styles.innerCard}>
@@ -80,7 +80,12 @@ export default function TrackerScreen() {
 
             <TouchableOpacity
               style={styles.card}
-              onPress={() => router.push('/edit-nutrition')}
+              onPress={() => router.push({pathname: '/nutrition-form' as const, 
+                params: {
+                  mode: 'edit',
+                  id: '1',
+                  meal: 'Kibble',
+                  calories: '120',},})}
             >
               <Text style={styles.cardTitle}>Kibble</Text>
               <View style={styles.innerCard}>
@@ -92,7 +97,7 @@ export default function TrackerScreen() {
 
             <TouchableOpacity
                 style={styles.addButton}
-                onPress={() => router.push('/add-nutrition')}
+                onPress={() => router.push('/nutrition-form?mode=add' as const)}
             >
               <Text style={styles.addButtonText}>+ Add Nutrition</Text>
             </TouchableOpacity>
@@ -101,7 +106,13 @@ export default function TrackerScreen() {
           <>
             <TouchableOpacity
               style={styles.card}
-              onPress={() => router.push('/edit-activity')}
+              onPress={() => router.push({ pathname: '/activity-form' as const,
+                params: {
+                  mode: 'edit',
+                  id: '1',
+                  type: 'Run',
+                  distance: '5',
+                  duration: '20',},})}
             >
               <Text style={styles.cardTitle}>Run</Text>
               <View style={styles.innerCard}>
@@ -113,7 +124,13 @@ export default function TrackerScreen() {
 
             <TouchableOpacity
               style={styles.card}
-              onPress={() => router.push('/edit-activity')}
+              onPress={() => router.push({ pathname: '/activity-form' as const,
+                params: {
+                  mode: 'edit',
+                  id: '1',
+                  type: 'Run',
+                  distance: '5',
+                  duration: '20',},})}
             >
               <Text style={styles.cardTitle}>Play</Text>
               <View style={styles.innerCard}>
@@ -125,7 +142,7 @@ export default function TrackerScreen() {
 
             <TouchableOpacity
               style={styles.addButton}
-              onPress={() => router.push('/add-activity')}
+              onPress={() => router.push('/activity-form?mode=add' as const)}
             >
               <Text style={styles.addButtonText}>+ Add Activity</Text>
             </TouchableOpacity>
