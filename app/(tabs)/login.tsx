@@ -17,6 +17,8 @@ import { router } from 'expo-router';
 import { useAuthStore } from '@/store/authStore';
 import { styles } from '@/styles/loginStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import api from '@/services/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function LoginScreen() {
@@ -25,18 +27,40 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { login, isLoading, error, clearError } = useAuthStore();
+const handleLogin = async () => {
+  if (!email.trim() || !password.trim()) {
+    Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
+    return;
+  }
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
-      return;
-    }
+  const success = await login({ email, password });
 
-    const success = await login({ email, password });
-    if (success) {
-      router.replace('/(tabs)');
+  if (success) {
+  try {
+    const token = await AsyncStorage.getItem("token");
+
+    await api.get('/pet-management/api/pet-owners/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // ✅ профиль есть
+    router.replace('/(tabs)');
+    
+  } catch (e: any) {
+    if (e.response?.status === 404) {
+      // ❗ профиля нет
+      router.replace('/(tabs)/complete_profile');
+    } else if (e.response?.status === 401) {
+      Alert.alert('Ошибка', 'Проблема с авторизацией');
+    } else {
+      console.log(e);
+      Alert.alert('Ошибка', 'Не удалось проверить профиль');
     }
-  };
+  }
+  }
+};
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>

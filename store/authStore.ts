@@ -66,34 +66,40 @@ export const useAuthStore = create<AuthStore>((set) => ({
     }
   },
 
-  // 📝 REGISTER
-  register: async (data: RegisterData) => {
-    set({ isLoading: true, error: null });
+register: async (data: RegisterData) => {
+  set({ isLoading: true, error: null });
 
-    try {
-      const response = await api.post("/user-service/auth/register", data);
+  try {
+    await api.post("/user-service/auth/register", data);
 
-      await AsyncStorage.setItem("token", response.data.token);
+    // 🔥 сразу логинимся
+    const loginRes = await api.post("/user-service/auth/login", {
+      email: data.email,
+      password: data.password,
+    });
 
-      set({
-        user: response.data.user,
-        token: response.data.token,
-        isLoading: false,
-      });
+    const token = loginRes.data;
 
-      return true;
-    } catch (error: any) {
-      set({
-        error:
-          error.response?.data?.message ||
-          "Ошибка регистрации",
-        isLoading: false,
-      });
+    await AsyncStorage.setItem("token", token);
 
-      return false;
-    }
-  },
+    set({
+      token,
+      user: null,
+      isLoading: false,
+    });
 
+    return true;
+  } catch (error: any) {
+    set({
+      error:
+        error.response?.data?.message ||
+        "Ошибка регистрации",
+      isLoading: false,
+    });
+
+    return false;
+  }
+},
   logout: async () => {
     await AsyncStorage.removeItem("token"); // 👈 очистка
     set({ user: null, token: null });

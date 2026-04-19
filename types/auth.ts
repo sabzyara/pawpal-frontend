@@ -8,16 +8,13 @@ export enum Role {
 export interface RegisterData {
   email: string;
   password: string;
-  phoneNumber: string;
   role: Role;
-  username?: string;
+}
+
+export interface CompleteProfileData {
+  username: string;
+  phoneNumber: string;
   address?: string;
-  firstName?: string;
-  lastName?: string;
-  licenseNumber?: string;
-  clinicName?: string;
-  experienceYears?: number;
-  serviceCategory?: string;
 }
 
 export interface LoginData {
