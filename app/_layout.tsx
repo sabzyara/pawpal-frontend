@@ -9,8 +9,8 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useEffect } from "react";
 import { useAuthStore } from "@/store/authStore"; // 👈 ДОБАВИЛИ
+import { useEffect } from "react";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -34,6 +34,23 @@ export default function RootLayout() {
             name="modal"
             options={{ presentation: "modal", title: "Modal" }}
           />
+
+          <Stack.Screen
+            name="activity-form"
+            options={{
+              presentation: 'transparentModal', 
+              headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="nutrition-form"
+            options={{
+              presentation: 'transparentModal',
+              headerShown: false,
+            }}
+          />
+
         </Stack>
       </PetProvider>
       <StatusBar style="auto" />
