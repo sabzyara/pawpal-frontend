@@ -1,6 +1,5 @@
 
 // app/(tabs)/tracker.tsx
-// import { TrackerColors } from '@/constants/theme';
 import { CalendarSection } from '@/components/home/Calendar';
 import Donut from '@/components/tracker/Donut';
 import { useTheme } from '@/hooks/useTheme';
