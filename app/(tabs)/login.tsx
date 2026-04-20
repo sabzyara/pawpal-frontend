@@ -26,6 +26,38 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+
+
+type RoleRoute = {
+  endpoint: string;
+  complete:
+    | "/(tabs)/complete_profile"
+    | "/(tabs)/complete_vet"
+    | "/(tabs)/complete_service";
+};
+
+const getRouteByRole = (role: string): RoleRoute | null => {
+  switch (role) {
+    case 'OWNER':
+      return {
+        endpoint: '/pet-management/api/pet-owners/me',
+        complete: '/(tabs)/complete_profile',
+      };
+    case 'VET':
+      return {
+        endpoint: '/specialist-service/api/veterinarians/me',
+        complete: '/(tabs)/complete_vet',
+      };
+    case 'SERVICE':
+      return {
+        endpoint: '/specialist-service/api/service-providers/me',
+        complete: '/(tabs)/complete_service',
+      };
+    default:
+      return null;
+  }
+};
+
   const { login, isLoading, error, clearError } = useAuthStore();
 const handleLogin = async () => {
   if (!email.trim() || !password.trim()) {
@@ -36,29 +68,56 @@ const handleLogin = async () => {
   const success = await login({ email, password });
 
   if (success) {
-  try {
-    const token = await AsyncStorage.getItem("token");
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+  Alert.alert("Ошибка", "Нет токена");
+  return;
+}
+      // 🔥 получаем роль
+      const me = await api.get('/user-service/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    await api.get('/pet-management/api/pet-owners/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const role = me.data.role?.name || me.data.role;
 
-    // ✅ профиль есть
-    router.replace('/(tabs)');
-    
-  } catch (e: any) {
-    if (e.response?.status === 404) {
-      // ❗ профиля нет
-      router.replace('/(tabs)/complete_profile');
-    } else if (e.response?.status === 401) {
-      Alert.alert('Ошибка', 'Проблема с авторизацией');
-    } else {
+      const config = getRouteByRole(role);
+
+      if (!config) {
+        Alert.alert("Ошибка", "Неизвестная роль");
+        return;
+      }
+
+      try {
+        // 🔥 проверяем профиль
+        await api.get(config.endpoint,  {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // ✅ профиль есть
+        router.replace('/(tabs)');
+
+      } catch (e: any) {
+        if (e.response?.status === 404) {
+          // ❗ профиля нет → нужный экран
+          router.replace(config.complete);
+        } else if (e.response?.status === 401) {
+  Alert.alert("Ошибка", "Сессия истекла");
+  router.replace('/(tabs)/login');
+}else {
+          console.log(e);
+          Alert.alert('Ошибка', 'Ошибка проверки профиля');
+        }
+      }
+
+    } catch (e) {
       console.log(e);
-      Alert.alert('Ошибка', 'Не удалось проверить профиль');
+      Alert.alert('Ошибка', 'Не удалось получить данные пользователя');
     }
-  }
   }
 };
 
