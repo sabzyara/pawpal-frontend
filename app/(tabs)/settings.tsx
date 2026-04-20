@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/useTheme';
+import { useThemeStore } from '@/store/themeStore';
 import React, { useState } from 'react';
 import {
   StyleSheet,
@@ -12,8 +13,12 @@ import {
 export default function SettingsScreen() {
   const { colors, isDark } = useTheme();
 
-  const [darkMode, setDarkMode] = useState(isDark);
   const [notifications, setNotifications] = useState(true);
+
+  const theme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
+
+const darkMode = theme === 'dark';
 
   return (
     <ThemedView style={styles.container}>
@@ -22,10 +27,9 @@ export default function SettingsScreen() {
       </ThemedText>
 
       <Section title="Preferences">
-        <SwitchItem
-          title="Dark Mode"
+        <SwitchItem title="Dark Mode"
           value={darkMode}
-          onValueChange={setDarkMode}
+          onValueChange={(value) => setTheme(value ? 'dark' : 'light')}
         />
 
         <SwitchItem
@@ -67,7 +71,13 @@ function Item({ title, onPress, danger }: any) {
   );
 }
 
-function SwitchItem({ title, value, onValueChange }: any) {
+type SwitchItemProps = {
+  title: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+};
+
+function SwitchItem({ title, value, onValueChange }: SwitchItemProps) {
   return (
     <View style={styles.item}>
       <ThemedText style={styles.itemText}>{title}</ThemedText>

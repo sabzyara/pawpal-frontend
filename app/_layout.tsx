@@ -8,25 +8,34 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { useAuthStore } from "@/store/authStore"; // 👈 ДОБАВИЛИ
+import { useTheme } from '@/hooks/useTheme';
+import { useAuthStore } from "@/store/authStore";
+import { useThemeStore } from '@/store/themeStore';
 import { useEffect } from "react";
+
 
 export const unstable_settings = {
   anchor: "(tabs)",
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
 
-  const loadUser = useAuthStore(state => state.loadUser); // 👈 ДОБАВИЛИ
+  const loadUser = useAuthStore(state => state.loadUser); 
 
   useEffect(() => {
-    loadUser(); // 👈 ВАЖНО
+    loadUser();
+  }, []);
+
+  const { theme } = useTheme();
+
+  const loadTheme = useThemeStore((s) => s.loadTheme);
+
+  useEffect(() => {
+    loadTheme();
   }, []);
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
       <PetProvider>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
