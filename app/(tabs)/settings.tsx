@@ -71,7 +71,13 @@ function Item({ title, onPress, danger }: any) {
   );
 }
 
-function SwitchItem({ title, value, onValueChange }: any) {
+type SwitchItemProps = {
+  title: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+};
+
+function SwitchItem({ title, value, onValueChange }: SwitchItemProps) {
   return (
     <View style={styles.item}>
       <ThemedText style={styles.itemText}>{title}</ThemedText>
