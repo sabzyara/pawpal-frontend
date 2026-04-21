@@ -1,113 +1,136 @@
 import { create } from 'zustand';
-import { UserProfile, Role, UserStatus } from '@/types/profile';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '@/services/api';
+import { UserProfile } from '@/types/profile';
 
 interface ProfileStore {
   profile: UserProfile | null;
   loading: boolean;
   error: string | null;
-  
-  // Actions
+
   fetchProfile: () => Promise<void>;
-  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
-  logout: () => void;
+  updateProfile: (data: any) => Promise<void>;
+  logout: () => Promise<void>;
 }
-
-// Mock данные для разных ролей
-const mockOwnerProfile: UserProfile = {
-  user: {
-    id: 1,
-    email: "owner@pawpal.kz",
-    role: Role.OWNER,
-    status: UserStatus.ACTIVE,
-    createdAt: "2024-01-15T10:00:00"
-  },
-  petOwner: {
-    id: 1,
-    userId: 1,
-    username: "Сабина",
-    phoneNumber: "+7 777 123 4567",
-    address: "г. Алматы, ул. Абая 123"
-  }
-};
-
-const mockVetProfile: UserProfile = {
-  user: {
-    id: 2,
-    email: "vet@pawpal.kz",
-    role: Role.VET,
-    status: UserStatus.ACTIVE,
-    createdAt: "2024-01-20T10:00:00"
-  },
-  veterinarian: {
-    vetId: 1,
-    userId: 2,
-    firstName: "Айгерим",
-    lastName: "Нуржанова",
-    phoneNumber: "+7 777 987 6543",
-    licenseNumber: "VET-2024-001",
-    clinicName: "ЗооВет Клиника",
-    experienceYears: 8
-  }
-};
-
-const mockServiceProfile: UserProfile = {
-  user: {
-    id: 3,
-    email: "service@pawpal.kz",
-    role: Role.SERVICE,
-    status: UserStatus.ACTIVE,
-    createdAt: "2024-02-01T10:00:00"
-  },
-  serviceProvider: {
-    serviceProviderId: 1,
-    userId: 3,
-    firstName: "Мадина",
-    lastName: "Ахметова",
-    phoneNumber: "+7 775 555 1234",
-    serviceCategory: "GROOMER"
-  }
-};
 
 export const useProfileStore = create<ProfileStore>((set, get) => ({
   profile: null,
   loading: false,
   error: null,
-  
+
+  // 🔥 ГЛАВНЫЙ МЕТОД
   fetchProfile: async () => {
-    set({ loading: true, error: null });
-    
     try {
-      // Имитация API запроса
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Для демонстрации используем профиль владельца
-      // В реальном приложении выбор зависит от авторизованного пользователя
-      set({ profile: mockOwnerProfile, loading: false });
-    } catch (error) {
-      set({ error: "Ошибка загрузки профиля", loading: false });
-    }
-  },
-  
-  updateProfile: async (data) => {
-    set({ loading: true });
-    
-    try {
-      // Имитация обновления
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const currentProfile = get().profile;
-      if (currentProfile) {
-        set({ 
-          profile: { ...currentProfile, ...data },
-          loading: false 
-        });
+      set({ loading: true, error: null });
+
+      const token = await AsyncStorage.getItem('token');
+
+      if (!token) {
+        throw new Error('No token');
       }
-    } catch (error) {
-      set({ error: "Ошибка обновления профиля", loading: false });
+
+      // 1️⃣ получаем USER
+      const userRes = await api.get('/user-service/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const user = userRes.data;
+
+      let petOwner = null;
+      let veterinarian = null;
+      let serviceProvider = null;
+
+      // 2️⃣ по роли тянем профиль
+      if (user.role === 'OWNER') {
+        try {
+          const res = await api.get('/pet-management/api/pet-owners/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          petOwner = res.data;
+        } catch (e) {
+          console.log('OWNER profile not found');
+        }
+      }
+
+      if (user.role === 'VET') {
+        try {
+          const res = await api.get('/specialist-service/api/veterinarians/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          veterinarian = res.data;
+        } catch (e) {
+          console.log('VET profile not found');
+        }
+      }
+
+      if (user.role === 'SERVICE') {
+        try {
+          const res = await api.get('/specialist-service/api/service-providers/me', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          serviceProvider = res.data;
+        } catch (e) {
+          console.log('SERVICE profile not found');
+        }
+      }
+
+      // 3️⃣ собираем профиль
+      const fullProfile: UserProfile = {
+        user,
+        petOwner,
+        veterinarian,
+        serviceProvider,
+      };
+
+      set({
+        profile: fullProfile,
+        loading: false,
+      });
+
+    } catch (e: any) {
+      console.log('❌ PROFILE ERROR:', e?.response?.data || e.message);
+
+      set({
+        error: 'Не удалось загрузить профиль',
+        loading: false,
+      });
     }
   },
-  
-  logout: () => {
-    set({ profile: null });
-  }
+
+  // ✏️ обновление профиля (пока простое)
+  updateProfile: async (data) => {
+    try {
+      set({ loading: true });
+
+      const current = get().profile;
+
+      if (!current) return;
+
+      set({
+        profile: {
+          ...current,
+          ...data,
+        },
+        loading: false,
+      });
+
+    } catch {
+      set({
+        error: 'Ошибка обновления',
+        loading: false,
+      });
+    }
+  },
+
+  // 🚪 logout
+  logout: async () => {
+    await AsyncStorage.removeItem('token');
+
+    set({
+      profile: null,
+      error: null,
+    });
+  },
 }));

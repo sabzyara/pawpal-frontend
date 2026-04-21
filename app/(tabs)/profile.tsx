@@ -24,8 +24,31 @@ export default function ProfileScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+  const load = async () => {
+    await fetchProfile();
+  };
+  load();
+}, []);
+
+useEffect(() => {
+  if (!profile) return;
+
+  const role = profile.user.role;
+
+  // ❗ если профиль не заполнен — редирект
+  if (role === Role.OWNER && !profile.petOwner) {
+    router.replace('/(tabs)/complete_profile');
+  }
+
+  if (role === Role.VET && !profile.veterinarian) {
+    router.replace('/(tabs)/complete_vet');
+  }
+
+  if (role === Role.SERVICE && !profile.serviceProvider) {
+    router.replace('/(tabs)/complete_service');
+  }
+
+}, [profile]);
 
   const onRefresh = async () => {
     setRefreshing(true);
