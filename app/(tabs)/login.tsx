@@ -20,6 +20,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '@/services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,6 +59,8 @@ export default function LoginScreen() {
     }
   };
 
+
+
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
@@ -82,6 +85,7 @@ export default function LoginScreen() {
           },
         });
 
+
         const role = me.data.role?.name || me.data.role;
         const config = getRouteByRole(role);
 
@@ -102,6 +106,8 @@ export default function LoginScreen() {
           await fetchProfile(); // 🔥 ГЛАВНЫЙ ФИКС
 
           router.replace('/(tabs)');
+
+      
 
         } catch (e: any) {
           if (e.response?.status === 404) {
