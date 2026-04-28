@@ -19,19 +19,21 @@ interface ThemeContext {
 
 export const useTheme = (): ThemeContext => {
   const systemScheme = useColorScheme();
-  const selectedTheme = useThemeStore((s) => s.theme); // 👈 из store
 
-  // 🔥 логика выбора темы
+  const selectedTheme = useThemeStore((s) => s.theme);
+
   const theme: ThemeType =
     selectedTheme === 'system'
-      ? (systemScheme === 'dark' ? 'dark' : 'light')
+      ? systemScheme === 'dark'
+        ? 'dark'
+        : 'light'
       : selectedTheme;
 
-  const colors = Colors[theme];
+  const colors: ThemeColors = Colors[theme];
 
   return {
     theme,
-    colors: colors as ThemeColors,
+    colors,
     typography: Typography,
     spacing: Spacing,
     shadows: Shadows,
