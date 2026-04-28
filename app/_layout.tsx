@@ -12,6 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from '@/store/themeStore';
 import { useEffect } from "react";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 export const unstable_settings = {
@@ -35,34 +36,36 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-      <PetProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modal"
-            options={{ presentation: "modal", title: "Modal" }}
-          />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+        <PetProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: "modal", title: "Modal" }}
+            />
 
-          <Stack.Screen
-            name="activity-form"
-            options={{
-              presentation: 'transparentModal', 
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="activity-form"
+              options={{
+                presentation: 'transparentModal', 
+                headerShown: false,
+              }}
+            />
 
-          <Stack.Screen
-            name="nutrition-form"
-            options={{
-              presentation: 'transparentModal',
-              headerShown: false,
-            }}
-          />
+            <Stack.Screen
+              name="nutrition-form"
+              options={{
+                presentation: 'transparentModal',
+                headerShown: false,
+              }}
+            />
 
-        </Stack>
-      </PetProvider>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+          </Stack>
+        </PetProvider>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }
