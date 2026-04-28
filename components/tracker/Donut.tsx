@@ -10,7 +10,6 @@ type Props = {
 };
 
 export default function Donut({ value, max, label }: Props) {
-    
   const radius = 80;
   const strokeWidth = 40;
   const circumference = 2 * Math.PI * radius;
@@ -18,15 +17,15 @@ export default function Donut({ value, max, label }: Props) {
   const progress = value / max;
   const strokeDashoffset = circumference - circumference * progress;
 
-    const { colors } = useTheme();
-  
+  const { colors } = useTheme();
 
   return (
     <View style={styles.container}>
       <Svg width={200} height={200}>
+        
         {/* Background (remaining) */}
         <Circle
-          stroke="#FFC7C7"
+          stroke={colors.tracker.secondary} // 🔥 вместо хардкода
           fill="none"
           cx="100"
           cy="100"
@@ -34,9 +33,9 @@ export default function Donut({ value, max, label }: Props) {
           strokeWidth={strokeWidth}
         />
 
-        {/* Progress (consumed/done) */}
+        {/* Progress */}
         <Circle
-          stroke="#FF6B6B"
+          stroke={colors.tracker.primary} // 🔥 вместо хардкода
           fill="none"
           cx="100"
           cy="100"
@@ -50,11 +49,18 @@ export default function Donut({ value, max, label }: Props) {
         />
       </Svg>
 
-      {/* Center text */}
       <View style={styles.center}>
-        <Text style={[styles.value, { color: colors.text.primary }]}>{value}</Text>
-        <Text style={[styles.max, { color: colors.text.secondary }]}>{max}</Text>
-        {label && <Text style={styles.label}>{label}</Text>}
+        <Text style={[styles.value, { color: colors.text.primary }]}>
+          {value}
+        </Text>
+        <Text style={[styles.max, { color: colors.text.secondary }]}>
+          {max}
+        </Text>
+        {label && (
+          <Text style={[styles.label, { color: colors.text.tertiary }]}>
+            {label}
+          </Text>
+        )}
       </View>
     </View>
   );

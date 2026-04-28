@@ -1,24 +1,26 @@
+import { useTheme } from '@/hooks/useTheme';
+import api from '@/services/api';
+import { useAuthStore } from '@/store/authStore';
+import { useProfileStore } from '@/store/profileStore';
+import { styles } from '@/styles/loginStyles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
+
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
-  Image,
-  Alert,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
-import { useAuthStore } from '@/store/authStore';
-import { useProfileStore } from '@/store/profileStore'; // 🔥 ДОБАВИЛИ
-import { styles } from '@/styles/loginStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import api from '@/services/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 export default function LoginScreen() {
@@ -27,7 +29,8 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const { login, isLoading, error, clearError } = useAuthStore();
-  const { fetchProfile } = useProfileStore(); // 🔥 ДОБАВИЛИ
+  const { fetchProfile } = useProfileStore();
+  const { colors } = useTheme();
 
   type RoleRoute = {
     endpoint: string;
@@ -78,7 +81,6 @@ export default function LoginScreen() {
           return;
         }
 
-        // 🔥 получаем пользователя
         const me = await api.get('/user-service/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -95,15 +97,13 @@ export default function LoginScreen() {
         }
 
         try {
-          // 🔥 проверяем профиль
           await api.get(config.endpoint, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           });
 
-          // ✅ ПРОФИЛЬ ЕСТЬ → СРАЗУ ГРУЗИМ
-          await fetchProfile(); // 🔥 ГЛАВНЫЙ ФИКС
+          await fetchProfile(); 
 
           router.replace('/(tabs)');
 
@@ -129,96 +129,102 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1 , backgroundColor: colors.background.primary}} edges={['top']}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={{ flex: 1, backgroundColor: '#F5F6FA' }}>
+        <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
 
-          <LinearGradient
-            colors={['#7A2E4D', '#E06387']}
-            style={styles.header}
+
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              alignItems: 'center', 
+            }}
+            keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.logoWrapper}>
-              <Image
-                source={require('@/assets/images/logo.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-            </View>
-
-            <Text style={styles.title}>PawPal</Text>
-            <Text style={styles.subtitle}>
-              Ваш помощник в уходе за питомцами
-            </Text>
-          </LinearGradient>
-
-          <ScrollView contentContainerStyle={styles.card}>
-            <View style={styles.form}>
-
-              {error && (
-                <View style={styles.errorBox}>
-                  <Text style={styles.errorText}>{error}</Text>
+              <LinearGradient
+                colors={['#7A2E4D', '#E06387']}
+                style={[styles.header, { width: '100%' }]}
+              >
+                <View style={styles.logoWrapper}>
+                  <Image
+                    source={require('@/assets/images/logo.png')}
+                    style={styles.logo}
+                    resizeMode="contain"
+                  />
                 </View>
-              )}
 
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#999"
-                value={email}
-                onChangeText={(text) => {
-                  clearError();
-                  setEmail(text);
-                }}
-                autoCapitalize="none"
-                keyboardType="email-address"
-              />
+                <Text style={styles.title}>PawPal</Text>
+                <Text style={styles.subtitle}>
+                  Ваш помощник в уходе за питомцами
+                </Text>
+              </LinearGradient>
+            
+              <View style={[styles.form, { marginTop: 20 }]}>
 
-              <View style={styles.passwordContainer}>
+                {error && (
+                  <View style={styles.errorBox}>
+                    <Text style={styles.errorText}>{error}</Text>
+                  </View>
+                )}
+                
                 <TextInput
                   style={styles.input}
-                  placeholder="Пароль"
+                  placeholder="Email"
                   placeholderTextColor="#999"
-                  secureTextEntry={!showPassword}
-                  value={password}
+                  value={email}
                   onChangeText={(text) => {
                     clearError();
-                    setPassword(text);
+                    setEmail(text);
                   }}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
                 />
 
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Пароль"
+                    placeholderTextColor="#999"
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={(text) => {
+                      clearError();
+                      setPassword(text);
+                    }}
+                  />
+
+                  <TouchableOpacity
+                    style={styles.eye}
+                    onPress={() => setShowPassword(!showPassword)}
+                  >
+                    <Text>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+                  </TouchableOpacity>
+                </View>
+
                 <TouchableOpacity
-                  style={styles.eye}
-                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.button}
+                  onPress={handleLogin}
+                  disabled={isLoading}
                 >
-                  <Text>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+                  {isLoading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>Войти</Text>
+                  )}
                 </TouchableOpacity>
+
+                <View style={styles.registerRow}>
+                  <Text style={styles.registerText}>Нет аккаунта? </Text>
+                  <TouchableOpacity onPress={() => router.push('/(tabs)/register')}>
+                    <Text style={styles.registerLink}>Зарегистрироваться</Text>
+                  </TouchableOpacity>
+                </View>
+
               </View>
-
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleLogin}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.buttonText}>Войти</Text>
-                )}
-              </TouchableOpacity>
-
-              <View style={styles.registerRow}>
-                <Text style={styles.registerText}>Нет аккаунта? </Text>
-                <TouchableOpacity onPress={() => router.push('/(tabs)/register')}>
-                  <Text style={styles.registerLink}>Зарегистрироваться</Text>
-                </TouchableOpacity>
-              </View>
-
-            </View>
           </ScrollView>
-
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
