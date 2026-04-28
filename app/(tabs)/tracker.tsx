@@ -16,18 +16,21 @@ export default function TrackerScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <ScrollView contentContainerStyle={colors.content}>
+      <ScrollView contentContainerStyle={styles.content}>
 
         <Text style={[styles.title, { color: colors.text.primary }]}>
           {tab === 'nutrition' ? 'Nutrition Tracker' : 'Activity Tracker'}
         </Text>
 
-      <View style={styles.tabs}>
+      <View style={[
+          styles.tabsContainer,
+          { backgroundColor: colors.card.elevated },
+        ]}>
         <TouchableOpacity
           style={[
             styles.tab,
             { backgroundColor: tab === 'nutrition'
-              ? colors.tracker.primary
+              ? colors.primary.main
               : colors.card.elevated }
           ]}
           onPress={() => setTab('nutrition')}
@@ -39,7 +42,7 @@ export default function TrackerScreen() {
           style={[
             styles.tab,
             { backgroundColor: tab === 'activity'
-              ? colors.tracker.primary
+              ? colors.primary.main
               : colors.card.elevated }
           ]}
           onPress={() => setTab('activity')}
@@ -63,50 +66,38 @@ export default function TrackerScreen() {
           <>
             <TouchableOpacity
               style={[
-                styles.card,
-                { backgroundColor: colors.tracker.primary }
+                styles.simpleCard,
+                { backgroundColor: colors.card.elevated }
               ]}
-              onPress={() => router.push({pathname: '/nutrition-form', 
-                params: {
-                  mode: 'edit',
-                  id: 1,
-                  meal: 'Kibble',
-                  calories: '120',},})}
+              onPress={() =>
+                router.push('/nutrition-form?mode=edit&meal=Kibble&calories=120')
+              }
             >
-              <Text style={[styles.cardTitle, { color: colors.text.inverse }]}>Kibble</Text>
-              <View style={[
-                styles.innerCard,
-                { backgroundColor: colors.tracker.secondary }
-              ]}>
-                <View style={colors.innerCardTitle}>
-                  <View style={colors.innerCardTitle}>
-                    <Text>20g</Text>
-                  </View>
-                </View>
-              </View>
+              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
+                Kibble
+              </Text>
+
+              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
+                120 kcal
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
-                styles.card,
-                { backgroundColor: colors.tracker.primary }
+                styles.simpleCard,
+                { backgroundColor: colors.card.elevated }
               ]}
-              onPress={() => router.push({pathname: '/nutrition-form' as const, 
-                params: {
-                  mode: 'edit',
-                  id: '1',
-                  meal: 'Kibble',
-                  calories: '120',},})}
+              onPress={() =>
+                router.push('/nutrition-form?mode=edit&meal=Kibble&calories=150')
+              }
             >
-              <Text style={[colors.cardTitle, { color: colors.text.inverse }]}>Kibble</Text>
-              <View style={[
-                styles.innerCard,
-                { backgroundColor: colors.tracker.secondary }
-              ]}>
-                <View style={colors.innerCardTitle}>
-                  <Text>30g</Text>
-                </View>
-              </View>
+              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
+                Kibble
+              </Text>
+
+              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
+                150 kcal
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -116,59 +107,47 @@ export default function TrackerScreen() {
                 ]}
                 onPress={() => router.push('/nutrition-form?mode=add' as const)}
             >
-              <Text style={colors.addButtonText}>+ Add Nutrition</Text>
+              <Text style={styles.addButtonText}>+ Add Nutrition</Text>
             </TouchableOpacity>
           </>
         ) : (
           <>
             <TouchableOpacity
               style={[
-                styles.card,
-                { backgroundColor: colors.tracker.primary }
+                styles.simpleCard,
+                { backgroundColor: colors.card.elevated }
               ]}
-              onPress={() => router.push({ pathname: '/activity-form' as const,
-                params: {
-                  mode: 'edit',
-                  id: '1',
-                  type: 'Run',
-                  distance: '5',
-                  duration: '20',},})}
+              onPress={() =>
+                router.push('/activity-form?mode=edit&type=Run&duration=5')
+              }
             >
-              <Text style={[colors.cardTitle, { color: colors.text.inverse }]}>Run</Text>
-              <View style={[
-                styles.innerCard,
-                { backgroundColor: colors.tracker.secondary }
-              ]}>
-                <View style={colors.innerCardTitle}>
-                  <Text>5 min</Text>
-                </View>
-              </View>
+              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
+                Run
+              </Text>
+
+              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
+                5 min
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
-                styles.card,
-                { backgroundColor: colors.tracker.primary }
+                styles.simpleCard,
+                { backgroundColor: colors.card.elevated }
               ]}
-              onPress={() => router.push({ pathname: '/activity-form' as const,
-                params: {
-                  mode: 'edit',
-                  id: '1',
-                  type: 'Run',
-                  distance: '5',
-                  duration: '20',},})}
+              onPress={() =>
+                router.push('/activity-form?mode=edit&type=Play&duration=5')
+              }
             >
-              <Text style={[colors.cardTitle, { color: colors.text.inverse }]}>Play</Text>
-              <View style={[
-                styles.innerCard,
-                { backgroundColor: colors.tracker.secondary }
-              ]}>
-                <View style={colors.innerCardTitle}>
-                  <Text>10 min</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
+              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
+                Run
+              </Text>
 
+              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
+                5 min
+              </Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity
               style={[
                 styles.addButton,
@@ -176,7 +155,7 @@ export default function TrackerScreen() {
               ]}
               onPress={() => router.push('/activity-form?mode=add' as const)}
             >
-              <Text style={colors.addButtonText}>+ Add Activity</Text>
+              <Text style={styles.addButtonText}>+ Add Activity</Text>
             </TouchableOpacity>
           </>
         )}
@@ -204,23 +183,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  tabs: {
+  tabsContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
+    borderRadius: 30,
+    padding: 4,
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
 
   tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 50,
-    borderRadius: 20,
-    marginHorizontal: 6,
+    flex: 1, // 🔥 ВАЖНО
+    paddingVertical: 12,
+    borderRadius: 25,
+    alignItems: 'center',
   },
 
   tabText: {
     color: '#fff',
-    fontWeight: '800',
-    fontSize: 18,
+    fontWeight: '600',
+    fontSize: 16,
   },
 
   mainValue: {
@@ -240,24 +221,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 16,
   },
-
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
-    color: '#fff',
+    
+  simpleCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
   },
 
-  innerCard: {
-    padding: 10,
-    borderRadius: 15,
+  cardLeft: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 
-    innerCardTitle: {
-    fontSize: 18,
-    fontWeight: '500',
-    marginBottom: 0,
-    color: '#fff',
+  cardRight: {
+    fontSize: 14,
+    opacity: 0.7,
   },
 
   addButton: {

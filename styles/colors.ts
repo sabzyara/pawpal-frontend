@@ -112,6 +112,5 @@ export const Colors = {
   },
 } as const;
 
-// 🔥 ВАЖНО — добавь это:
 export type ThemeType = keyof typeof Colors;
 export type ThemeColors = (typeof Colors)[ThemeType];

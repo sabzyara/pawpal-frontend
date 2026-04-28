@@ -52,39 +52,89 @@ export default function NotificationsScreen() {
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       
-      {/* 🔥 TITLE */}
       <Text style={[styles.header, { color: colors.text.primary }]}>
         Notifications
       </Text>
 
-      {/* 🔥 TABS */}
-      <View style={styles.tabs}>
+      <View
+        style={[
+          styles.tabsContainer,
+          { backgroundColor: colors.card.elevated },
+        ]}
+      >
+        {/* UNREAD */}
         <TouchableOpacity
           style={[
             styles.tab,
-            tab === 'unread' && { backgroundColor: colors.primary.main },
+            tab === 'unread' && {
+              backgroundColor: colors.primary.main,
+            },
           ]}
           onPress={() => setTab('unread')}
         >
-          <Text style={styles.tabText}>
-            Unread {data.filter((n) => !n.read).length}
+          <Text
+            style={[
+              styles.tabText,
+              { color: tab === 'unread' ? 'white' : colors.text.secondary },
+            ]}
+          >
+            Unread
           </Text>
+
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor:
+                  tab === 'unread'
+                    ? 'rgba(255,255,255,0.2)'
+                    : colors.border.medium,
+              },
+            ]}
+          >
+            <Text style={styles.badgeText}>
+              {data.filter((n) => !n.read).length}
+            </Text>
+          </View>
         </TouchableOpacity>
 
+        {/* READ */}
         <TouchableOpacity
           style={[
             styles.tab,
-            tab === 'read' && { backgroundColor: colors.primary.main },
+            tab === 'read' && {
+              backgroundColor: colors.primary.main,
+            },
           ]}
           onPress={() => setTab('read')}
         >
-          <Text style={styles.tabText}>
-            Read {data.filter((n) => n.read).length}
+          <Text
+            style={[
+              styles.tabText,
+              { color: tab === 'read' ? 'white' : colors.text.secondary },
+            ]}
+          >
+            Read
           </Text>
+
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor:
+                  tab === 'read'
+                    ? 'rgba(255,255,255,0.2)'
+                    : colors.border.medium,
+              },
+            ]}
+          >
+            <Text style={styles.badgeText}>
+              {data.filter((n) => n.read).length}
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* 🔥 LIST */}
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
@@ -110,23 +160,41 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  tabs: {
+  tabsContainer: {
     flexDirection: 'row',
+    borderRadius: 30,
+    padding: 4,
     marginHorizontal: 16,
-    marginBottom: 10,
-    gap: 10,
+    marginBottom: 16,
   },
 
   tab: {
     flex: 1,
-    padding: 12,
-    borderRadius: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2A2A2A',
+    paddingVertical: 12,
+    borderRadius: 30,
+    gap: 8,
   },
 
   tabText: {
-    color: 'white',
+    fontSize: 14,
     fontWeight: '600',
+  },
+
+  badge: {
+    minWidth: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+
+  badgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
