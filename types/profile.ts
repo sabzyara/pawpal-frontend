@@ -27,6 +27,7 @@ export interface PetOwner {
   username: string;
   phoneNumber: string;
   address: string;
+  avatarUrl?: string;
 }
 
 // Ветеринар
@@ -39,6 +40,7 @@ export interface Veterinarian {
   licenseNumber: string;
   clinicName: string;
   experienceYears: number;
+  avatarUrl?: string;
 }
 
 // Сервис-провайдер
@@ -49,6 +51,7 @@ export interface ServiceProvider {
   lastName: string;
   phoneNumber: string;
   serviceCategory: string;
+  avatarUrl?: string;
 }
 
 // Полный профиль пользователя

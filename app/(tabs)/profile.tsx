@@ -131,11 +131,26 @@ useEffect(() => {
     return profile?.user.email?.split('@')[0] || "User";
   };
 
-  const getAvatarUrl = (): string => {
     
-    const seed = getDisplayName() || "user";
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
-  };
+  const getAvatarUrl = (): string => {
+  const role = profile?.user.role;
+
+  if (role === Role.OWNER && profile?.petOwner?.avatarUrl) {
+    return profile.petOwner.avatarUrl;
+  }
+
+  if (role === Role.VET && profile?.veterinarian?.avatarUrl) {
+    return profile.veterinarian.avatarUrl;
+  }
+
+  if (role === Role.SERVICE && profile?.serviceProvider?.avatarUrl) {
+    return profile.serviceProvider.avatarUrl;
+  }
+
+  // fallback
+  const seed = getDisplayName() || "user";
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
+};
 
   const getStats = () => {
     switch (profile?.user.role) {
