@@ -1,21 +1,23 @@
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/useTheme';
+import api from '@/services/api';
 import { useThemeStore } from '@/store/themeStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Alert,
   StyleSheet,
   Switch,
   TouchableOpacity,
   View,
-  Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '@/services/api';
-import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
+
+  const styles = createStyles(colors);
 
   const [notifications, setNotifications] = useState(true);
 
@@ -24,7 +26,6 @@ export default function SettingsScreen() {
 
   const darkMode = theme === 'dark';
 
-  // 🔥 DELETE ACCOUNT
   const handleDeleteAccount = () => {
     Alert.alert(
       'Удалить аккаунт?',
@@ -46,11 +47,9 @@ export default function SettingsScreen() {
 
               await AsyncStorage.removeItem('token');
               router.replace('/login');
-
             } catch (e: any) {
-  console.log('STATUS:', e?.response?.status);
-  console.log('DATA:', e?.response?.data);
-}
+              console.log(e?.response?.data);
+            }
           },
         },
       ]
@@ -58,45 +57,47 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText style={styles.title}>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ThemedText style={[styles.header, { color: colors.text.primary }]}>
         Settings
       </ThemedText>
 
-      {/* PREFERENCES */}
-      <Section title="Preferences">
+      <Section title="Preferences" styles={styles}>
         <SwitchItem
           title="Dark Mode"
           value={darkMode}
-          onValueChange={(value) => setTheme(value ? 'dark' : 'light')}
+          onValueChange={(value: boolean) =>
+            setTheme(value ? 'dark' : 'light')
+          }
+          colors={colors}
         />
 
         <SwitchItem
           title="Notifications"
           value={notifications}
           onValueChange={setNotifications}
+          colors={colors}
         />
       </Section>
 
-      {/* ACCOUNT */}
-      <Section title="Account">
+      <Section title="Account" styles={styles}>
         <Item
           title="Delete Account"
           danger
           onPress={handleDeleteAccount}
+          styles={styles}
         />
       </Section>
 
-      {/* ABOUT */}
-      <Section title="About">
-        <Item title="Privacy Policy" onPress={() => {}} />
-        <Item title="App Version 1.0.0" />
+      <Section title="About" styles={styles}>
+        <Item title="Privacy Policy" styles={styles} />
+        <Item title="App Version 1.0.0" styles={styles} />
       </Section>
-    </ThemedView>
+    </SafeAreaView>
   );
 }
 
-function Section({ title, children }: any) {
+function Section({ title, children, styles }: any) {
   return (
     <View style={styles.section}>
       <ThemedText style={styles.sectionTitle}>{title}</ThemedText>
@@ -105,7 +106,7 @@ function Section({ title, children }: any) {
   );
 }
 
-function Item({ title, onPress, danger }: any) {
+function Item({ title, onPress, danger, styles }: any) {
   return (
     <TouchableOpacity style={styles.item} onPress={onPress}>
       <ThemedText
@@ -120,78 +121,94 @@ function Item({ title, onPress, danger }: any) {
   );
 }
 
-type SwitchItemProps = {
-  title: string;
-  value: boolean;
-  onValueChange: (value: boolean) => void;
-};
-
-function SwitchItem({ title, value, onValueChange }: SwitchItemProps) {
+function SwitchItem({ title, value, onValueChange, colors }: any) {
   return (
-    <View style={styles.item}>
-      <ThemedText style={styles.itemText}>{title}</ThemedText>
+    <View style={stylesStatic.item}>
+      <ThemedText
+        style={[
+          stylesStatic.itemText,
+          { color: colors.text.primary }
+        ]}
+      >
+        {title}
+      </ThemedText>
+
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: '#D1D5DB', true: '#7A2E4D' }}
+        trackColor={{
+          false: colors.border.light,
+          true: colors.primary.main,
+        }}
         thumbColor="#fff"
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#F5F6FA',
-  },
-
-  title: {
-    marginTop: 30,
-    marginBottom: 24,
-    textAlign: 'center',
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#7A2E4D',
-  },
-
-  section: {
-    marginBottom: 20,
-  },
-
-  sectionTitle: {
-    marginBottom: 8,
-    opacity: 0.6,
-    fontSize: 13,
-  },
-
-  card: {
-    borderRadius: 14,
-    backgroundColor: '#fff',
-
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-
+const stylesStatic = StyleSheet.create({
   item: {
     padding: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F1F1',
   },
-
   itemText: {
     fontSize: 15,
   },
-
-  dangerText: {
-    color: '#E53935',
-    fontWeight: '600',
-  },
 });
+
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: colors.background.secondary,
+    },
+
+    header: {
+      fontSize: 28,
+      fontWeight: '800',
+      textAlign: 'center',
+      marginTop: 10,
+      marginBottom: 20,
+      color: colors.primary.main,
+    },
+
+    section: {
+      marginBottom: 20,
+    },
+
+    sectionTitle: {
+      marginBottom: 8,
+      fontSize: 13,
+      color: colors.text.secondary,
+    },
+
+    card: {
+      borderRadius: 16,
+      backgroundColor: colors.card.default,
+      overflow: 'hidden',
+
+      shadowColor: '#000',
+      shadowOpacity: 0.06,
+      shadowRadius: 8,
+      elevation: 3,
+    },
+
+    item: {
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border.light,
+    },
+
+    itemText: {
+      fontSize: 15,
+      color: colors.text.primary,
+    },
+
+    dangerText: {
+      color: '#E53935',
+      fontWeight: '600',
+    },
+  });
