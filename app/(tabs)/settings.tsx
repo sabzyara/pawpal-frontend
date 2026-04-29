@@ -9,6 +9,7 @@ import {
   Alert,
   StyleSheet,
   Switch,
+  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -57,10 +58,10 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ThemedText style={[styles.header, { color: colors.text.primary }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <Text style={[styles.header, { color: colors.text.primary }]}>
         Settings
-      </ThemedText>
+      </Text>
 
       <Section title="Preferences" styles={styles}>
         <SwitchItem
@@ -123,7 +124,7 @@ function Item({ title, onPress, danger, styles }: any) {
 
 function SwitchItem({ title, value, onValueChange, colors }: any) {
   return (
-    <View style={stylesStatic.item}>
+    <View style={[stylesStatic.item, { backgroundColor: colors.card.elevated }]}>
       <ThemedText
         style={[
           stylesStatic.itemText,
@@ -163,16 +164,13 @@ const createStyles = (colors: any) =>
     container: {
       flex: 1,
       padding: 16,
-      backgroundColor: colors.background.secondary,
     },
 
     header: {
-      fontSize: 28,
+      fontSize: 32,
       fontWeight: '800',
       textAlign: 'center',
-      marginTop: 10,
-      marginBottom: 20,
-      color: colors.primary.main,
+      marginBottom: 10,
     },
 
     section: {
@@ -198,6 +196,7 @@ const createStyles = (colors: any) =>
 
     item: {
       padding: 16,
+      backgroundColor: colors.card.elevated,
       borderBottomWidth: 1,
       borderBottomColor: colors.border.light,
     },
