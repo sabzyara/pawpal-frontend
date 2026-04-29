@@ -1,5 +1,3 @@
-
-// app/(tabs)/tracker.tsx
 import { CalendarSection } from '@/components/home/Calendar';
 import Donut from '@/components/tracker/Donut';
 import { useTheme } from '@/hooks/useTheme';
@@ -192,7 +190,7 @@ const styles = StyleSheet.create({
   },
 
   tab: {
-    flex: 1, // 🔥 ВАЖНО
+    flex: 1, 
     paddingVertical: 12,
     borderRadius: 25,
     alignItems: 'center',
