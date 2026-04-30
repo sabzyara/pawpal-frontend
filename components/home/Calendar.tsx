@@ -1,10 +1,10 @@
 // screens/home/components/CalendarSection.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/hooks/useTheme';
 import { createHomeStyles } from '@/styles/homeStyles';
 import { DAYS } from '@/types/home_index';
+import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface CalendarSectionProps {
   selectedDate: number;
@@ -41,7 +41,7 @@ export const CalendarSection: React.FC<CalendarSectionProps> = ({
             <LinearGradient
               colors={
                 selectedDate === day.date
-                  ? (["#FF6B6B", "#FF8E8E"] as [string, string])
+                  ? ([colors.tracker.primary, colors.tracker.secondary] as [string, string])
                   : ([colors.background.secondary, colors.background.secondary] as [string, string])
               }
               style={[

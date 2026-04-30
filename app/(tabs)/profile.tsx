@@ -1,24 +1,28 @@
+import { useTheme } from '@/hooks/useTheme';
+import { useProfileStore } from '@/store/profileStore';
+import { profileStyles } from '@/styles/profileScreenStyles';
+import { Role } from '@/types/profile';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
   Alert,
-  RefreshControl,
   Dimensions,
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useProfileStore } from '@/store/profileStore';
-import { Role } from '@/types/profile';
-import { profileStyles } from '@/styles/profileScreenStyles';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
+  const { colors } = useTheme();
+  const styles = profileStyles(colors);
   const router = useRouter();
   const { profile, loading, error, fetchProfile, logout } = useProfileStore();
   const [refreshing, setRefreshing] = useState(false);
@@ -131,11 +135,26 @@ useEffect(() => {
     return profile?.user.email?.split('@')[0] || "User";
   };
 
-  const getAvatarUrl = (): string => {
     
-    const seed = getDisplayName() || "user";
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
-  };
+  const getAvatarUrl = (): string => {
+  const role = profile?.user.role;
+
+  if (role === Role.OWNER && profile?.petOwner?.avatarUrl) {
+    return profile.petOwner.avatarUrl;
+  }
+
+  if (role === Role.VET && profile?.veterinarian?.avatarUrl) {
+    return profile.veterinarian.avatarUrl;
+  }
+
+  if (role === Role.SERVICE && profile?.serviceProvider?.avatarUrl) {
+    return profile.serviceProvider.avatarUrl;
+  }
+
+  // fallback
+  const seed = getDisplayName() || "user";
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
+};
 
   const getStats = () => {
     switch (profile?.user.role) {
@@ -175,16 +194,16 @@ useEffect(() => {
     ];
 
     return (
-      <View style={profileStyles.infoSection}>
-        <Text style={profileStyles.sectionTitle}>Personal Information</Text>
+      <View style={styles.infoSection}>
+        <Text style={styles.sectionTitle}>Personal Information</Text>
         {infoItems.map((item, index) => (
-          <View key={index} style={profileStyles.infoCard}>
-            <View style={profileStyles.infoIcon}>
-              <Feather name={item.icon as any} size={20} color="#FF6B6B" />
+          <View key={index} style={styles.infoCard}>
+            <View style={styles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color={colors.text.tertiary} />
             </View>
-            <View style={profileStyles.infoContent}>
-              <Text style={profileStyles.infoLabel}>{item.label}</Text>
-              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>{item.label}</Text>
+              <Text style={styles.infoValue}>{item.value}</Text>
             </View>
           </View>
         ))}
@@ -203,16 +222,16 @@ useEffect(() => {
     ];
 
     return (
-      <View style={profileStyles.infoSection}>
-        <Text style={profileStyles.sectionTitle}>Professional Information</Text>
+      <View style={styles.infoSection}>
+        <Text style={styles.sectionTitle}>Professional Information</Text>
         {infoItems.map((item, index) => (
-          <View key={index} style={profileStyles.infoCard}>
-            <View style={profileStyles.infoIcon}>
-              <Feather name={item.icon as any} size={20} color="#4ECDC4" />
+          <View key={index} style={styles.infoCard}>
+            <View style={styles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color={colors.text.tertiary} />
             </View>
-            <View style={profileStyles.infoContent}>
-              <Text style={profileStyles.infoLabel}>{item.label}</Text>
-              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>{item.label}</Text>
+              <Text style={styles.infoValue}>{item.value}</Text>
             </View>
           </View>
         ))}
@@ -229,16 +248,16 @@ useEffect(() => {
     ];
 
     return (
-      <View style={profileStyles.infoSection}>
-        <Text style={profileStyles.sectionTitle}>Service Information</Text>
+      <View style={styles.infoSection}>
+        <Text style={styles.sectionTitle}>Service Information</Text>
         {infoItems.map((item, index) => (
-          <View key={index} style={profileStyles.infoCard}>
-            <View style={profileStyles.infoIcon}>
-              <Feather name={item.icon as any} size={20} color="#FFE66D" />
+          <View key={index} style={styles.infoCard}>
+            <View style={styles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color={colors.text.tertiary} />
             </View>
-            <View style={profileStyles.infoContent}>
-              <Text style={profileStyles.infoLabel}>{item.label}</Text>
-              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>{item.label}</Text>
+              <Text style={styles.infoValue}>{item.value}</Text>
             </View>
           </View>
         ))}
@@ -253,16 +272,16 @@ useEffect(() => {
     ];
 
     return (
-      <View style={profileStyles.infoSection}>
-        <Text style={profileStyles.sectionTitle}>Admin Information</Text>
+      <View style={styles.infoSection}>
+        <Text style={styles.sectionTitle}>Admin Information</Text>
         {infoItems.map((item, index) => (
-          <View key={index} style={profileStyles.infoCard}>
-            <View style={profileStyles.infoIcon}>
-              <Feather name={item.icon as any} size={20} color="#A8E6CF" />
+          <View key={index} style={styles.infoCard}>
+            <View style={styles.infoIcon}>
+              <Feather name={item.icon as any} size={20} color={colors.text.tertiary} />
             </View>
-            <View style={profileStyles.infoContent}>
-              <Text style={profileStyles.infoLabel}>{item.label}</Text>
-              <Text style={profileStyles.infoValue}>{item.value}</Text>
+            <View style={styles.infoContent}>
+              <Text style={styles.infoLabel}>{item.label}</Text>
+              <Text style={styles.infoValue}>{item.value}</Text>
             </View>
           </View>
         ))}
@@ -274,41 +293,41 @@ useEffect(() => {
     switch (profile?.user.role) {
       case Role.OWNER:
         return (
-          <View style={profileStyles.actionsSection}>
-            <Text style={profileStyles.sectionTitle}>My Pets</Text>
-            <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyPets}>
+          <View style={styles.actionsSection}>
+            <Text style={styles.sectionTitle}>My Pets</Text>
+            <TouchableOpacity style={styles.actionCard} onPress={handleMyPets}>
               <LinearGradient
-                colors={["#FF6B6B", "#FF8E8E"]}
-                style={profileStyles.actionGradient}
+                colors={colors.primary.gradient}
+                style={styles.actionGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
-                <View style={profileStyles.actionLeft}>
+                <View style={styles.actionLeft}>
                   <MaterialCommunityIcons name="paw" size={24} color="#FFF" />
-                  <View style={profileStyles.actionTextContainer}>
-                    <Text style={profileStyles.actionTitle}>My Pets</Text>
-                    <Text style={profileStyles.actionSubtitle}>Manage your furry friends</Text>
+                  <View style={styles.actionTextContainer}>
+                    <Text style={styles.actionTitle}>My Pets</Text>
+                    <Text style={styles.actionSubtitle}>Manage your furry friends</Text>
                   </View>
                 </View>
-                <Feather name="chevron-right" size={20} color="#FFF" />
+                <Feather name="chevron-right" size={20} color={colors.text.tertiary} />
               </LinearGradient>
             </TouchableOpacity>
 
-            <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyAppointments}>
+            <TouchableOpacity style={styles.actionCard} onPress={handleMyAppointments}>
               <LinearGradient
-                colors={["#4ECDC4", "#6BE4DC"]}
-                style={profileStyles.actionGradient}
+                colors={colors.primary.gradient}
+                style={styles.actionGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
-                <View style={profileStyles.actionLeft}>
-                  <Feather name="calendar" size={24} color="#FFF" />
-                  <View style={profileStyles.actionTextContainer}>
-                    <Text style={profileStyles.actionTitle}>Appointments</Text>
-                    <Text style={profileStyles.actionSubtitle}>View your booking history</Text>
+                <View style={styles.actionLeft}>
+                  <Feather name="calendar" size={24} color={colors.text.tertiary} />
+                  <View style={styles.actionTextContainer}>
+                    <Text style={styles.actionTitle}>Appointments</Text>
+                    <Text style={styles.actionSubtitle}>View your booking history</Text>
                   </View>
                 </View>
-                <Feather name="chevron-right" size={20} color="#FFF" />
+                <Feather name="chevron-right" size={20} color={colors.text.tertiary} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -317,20 +336,20 @@ useEffect(() => {
       case Role.VET:
       case Role.SERVICE:
         return (
-          <View style={profileStyles.actionsSection}>
-            <Text style={profileStyles.sectionTitle}>Work</Text>
-            <TouchableOpacity style={profileStyles.actionCard} onPress={handleMyAppointments}>
+          <View style={styles.actionsSection}>
+            <Text style={styles.sectionTitle}>Work</Text>
+            <TouchableOpacity style={styles.actionCard} onPress={handleMyAppointments}>
               <LinearGradient
-                colors={["#667EEA", "#764BA2"]}
-                style={profileStyles.actionGradient}
+                colors={colors.primary.gradient}
+                style={styles.actionGradient}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
               >
-                <View style={profileStyles.actionLeft}>
+                <View style={styles.actionLeft}>
                   <Feather name="briefcase" size={24} color="#FFF" />
-                  <View style={profileStyles.actionTextContainer}>
-                    <Text style={profileStyles.actionTitle}>My Schedule</Text>
-                    <Text style={profileStyles.actionSubtitle}>Manage client appointments</Text>
+                  <View style={styles.actionTextContainer}>
+                    <Text style={styles.actionTitle}>My Schedule</Text>
+                    <Text style={styles.actionSubtitle}>Manage client appointments</Text>
                   </View>
                 </View>
                 <Feather name="chevron-right" size={20} color="#FFF" />
@@ -346,10 +365,10 @@ useEffect(() => {
 
   if (loading && !profile) {
     return (
-      <View style={profileStyles.centerContainer}>
-        <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.loadingGradient}>
+      <View style={styles.centerContainer}>
+        <LinearGradient colors={colors.primary.gradient} style={styles.loadingGradient}>
           <MaterialCommunityIcons name="paw" size={48} color="#FFF" />
-          <Text style={profileStyles.loadingText}>Loading profile...</Text>
+          <Text style={styles.loadingText}>Loading profile...</Text>
         </LinearGradient>
       </View>
     );
@@ -357,14 +376,14 @@ useEffect(() => {
 
   if (error) {
     return (
-      <View style={profileStyles.centerContainer}>
-        <View style={profileStyles.errorContainer}>
+      <View style={styles.centerContainer}>
+        <View style={styles.errorContainer}>
           <Feather name="alert-circle" size={64} color="#FF6B6B" />
-          <Text style={profileStyles.errorText}>{error}</Text>
-          <TouchableOpacity style={profileStyles.retryButton} onPress={fetchProfile}>
-            <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.retryGradient}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={fetchProfile}>
+            <LinearGradient colors={colors.primary.gradient} style={styles.retryGradient}>
               <Feather name="refresh-cw" size={20} color="#FFF" />
-              <Text style={profileStyles.retryButtonText}>Try Again</Text>
+              <Text style={styles.retryButtonText}>Try Again</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -375,114 +394,140 @@ useEffect(() => {
   const stats = getStats();
 
   return (
-    <ScrollView 
-      style={profileStyles.container}
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FF6B6B" />
-      }
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background.primary }}
     >
-      {/* Header with Cover Photo */}
-      <View style={profileStyles.headerContainer}>
-        <LinearGradient
-          colors={["#FF6B6B", "#FF8E8E", "#FFB88C"]}
-          style={profileStyles.coverPhoto}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        />
-        
-        <View style={profileStyles.avatarWrapper}>
-          <View style={profileStyles.avatarContainer}>
-            <Image
-              source={{ uri: getAvatarUrl() }}
-              style={profileStyles.avatar}
-            />
-            <View style={profileStyles.statusBadge}>
-              <View style={profileStyles.statusDot} />
-            </View>
-          </View>
-          <View style={profileStyles.roleBadge}>
-            <MaterialCommunityIcons name={getRoleIcon() as any} size={16} color="#FFF" />
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.primary.main}
+          />
+        }
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            margin: 16,
+            borderRadius: 16,
+            backgroundColor: colors.card.elevated,
+            borderWidth: 1,
+            borderColor: colors.border.medium,
+          }}
+        >
+          {/* АВАТАР */}
+          <Image
+            source={{ uri: getAvatarUrl() }}
+            style={{
+              width: 70,
+              height: 70,
+              borderRadius: 35,
+              marginRight: 16,
+            }}
+          />
+
+          {/* ИНФА СПРАВА */}
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '700',
+                color: colors.text.primary,
+                marginBottom: 4,
+              }}
+            >
+              {getDisplayName()}
+            </Text>
+
+            <Text style={{ color: colors.text.secondary }}>
+              {getRoleName()}
+            </Text>
+
+            <Text style={{ color: colors.text.tertiary }}>
+              {profile?.user.email}
+            </Text>
           </View>
         </View>
 
-        <Text style={profileStyles.userName}>{getDisplayName()}</Text>
-        <Text style={profileStyles.userRole}>{getRoleName()}</Text>
-        <Text style={profileStyles.userEmail}>{profile?.user.email}</Text>
-      </View>
+        {/* Stats Cards */}
+        <View style={styles.statsContainer}>
+          {stats.map((stat, index) => (
+            <View key={index} style={styles.statCard}>
+              <LinearGradient
+                colors={[colors.card.default, colors.card.elevated]}
+                style={styles.statGradient}
+              >
+                <View style={styles.statIcon}>
+                  <Feather name={stat.icon as any} size={24} color={colors.primary.main} />
+                </View>
+                <Text style={styles.statNumber}>{stat.value}</Text>
+                <Text style={styles.statLabel}>{stat.label}</Text>
+              </LinearGradient>
+            </View>
+          ))}
+        </View>
 
-      {/* Stats Cards */}
-      <View style={profileStyles.statsContainer}>
-        {stats.map((stat, index) => (
-          <View key={index} style={profileStyles.statCard}>
-            <LinearGradient
-              colors={["#FFFFFF", "#F8F9FA"]}
-              style={profileStyles.statGradient}
-            >
-              <View style={profileStyles.statIcon}>
-                <Feather name={stat.icon as any} size={24} color="#FF6B6B" />
+        {/* Role Specific Information */}
+        {profile?.user.role === Role.OWNER && renderOwnerInfo()}
+        {profile?.user.role === Role.VET && renderVetInfo()}
+        {profile?.user.role === Role.SERVICE && renderServiceInfo()}
+        {profile?.user.role === Role.ADMIN && renderAdminInfo()}
+
+        {/* Role Specific Actions */}
+        {renderRoleSpecificActions()}
+
+        {/* Settings Section */}
+        <View style={styles.actionsSection}>
+          <Text style={styles.sectionTitle}>Settings</Text>
+          
+          <TouchableOpacity style={styles.settingItem} onPress={handleEditProfile}>
+            <View style={styles.settingLeft}>
+              <LinearGradient colors={colors.primary.gradient} style={styles.settingIcon}>
+                <Feather name="edit-2" size={18} color="#FFF" />
+              </LinearGradient>
+              <View>
+                <Text style={styles.settingTitle}>Edit Profile</Text>
+                <Text style={styles.settingSubtitle}>Update your personal information</Text>
               </View>
-              <Text style={profileStyles.statNumber}>{stat.value}</Text>
-              <Text style={profileStyles.statLabel}>{stat.label}</Text>
-            </LinearGradient>
-          </View>
-        ))}
-      </View>
-
-      {/* Role Specific Information */}
-      {profile?.user.role === Role.OWNER && renderOwnerInfo()}
-      {profile?.user.role === Role.VET && renderVetInfo()}
-      {profile?.user.role === Role.SERVICE && renderServiceInfo()}
-      {profile?.user.role === Role.ADMIN && renderAdminInfo()}
-
-      {/* Role Specific Actions */}
-      {renderRoleSpecificActions()}
-
-      {/* Settings Section */}
-      <View style={profileStyles.actionsSection}>
-        <Text style={profileStyles.sectionTitle}>Settings</Text>
-        
-        <TouchableOpacity style={profileStyles.settingItem} onPress={handleEditProfile}>
-          <View style={profileStyles.settingLeft}>
-            <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.settingIcon}>
-              <Feather name="edit-2" size={18} color="#FFF" />
-            </LinearGradient>
-            <View>
-              <Text style={profileStyles.settingTitle}>Edit Profile</Text>
-              <Text style={profileStyles.settingSubtitle}>Update your personal information</Text>
             </View>
-          </View>
-          <Feather name="chevron-right" size={20} color="#CCC" />
-        </TouchableOpacity>
+            <Feather name="chevron-right" size={20} color="#CCC" />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={profileStyles.settingItem} onPress={handleSettings}>
-          <View style={profileStyles.settingLeft}>
-            <LinearGradient colors={["#4ECDC4", "#6BE4DC"]} style={profileStyles.settingIcon}>
-              <Feather name="settings" size={18} color="#FFF" />
-            </LinearGradient>
-            <View>
-              <Text style={profileStyles.settingTitle}>Settings</Text>
-              <Text style={profileStyles.settingSubtitle}>Notifications, language & more</Text>
+          <TouchableOpacity style={styles.settingItem} onPress={handleSettings}>
+            <View style={styles.settingLeft}>
+              <LinearGradient colors={colors.primary.gradient} style={styles.settingIcon}>
+                <Feather name="settings" size={18} color="#FFF" />
+              </LinearGradient>
+              <View>
+                <Text style={styles.settingTitle}>Settings</Text>
+                <Text style={styles.settingSubtitle}>Notifications, language & more</Text>
+              </View>
             </View>
-          </View>
-          <Feather name="chevron-right" size={20} color="#CCC" />
-        </TouchableOpacity>
+            <Feather name="chevron-right" size={20} color="#CCC" />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={[profileStyles.settingItem, profileStyles.logoutItem]} onPress={handleLogout}>
-          <View style={profileStyles.settingLeft}>
-            <LinearGradient colors={["#FF6B6B", "#FF8E8E"]} style={profileStyles.settingIcon}>
-              <Feather name="log-out" size={18} color="#FFF" />
-            </LinearGradient>
-            <View>
-              <Text style={[profileStyles.settingTitle, profileStyles.logoutText]}>Logout</Text>
-              <Text style={profileStyles.settingSubtitle}>Sign out from your account</Text>
+          <TouchableOpacity style={[styles.settingItem, styles.logoutItem]} onPress={handleLogout}>
+            <View style={styles.settingLeft}>
+              <LinearGradient colors={colors.primary.gradient} style={styles.settingIcon}>
+                <Feather name="log-out" size={18} color="#FFF" />
+              </LinearGradient>
+              <View>
+                <Text style={[styles.settingTitle, styles.logoutText]}>Logout</Text>
+                <Text style={styles.settingSubtitle}>Sign out from your account</Text>
+              </View>
             </View>
-          </View>
-          <Feather name="chevron-right" size={20} color="#CCC" />
-        </TouchableOpacity>
-      </View>
+            <Feather name="chevron-right" size={20} color="#CCC" />
+          </TouchableOpacity>
+        </View>
 
-      <View style={profileStyles.bottomSpacing} />
-    </ScrollView>
+        <View style={styles.bottomSpacing} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
