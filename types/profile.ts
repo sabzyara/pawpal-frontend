@@ -2,13 +2,13 @@ export enum Role {
   OWNER = "OWNER",
   VET = "VET",
   SERVICE = "SERVICE",
-  ADMIN = "ADMIN"
+  ADMIN = "ADMIN",
 }
 
 export enum UserStatus {
   ACTIVE = "ACTIVE",
   INACTIVE = "INACTIVE",
-  BANNED = "BANNED"
+  BANNED = "BANNED",
 }
 
 // Базовый пользователь
@@ -32,15 +32,16 @@ export interface PetOwner {
 
 // Ветеринар
 export interface Veterinarian {
-  vetId: number;
-  userId: number;
+  id: number;
   firstName: string;
   lastName: string;
-  phoneNumber: string;
-  licenseNumber: string;
-  clinicName: string;
+  avatarUrl?: string;
+  clinicName?: string;
   experienceYears: number;
   avatarUrl?: string;
+  rating: number;
+  patientsCount: number;
+  about?: string;
 }
 
 // Сервис-провайдер

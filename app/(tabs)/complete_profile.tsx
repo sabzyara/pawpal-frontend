@@ -43,7 +43,7 @@ export default function CompleteProfileScreen() {
         }
       );
 
-      router.replace('/(tabs)'); // 👈 на главную
+      router.replace('/(tabs)'); 
     } catch (e: any) {
       console.log('❌ ERROR:', e?.response?.data);
 
