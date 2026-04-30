@@ -174,6 +174,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   petsListContent: {
     paddingHorizontal: 16,
+    paddingLeft: 20,
   },
   petCard: {
     width: 120,
