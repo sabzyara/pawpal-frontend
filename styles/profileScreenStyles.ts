@@ -1,11 +1,12 @@
-import { StyleSheet, Platform, Dimensions } from "react-native";
+import { ThemeColors } from "@/styles/colors";
+import { Dimensions, StyleSheet } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-export const profileStyles = StyleSheet.create({
+export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: colors.background.primary,
   },
 
   // Loading & Error States
@@ -13,7 +14,7 @@ export const profileStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F8F9FA",
+    backgroundColor: colors.background.primary,
   },
   loadingGradient: {
     padding: 32,
@@ -23,7 +24,7 @@ export const profileStyles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: "#FFF",
+    color: colors.text.inverse,
     fontWeight: "600",
   },
   errorContainer: {
@@ -33,7 +34,7 @@ export const profileStyles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    color: "#666",
+    color: colors.text.secondary,
     textAlign: "center",
   },
   retryButton: {
@@ -48,7 +49,7 @@ export const profileStyles = StyleSheet.create({
     borderRadius: 24,
   },
   retryButtonText: {
-    color: "#FFF",
+    color: colors.text.inverse,
     fontSize: 16,
     fontWeight: "600",
   },
@@ -75,9 +76,9 @@ export const profileStyles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 4,
-    borderColor: "#FFF",
-    backgroundColor: "#FFF",
+    // borderWidth: 4,
+    // borderColor: "#FFF",
+    // backgroundColor: "#FFF",
   },
   statusBadge: {
     position: "absolute",
@@ -114,18 +115,18 @@ export const profileStyles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: colors.text.primary,
     marginTop: 8,
   },
   userRole: {
     fontSize: 14,
-    color: "#FF6B6B",
+    color: colors.text.secondary,
     fontWeight: "600",
     marginTop: 4,
   },
   userEmail: {
     fontSize: 12,
-    color: "#999",
+    color: colors.text.tertiary,
     marginTop: 4,
   },
 
@@ -144,6 +145,7 @@ export const profileStyles = StyleSheet.create({
     alignItems: "center",
     padding: 16,
     borderRadius: 20,
+    backgroundColor: colors.card.default,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -154,7 +156,7 @@ export const profileStyles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FFF0F0",
+    backgroundColor: colors.background.secondary,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
@@ -162,12 +164,12 @@ export const profileStyles = StyleSheet.create({
   statNumber: {
     fontSize: 22,
     fontWeight: "800",
-    color: "#1A1A1A",
+    color: colors.text.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: "#666",
+    color: colors.text.secondary,
     fontWeight: "500",
   },
 
@@ -179,14 +181,14 @@ export const profileStyles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: colors.text.primary,
     marginBottom: 16,
     paddingLeft: 4,
   },
   infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF",
+    backgroundColor: colors.card.default,
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
@@ -195,12 +197,13 @@ export const profileStyles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    borderColor: colors.border.light,
   },
   infoIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: colors.background.secondary,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -210,13 +213,13 @@ export const profileStyles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
-    color: "#999",
+    color: colors.text.tertiary,
     marginBottom: 2,
   },
   infoValue: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1A1A1A",
+    color: colors.text.primary,
   },
 
   // Action Cards
@@ -259,7 +262,7 @@ export const profileStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#FFF",
+    backgroundColor: colors.card.default,
     padding: 16,
     borderRadius: 16,
     marginBottom: 12,
@@ -268,6 +271,7 @@ export const profileStyles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    borderColor: colors.border.light,
   },
   settingLeft: {
     flexDirection: "row",
@@ -284,18 +288,18 @@ export const profileStyles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1A1A1A",
+    color: colors.text.primary,
     marginBottom: 2,
   },
   settingSubtitle: {
     fontSize: 12,
-    color: "#999",
+    color: colors.text.secondary,
   },
   logoutItem: {
-    backgroundColor: "#FFF5F5",
+    backgroundColor: colors.background.secondary,
   },
   logoutText: {
-    color: "#FF6B6B",
+    color: colors.primary.main,
   },
 
   // Bottom Spacing

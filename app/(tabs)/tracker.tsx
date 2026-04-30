@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
 
   tab: {
-    flex: 1, // 🔥 ВАЖНО
+    flex: 1,
     paddingVertical: 12,
     borderRadius: 25,
     alignItems: 'center',
