@@ -1,41 +1,42 @@
 // screens/home/styles/homeStyles.ts
-import { StyleSheet } from 'react-native';
 import { ThemeColors } from '@/styles/colors';
+import { StyleSheet } from 'react-native';
 
 export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.background.primary,
   },
   container: {
     flex: 1,
   },
 
-  // ========== HEADER STYLES ==========
-  headerGradient: {
-    paddingTop: 20,
-    paddingBottom: 40,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
   headerSection: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 18,
+        marginHorizontal: 16,
+        marginTop: 10,
+        borderRadius: 20,
+        backgroundColor: colors.card.elevated,
+        borderWidth: 1,
+        borderColor: colors.border.focus,
+
+        shadowColor: '#000',
+        shadowOpacity: 0.06,
+        shadowRadius: 10,
+        elevation: 3,
   },
   greeting: {
+    color: colors.text.secondary,
     fontSize: 14,
-    color: '#FFF',
-    opacity: 0.9,
     marginBottom: 4,
-    fontWeight: '500',
   },
   userName: {
-    fontSize: 28,
+    color: colors.text.primary,
+    fontSize: 24,
     fontWeight: '700',
-    color: '#FFF',
-    letterSpacing: -0.5,
   },
   notificationIcon: {
     width: 44,
@@ -46,61 +47,26 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     alignItems: 'center',
     backdropFilter: 'blur(10px)',
   },
-  notificationBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#FF6B6B',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-    borderWidth: 2,
-    borderColor: '#FFF',
-  },
-  badgeText: {
-    color: '#FFF',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
+  // notificationBadge: {
+  //   position: 'absolute',
+  //   top: -4,
+  //   right: -4,
+  //   backgroundColor: '#FF6B6B',
+  //   borderRadius: 10,
+  //   minWidth: 20,
+  //   height: 20,
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   paddingHorizontal: 4,
+  //   borderWidth: 2,
+  //   borderColor: '#FFF',
+  // },
+  // badgeText: {
+  //   color: '#FFF',
+  //   fontSize: 10,
+  //   fontWeight: 'bold',
+  // },
 
-  // ========== STATS CARDS ==========
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: -24,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    marginHorizontal: 6,
-    paddingVertical: 16,
-    borderRadius: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#FFF',
-    opacity: 0.9,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-
-  // ========== SECTION COMMON ==========
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -171,6 +137,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   // ========== PETS SECTION ==========
   petsSection: {
     marginBottom: 24,
+    marginTop: 50,
   },
   petsListContent: {
     paddingHorizontal: 16,

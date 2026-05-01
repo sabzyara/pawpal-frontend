@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { createHomeStyles } from '@/styles/homeStyles';
 import { Feather } from '@expo/vector-icons';
+import React from 'react';
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 
 interface Pet {
   id: number;
@@ -27,7 +27,6 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
   return (
     <View style={styles.petsSection}>
       
-      {/* HEADER */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" ,marginBottom: 12 , paddingHorizontal: 20}}>
         <Text style={styles.sectionTitle}>My Pets</Text>
 
@@ -36,7 +35,6 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* EMPTY */}
       {pets.length === 0 && (
         <TouchableOpacity
           onPress={onAddPress}
@@ -54,7 +52,6 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* LIST */}
       <FlatList
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -86,7 +83,6 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
               }}
             />
 
-            {/* NAME */}
             <Text
               style={{
                 fontSize: 14,
