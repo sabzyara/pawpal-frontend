@@ -1,22 +1,21 @@
 // screens/home/HomeScreen.tsx
-import React from 'react';
-import { ScrollView, RefreshControl, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { usePets } from "@/store/petStore";
-import { useTheme } from '@/hooks/useTheme';
-import { useGreeting } from '@/hooks/useGreeting';
-import { useSchedule } from '@/hooks/useSchedule';
-import { useNotifications } from '@/hooks/useNotifications';
-import { HomeHeader } from '@/components/home/Header';
-import { StatsCards } from '@/components/home/StatsCard';
 import { CalendarSection } from '@/components/home/Calendar';
+import { FloatingChatButton } from '@/components/home/FloatingChatButton';
+import { HomeHeader } from '@/components/home/Header';
+import { LearnCard } from '@/components/home/LearnCard';
 import { PetsSection } from '@/components/home/PetsList';
 import { ScheduleSection } from '@/components/home/ScheduleSection';
-import { LearnCard } from '@/components/home/LearnCard';
+import { useGreeting } from '@/hooks/useGreeting';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useSchedule } from '@/hooks/useSchedule';
+import { useTheme } from '@/hooks/useTheme';
+import { usePets } from "@/store/petStore";
 import { createHomeStyles } from '@/styles/homeStyles';
-import { ScheduleItem, SCHEDULE_TYPES_CONFIG } from '@/types/home_index';
-import { FloatingChatButton } from '@/components/home/FloatingChatButton';
+import { SCHEDULE_TYPES_CONFIG, ScheduleItem } from '@/types/home_index';
+import { router } from 'expo-router';
+import React from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const { colors } = useTheme();
@@ -81,22 +80,61 @@ export default function HomeScreen() {
             notificationCount={upcomingTasks}
             onNotificationPress={handleNotificationPress}
           />
-
-          <StatsCards
-            totalPets={pets.length}
-            completedTasks={completedTasks}
-            pendingTasks={upcomingTasks}
-          />
-
-          <CalendarSection
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-          />
+            {/* <View
+              style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 16,
+              margin: 16,
+              borderRadius: 16,
+              backgroundColor: colors.card.elevated,
+              borderWidth: 1,
+              borderColor: colors.border.medium,
+              }}
+            >
+      
+              <Image
+                source={{ uri: getAvatarUrl() }}
+                style={{
+                  width: 70,
+                  height: 70,
+                  borderRadius: 35,
+                  marginRight: 16,
+                }}
+              />
+            
+           
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '700',
+                    color: colors.text.primary,
+                    marginBottom: 4,
+                  }}
+                >
+                  {getDisplayName()}
+                </Text>
+            
+                <Text style={{ color: colors.text.secondary }}>
+                  {getRoleName()}
+                </Text>
+            
+                <Text style={{ color: colors.text.tertiary }}>
+                    {profile?.user.email}
+                </Text>
+              </View>
+            </View> */}
 
           <PetsSection
             pets={pets}
             onAddPress={handleAddPet}
             onPetPress={handlePetPress}
+          />
+
+          <CalendarSection
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
           />
 
           <ScheduleSection

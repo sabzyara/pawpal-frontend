@@ -531,3 +531,71 @@ useEffect(() => {
     </SafeAreaView>
   );
 }
+
+// import { useTheme } from '@/hooks/useTheme';
+// import { useProfileStore } from '@/store/profileStore';
+// import { useEffect } from 'react';
+// import { ScrollView } from 'react-native';
+// import { SafeAreaView } from 'react-native-safe-area-context';
+
+// import InfoSection from '@/components/profile/InfoSection';
+// import ProfileHeader from '@/components/profile/ProfileHeader';
+// import ProfileStats from '@/components/profile/ProfileStats';
+// import RoleActions from '@/components/profile/RoleActions';
+
+// // import { getAvatarUrl, getDisplayName, getRoleName } from '@/utils/profile';
+// import { getAvatarUrl, getDisplayName, getRoleName } from '../../utils/profile';
+
+// export default function ProfileScreen() {
+//   const { colors } = useTheme();
+//   const { profile, fetchProfile } = useProfileStore();
+
+//   useEffect(() => {
+//     fetchProfile();
+//   }, []);
+
+//   if (!profile) return null;
+
+//   const stats = [
+//     { value: "12", label: "Pets", icon: "paw" },
+//     { value: "24", label: "Appointments", icon: "calendar" },
+//     { value: "4.8", label: "Rating", icon: "star" },
+//   ];
+
+//   console.log('getAvatarUrl:', getAvatarUrl);
+
+//   return (
+//     <SafeAreaView style={{ flex: 1 }}>
+//       <ScrollView>
+
+//         <ProfileHeader
+//           avatar={getAvatarUrl(profile)}
+//           name={getDisplayName(profile)}
+//           role={getRoleName(profile.user.role)}
+//           email={profile.user.email}
+//           colors={colors}
+//         />
+
+//         <ProfileStats stats={stats} colors={colors} />
+
+//         <InfoSection
+//           title="Info"
+//           colors={colors}
+//           items={[
+//             { icon: 'user', label: 'Email', value: profile.user.email }
+//           ]}
+//         />
+
+//         <RoleActions
+//           role={profile.user.role}
+//           colors={colors}
+//           handlers={{
+//             pets: () => {},
+//             appointments: () => {},
+//           }}
+//         />
+
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// }

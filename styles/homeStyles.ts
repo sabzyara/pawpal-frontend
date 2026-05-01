@@ -1,11 +1,11 @@
-// screens/home/styles/homeStyles.ts
-import { StyleSheet } from 'react-native';
+//screens/home/styles/homeStyles.ts
 import { ThemeColors } from '@/styles/colors';
+import { StyleSheet } from 'react-native';
 
 export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.background.primary,
   },
   container: {
     flex: 1,
@@ -26,7 +26,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   greeting: {
     fontSize: 14,
-    color: '#FFF',
+    color: colors.text.inverse,
     opacity: 0.9,
     marginBottom: 4,
     fontWeight: '500',
@@ -34,7 +34,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   userName: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFF',
+    color: colors.text.inverse,
     letterSpacing: -0.5,
   },
   notificationIcon: {
@@ -50,7 +50,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: '#FF6B6B',
+    backgroundColor: colors.primary.main,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -61,45 +61,10 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     borderColor: '#FFF',
   },
   badgeText: {
-    color: '#FFF',
+    color: colors.text.inverse,
     fontSize: 10,
     fontWeight: 'bold',
   },
-
-  // ========== STATS CARDS ==========
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    marginTop: -24,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    marginHorizontal: 6,
-    paddingVertical: 16,
-    borderRadius: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#FFF',
-    opacity: 0.9,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-
   // ========== SECTION COMMON ==========
   sectionHeader: {
     flexDirection: 'row',
@@ -136,7 +101,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     position: 'relative',
   },
   dayCardActive: {
-    shadowColor: '#FF6B6B',
+    shadowColor: colors.card.default,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -149,7 +114,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     marginBottom: 4,
   },
   dayTextActive: {
-    color: '#FFF',
+    color: colors.text.inverse,
   },
   dateText: {
     fontSize: 18,
@@ -157,14 +122,14 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.text.primary,
   },
   dateTextActive: {
-    color: '#FFF',
+    color: colors.text.inverse,
   },
   activeIndicator: {
     position: 'absolute',
     bottom: -8,
     width: 30,
     height: 3,
-    backgroundColor: '#FFF',
+    backgroundColor: colors.primary.main,
     borderRadius: 2,
   },
 
@@ -215,7 +180,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#4ECDC4',
+    backgroundColor: colors.primary.main,
   },
   petStatusText: {
     fontSize: 11,
@@ -256,6 +221,8 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    backgroundColor: colors.card.default,
+    borderColor: colors.border.light,
   },
   completedCard: {
     opacity: 0.7,
@@ -293,7 +260,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   scheduleTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFF',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   completedText: {
@@ -302,13 +269,13 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   },
   scheduleTime: {
     fontSize: 12,
-    color: '#FFF',
+    color: colors.text.secondary,
     opacity: 0.8,
     marginBottom: 2,
   },
   schedulePet: {
     fontSize: 11,
-    color: '#FFF',
+    color: colors.text.tertiary,
     opacity: 0.7,
   },
   chevron: {
@@ -335,7 +302,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 12,
   },
   addTaskText: {
-    color: '#FFF',
+    color: colors.text.inverse,
     fontWeight: '600',
     fontSize: 14,
   },
@@ -352,6 +319,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 6,
+    backgroundColor: colors.card.default
   },
   learnContent: {
     flexDirection: 'row',
@@ -361,12 +329,12 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   learnTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#FFF',
+    color: colors.text.primary,
     marginBottom: 4,
   },
   learnSubtitle: {
     fontSize: 13,
-    color: '#FFF',
+    color: colors.text.secondary,
     opacity: 0.9,
   },
 });
