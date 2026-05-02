@@ -1,27 +1,29 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  Image,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/themed-text";
+import { useTheme } from '@/hooks/useTheme';
 import api from "@/services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditPetScreen() {
   const { id } = useLocalSearchParams();
 
   const [loading, setLoading] = useState(false);
   const [pet, setPet] = useState<any>(null);
-
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [breed, setBreed] = useState("");
@@ -164,7 +166,7 @@ export default function EditPetScreen() {
             />
 
             <View style={styles.editBadge}>
-              <ThemedText style={{ color: "#fff" }}>
+              <ThemedText style={{ color: colors.text.inverse }}>
                 Edit
               </ThemedText>
             </View>
@@ -173,17 +175,17 @@ export default function EditPetScreen() {
 
         {/* FORM */}
         <View style={styles.form}>
-          <TextInput value={name} onChangeText={setName} placeholder="Name" style={styles.input} />
-          <TextInput value={species} onChangeText={setSpecies} placeholder="Species" style={styles.input} />
-          <TextInput value={breed} onChangeText={setBreed} placeholder="Breed" style={styles.input} />
-          <TextInput value={gender} onChangeText={setGender} placeholder="Gender" style={styles.input} />
-          <TextInput value={age} onChangeText={setAge} placeholder="Age" style={styles.input} />
-          <TextInput value={weight} onChangeText={setWeight} placeholder="Weight" style={styles.input} />
-          <TextInput value={health} onChangeText={setHealth} placeholder="Health" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={name} onChangeText={setName} placeholder="Name" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={species} onChangeText={setSpecies} placeholder="Species" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={breed} onChangeText={setBreed} placeholder="Breed" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={gender} onChangeText={setGender} placeholder="Gender" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={age} onChangeText={setAge} placeholder="Age" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={weight} onChangeText={setWeight} placeholder="Weight" style={styles.input} />
+          <TextInput placeholderTextColor={colors.text.tertiary} value={health} onChangeText={setHealth} placeholder="Health" style={styles.input} />
 
           <TouchableOpacity style={styles.button} onPress={handleSave}>
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.text.inverse} />
             ) : (
               <ThemedText style={styles.buttonText}>
                 Save
@@ -197,62 +199,81 @@ export default function EditPetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#F5F6FA",
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  back: {
-    fontSize: 20,
-  },
-  avatarContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
-  },
-  editBadge: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#FF6B6B",
-    padding: 6,
-    borderRadius: 10,
-  },
-  form: {
-    gap: 12,
-  },
-  input: {
-    backgroundColor: "#fff",
-    padding: 14,
-    borderRadius: 14,
-  },
-  button: {
-    backgroundColor: "#FF6B6B",
-    padding: 16,
-    borderRadius: 14,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background.primary,
+    },
+
+    center: {
+      flex: 1,
+      justifyContent: 'center',
+      backgroundColor: colors.background.primary,
+    },
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 20,
+      alignItems: 'center',
+    },
+
+    title: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text.primary,
+    },
+
+    back: {
+      fontSize: 20,
+      color: colors.primary.main,
+    },
+
+    avatarContainer: {
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+
+    avatar: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+    },
+
+    editBadge: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      backgroundColor: colors.primary.main,
+      padding: 6,
+      borderRadius: 10,
+    },
+
+    form: {
+      gap: 12,
+    },
+
+    input: {
+      backgroundColor: colors.input.background,
+      padding: 14,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.input.border,
+      color: colors.text.primary,
+    },
+
+    button: {
+      backgroundColor: colors.primary.main,
+      padding: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 10,
+    },
+
+    buttonText: {
+      color: colors.text.inverse,
+      fontWeight: '600',
+    },
+  });

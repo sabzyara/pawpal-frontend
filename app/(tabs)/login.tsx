@@ -67,6 +67,8 @@ export default function LoginScreen() {
 
 
   const handleLogin = async () => {
+    console.log("REQUEST START");
+    
     if (!email.trim() || !password.trim()) {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
       return;

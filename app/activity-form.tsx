@@ -1,23 +1,24 @@
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/useTheme';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Keyboard,
-    KeyboardAvoidingView,
-    PanResponder,
-    Platform,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Keyboard,
+  KeyboardAvoidingView,
+  PanResponder,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 
 export default function NutritionForm() {
   const { colors } = useTheme();
+  const styles = createStyles(colors);  
   const { mode, type, distance, duration, id } = useLocalSearchParams();
   
   const [activityType, setActivityType] = useState( typeof type === 'string' ? type : '' );
@@ -108,55 +109,54 @@ export default function NutritionForm() {
             style={[
               styles.sheet,
               {
-                transform: [{ translateY }],
-                backgroundColor: colors.background.primary || '#111',
+                transform: [{ translateY }]              
               },
             ]}
           >
             <View {...panResponder.panHandlers} style={styles.handle} />
 
-            <ThemedView style={styles.header}>
-              <ThemedText type="title">
+            <View style={styles.header}>
+              <Text style={styles.title}>
                 {mode === 'edit' ? 'Edit Activity' : 'Add Activity'}
-              </ThemedText>
-            </ThemedView>
+              </Text>
+            </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <ThemedView style={styles.form}>
-                <ThemedText style={styles.label}>Activity Type</ThemedText>
+              <View style={styles.form}>
+                <Text style={styles.label}>Activity Type</Text>
                 <TextInput 
                 value={activityType}
                 onChangeText={setActivityType}
-                style={[styles.input, { backgroundColor: colors.input.background, color: colors.text.primary }]}
+                style={styles.input}
                 placeholder="Enter type of activity"
                 />
 
-                <ThemedText style={styles.label}>Distance</ThemedText>
+                <Text style={styles.label}>Distance</Text>
                 <TextInput 
                 value={distanceValue}
                 onChangeText={setDistanceValue}
-                style={[styles.input, { backgroundColor: colors.input.background, color: colors.text.primary }]}
+                style={styles.input}
                 placeholder="Enter the distance"
                 />
 
-                <ThemedText style={styles.label}>Duration</ThemedText>
+                <Text style={styles.label}>Duration</Text>
                 <TextInput 
                 value={durationValue}
                 onChangeText={setDurationValue}
-                style={[styles.input, { backgroundColor: colors.input.background, color: colors.text.primary }]}
+                style={styles.input}
                 placeholder="Enter duration in minutes"
                 keyboardType="numeric"
                 />
                 
                 <TouchableOpacity
-                  style={[styles.saveButton, { backgroundColor: colors.primary.main }]}
+                  style={styles.saveButton}
                   onPress={handleSave}
                 >
                   <ThemedText style={styles.saveButtonText}>
                     {mode === 'edit' ? 'Save Changes' : 'Add'}
                   </ThemedText>
                 </TouchableOpacity>
-              </ThemedView>
+              </View>
             </TouchableWithoutFeedback>
           </Animated.View>
         </KeyboardAvoidingView>
@@ -165,50 +165,82 @@ export default function NutritionForm() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'flex-end' },
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    title: {
+      fontSize: 26,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    container: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
 
-  overlay: { ...StyleSheet.absoluteFillObject },
-  overlayBg: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+    },
 
-  sheet: {
-    padding: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    minHeight: '50%',
-  },
+    overlayBg: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.4)', // можно оставить
+    },
 
-  handle: {
-    width: 120,
-    height: 6,
-    backgroundColor: '#888',
-    borderRadius: 3,
-    alignSelf: 'center',
-    marginBottom: 10,
-  },
+    sheet: {
+      padding: 16,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      minHeight: '50%',
+      backgroundColor: colors.background.primary,
+    },
 
-  header: { alignItems: 'center', paddingVertical: 10 },
+    handle: {
+      width: 150,
+      height: 6,
+      backgroundColor: colors.border.medium,
+      borderRadius: 3,
+      alignSelf: 'center',
+      marginBottom: 12,
+    },
 
-  form: { paddingHorizontal: 16 },
+    header: {
+      alignItems: 'center',
+      paddingVertical: 10,
+    },
 
-  label: { marginTop: 16 },
+    form: {
+      paddingHorizontal: 16,
+    },
 
-  input: {
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 6,
-  },
+    label: {
+      marginTop: 16,
+      color: colors.text.secondary,
+      fontSize: 13,
+    },
 
-  saveButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 10,
-  },
+    input: {
+      padding: 14,
+      borderRadius: 12,
+      marginTop: 6,
 
-  saveButtonText: { color: '#fff', fontWeight: '600' },
-});
+      backgroundColor: colors.input.background,
+      borderWidth: 1,
+      borderColor: colors.input.border,
+      color: colors.text.primary,
+    },
+
+    saveButton: {
+      padding: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 30,
+      marginBottom: 10,
+      backgroundColor: colors.primary.main,
+    },
+
+    saveButtonText: {
+      color: colors.text.inverse,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+  });
