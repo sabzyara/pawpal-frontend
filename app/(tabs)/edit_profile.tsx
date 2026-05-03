@@ -1,25 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import {
-View,
-StyleSheet,
-ScrollView,
-TextInput,
-TouchableOpacity,
-Alert,
-ActivityIndicator,
-Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
-import { useProfileStore } from '@/store/profileStore';
+import { useTheme } from '@/hooks/useTheme';
 import api from '@/services/api';
+import { useProfileStore } from '@/store/profileStore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EditProfileScreen() {
 const { profile, fetchProfile } = useProfileStore();
-
+const { colors } = useTheme();
+const styles = createStyles(colors);
 const [loading, setLoading] = useState(false);
 const [firstName, setFirstName] = useState('');
 const [lastName, setLastName] = useState('');
@@ -253,6 +255,7 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
         <>
           <TextInput
             placeholder="First Name"
+            placeholderTextColor={colors.text.tertiary}
             value={firstName}
             onChangeText={setFirstName}
             style={styles.input}
@@ -260,6 +263,7 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
 
           <TextInput
             placeholder="Last Name"
+            placeholderTextColor={colors.text.tertiary}
             value={lastName}
             onChangeText={setLastName}
             style={styles.input}
@@ -270,6 +274,7 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
       {role === 'OWNER' && (
         <TextInput
           placeholder="Username"
+          placeholderTextColor={colors.text.tertiary}
           value={extra}
           onChangeText={setExtra}
           style={styles.input}
@@ -278,6 +283,7 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
 
       <TextInput
         placeholder="Phone"
+        placeholderTextColor={colors.text.tertiary}
         value={phone}
         onChangeText={setPhone}
         style={styles.input}
@@ -286,6 +292,7 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
       {role === 'SERVICE' && (
         <TextInput
           placeholder="Service Category"
+          placeholderTextColor={colors.text.tertiary}
           value={extra}
           onChangeText={setExtra}
           style={styles.input}
@@ -294,7 +301,7 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
 
       <TouchableOpacity style={styles.button} onPress={handleSave}>
         {loading ? (
-          <ActivityIndicator color="#fff" />
+          <ActivityIndicator color={colors.text.inverse} />
         ) : (
           <ThemedText style={styles.buttonText}>
             Save Changes
@@ -311,99 +318,105 @@ return ( <SafeAreaView style={styles.container}> <ScrollView>
 );
 }
 
-const styles = StyleSheet.create({
-container: {
-flex: 1,
-padding: 20,
-backgroundColor: '#F5F6FA',
-},
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background.primary,
+    },
 
-header: {
-flexDirection: 'row',
-justifyContent: 'space-between',
-alignItems: 'center',
-marginBottom: 20,
-},
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
 
-headerTitle: {
-fontSize: 20,
-fontWeight: '700',
-color: '#7A2E4D',
-},
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text.primary,
+    },
 
-backButton: {
-width: 40,
-height: 40,
-borderRadius: 12,
-backgroundColor: '#fff',
-alignItems: 'center',
-justifyContent: 'center',
-elevation: 3,
-},
+    backButton: {
+      width: 45,
+      height: 45,
+      borderRadius: 12,
+      backgroundColor: colors.card.default,
+      alignItems: 'center',
+      justifyContent: 'center',
 
-backIcon: {
-fontSize: 18,
-color: '#7A2E4D',
-},
+      shadowColor: '#000',
+      shadowOpacity: 0.06,
+      shadowRadius: 6,
+      elevation: 3,
+    },
 
-avatarContainer: {
-alignItems: 'center',
-marginBottom: 20,
-},
+    backIcon: {
+      fontSize: 24,
+      color: colors.primary.main,
+    },
 
-avatar: {
-width: 110,
-height: 110,
-borderRadius: 55,
-},
+    avatarContainer: {
+      alignItems: 'center',
+      marginBottom: 20,
+    },
 
-avatarFallback: {
-width: 110,
-height: 110,
-borderRadius: 55,
-backgroundColor: '#7A2E4D',
-alignItems: 'center',
-justifyContent: 'center',
-},
+    avatar: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+    },
 
-initials: {
-color: '#fff',
-fontSize: 28,
-fontWeight: '700',
-},
+    avatarFallback: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+      backgroundColor: colors.primary.main,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-editBadge: {
-position: 'absolute',
-bottom: 0,
-right: 0,
-backgroundColor: '#7A2E4D',
-paddingHorizontal: 8,
-paddingVertical: 4,
-borderRadius: 10,
-},
+    initials: {
+      color: colors.text.inverse,
+      fontSize: 28,
+      fontWeight: '700',
+    },
 
-form: {
-gap: 12,
-},
+    editBadge: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      backgroundColor: colors.primary.main,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 10,
+    },
 
-input: {
-backgroundColor: '#fff',
-borderRadius: 14,
-padding: 14,
-borderWidth: 1,
-borderColor: '#E5E7EB',
-},
+    form: {
+      gap: 12,
+    },
 
-button: {
-backgroundColor: '#7A2E4D',
-padding: 16,
-borderRadius: 14,
-alignItems: 'center',
-marginTop: 10,
-},
+    input: {
+      backgroundColor: colors.input.background,
+      borderRadius: 14,
+      padding: 14,
+      borderWidth: 1,
+      borderColor: colors.input.border,
+      color: colors.text.primary,
+    },
 
-buttonText: {
-color: '#fff',
-fontWeight: '600',
-},
-});
+    button: {
+      backgroundColor: colors.primary.main,
+      padding: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 10,
+    },
+
+    buttonText: {
+      color: colors.text.inverse,
+      fontWeight: '600',
+    },
+  });

@@ -1,24 +1,25 @@
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { useTheme } from '@/hooks/useTheme';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Keyboard,
-    KeyboardAvoidingView,
-    PanResponder,
-    Platform,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Keyboard,
+  KeyboardAvoidingView,
+  PanResponder,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from 'react-native';
 
 export default function NutritionForm() {
-  const { colors } = useTheme();
   const { mode, meal, calories, id } = useLocalSearchParams();
+
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
 //   const [mealType, setMealType] = useState(meal || '');
 //   const [caloriesValue, setCaloriesValue] = useState(calories || '');
@@ -112,44 +113,43 @@ export default function NutritionForm() {
               styles.sheet,
               {
                 transform: [{ translateY }],
-                backgroundColor: colors.background.primary || '#111',
               },
             ]}
           >
             <View {...panResponder.panHandlers} style={styles.handle} />
 
-            <ThemedView style={styles.header}>
-              <ThemedText type="title">
+            <View style={styles.header}>
+              <Text style={styles.title}>
                 {mode === 'edit' ? 'Edit Nutrition' : 'Add Nutrition'}
-              </ThemedText>
-            </ThemedView>
+              </Text>
+            </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <ThemedView style={styles.form}>
-                <ThemedText style={styles.label}>Meal Type</ThemedText>
+              <View style={styles.form}>
+                <Text style={styles.label}>Meal Type</Text>
                 <TextInput
                   value={mealType}
                   onChangeText={setMealType}
-                  style={[styles.input, { backgroundColor: colors.input?.background }]}
+                  style={styles.input}
                 />
 
-                <ThemedText style={styles.label}>Calories</ThemedText>
+                <Text style={styles.label}>Calories</Text>
                 <TextInput
                   value={caloriesValue}
                   onChangeText={setCaloriesValue}
-                  style={[styles.input, { backgroundColor: colors.input?.background }]}
+                  style={styles.input}
                   keyboardType="numeric"
                 />
 
                 <TouchableOpacity
-                  style={[styles.saveButton, { backgroundColor: colors.primary.main }]}
+                  style={styles.saveButton}
                   onPress={handleSave}
                 >
-                  <ThemedText style={styles.saveButtonText}>
+                  <Text style={styles.saveButtonText}>
                     {mode === 'edit' ? 'Save Changes' : 'Add'}
-                  </ThemedText>
+                  </Text>
                 </TouchableOpacity>
-              </ThemedView>
+              </View>
             </TouchableWithoutFeedback>
           </Animated.View>
         </KeyboardAvoidingView>
@@ -158,50 +158,82 @@ export default function NutritionForm() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'flex-end' },
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    title: {
+      fontSize: 26,
+      fontWeight: '700',
+      textAlign: 'center',
+    },
+    container: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
 
-  overlay: { ...StyleSheet.absoluteFillObject },
-  overlayBg: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+    },
 
-  sheet: {
-    padding: 10,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    minHeight: '50%',
-  },
+    overlayBg: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0,0,0,0.4)', // можно оставить
+    },
 
-  handle: {
-    width: 120,
-    height: 6,
-    backgroundColor: '#888',
-    borderRadius: 3,
-    alignSelf: 'center',
-    marginBottom: 10,
-  },
+    sheet: {
+      padding: 16,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      minHeight: '50%',
+      backgroundColor: colors.background.primary,
+    },
 
-  header: { alignItems: 'center', paddingVertical: 10 },
+    handle: {
+      width: 150,
+      height: 6,
+      backgroundColor: colors.border.medium,
+      borderRadius: 3,
+      alignSelf: 'center',
+      marginBottom: 12,
+    },
 
-  form: { paddingHorizontal: 16 },
+    header: {
+      alignItems: 'center',
+      paddingVertical: 10,
+    },
 
-  label: { marginTop: 16 },
+    form: {
+      paddingHorizontal: 16,
+    },
 
-  input: {
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 6,
-  },
+    label: {
+      marginTop: 16,
+      color: colors.text.secondary,
+      fontSize: 13,
+    },
 
-  saveButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 30,
-    marginBottom: 10,
-  },
+    input: {
+      padding: 14,
+      borderRadius: 12,
+      marginTop: 6,
 
-  saveButtonText: { color: '#fff', fontWeight: '600' },
-});
+      backgroundColor: colors.input.background,
+      borderWidth: 1,
+      borderColor: colors.input.border,
+      color: colors.text.primary,
+    },
+
+    saveButton: {
+      padding: 16,
+      borderRadius: 14,
+      alignItems: 'center',
+      marginTop: 30,
+      marginBottom: 10,
+      backgroundColor: colors.primary.main,
+    },
+
+    saveButtonText: {
+      color: colors.text.inverse,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+  });

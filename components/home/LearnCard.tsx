@@ -1,9 +1,9 @@
-import React from 'react';
-import { TouchableOpacity, Text, View } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { createHomeStyles } from '@/styles/homeStyles';
+import { Feather } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 interface LearnCardProps {
   onPress: () => void;
@@ -16,7 +16,7 @@ export const LearnCard: React.FC<LearnCardProps> = ({ onPress }) => {
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.9}>
       <LinearGradient
-        colors={["#667EEA", "#764BA2"]}
+        colors={[colors.primary.main, colors.primary.light]}
         style={styles.learnCard}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}

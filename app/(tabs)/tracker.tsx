@@ -33,7 +33,9 @@ export default function TrackerScreen() {
           ]}
           onPress={() => setTab('nutrition')}
         >
-          <Text style={styles.tabText}>Nutrition</Text>
+          <Text style={[styles.tabText,
+            { color: tab === 'nutrition' ? 'white' : colors.text.secondary },
+          ]}>Nutrition</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -45,7 +47,9 @@ export default function TrackerScreen() {
           ]}
           onPress={() => setTab('activity')}
         >
-          <Text style={styles.tabText}>Activity</Text>
+          <Text style={[styles.tabText,
+            { color: tab === 'activity' ? 'white' : colors.text.secondary },
+          ]}>Activity</Text>
         </TouchableOpacity>
       </View>
         <CalendarSection
@@ -248,5 +252,6 @@ const styles = StyleSheet.create({
 addButtonText: {
   fontSize: 16,
   fontWeight: '700',
+  color: "#FFFF",
 },
 });

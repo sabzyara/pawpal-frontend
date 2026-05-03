@@ -1,4 +1,3 @@
-import { PetProvider } from "@/store/petStore";
 import {
   DarkTheme,
   DefaultTheme,
@@ -38,7 +37,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-        <PetProvider>
+        
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen
@@ -63,7 +62,6 @@ export default function RootLayout() {
             />
 
           </Stack>
-        </PetProvider>
         <StatusBar style="auto" />
       </ThemeProvider>
     </GestureHandlerRootView>

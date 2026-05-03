@@ -1,26 +1,24 @@
-import { usePets } from "@/store/petStore";
-import { router } from "expo-router";
+import { useTheme } from '@/hooks/useTheme';
+import api from "@/services/api";
+import { Feather } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, Stack } from "expo-router";
 import { useState } from "react";
 import {
-  Text,
-  TextInput,
-  View,
-  TouchableOpacity,
-  ScrollView,
+  ActivityIndicator,
+  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
-  Alert,
-  TouchableWithoutFeedback,
-  Keyboard,
-  Dimensions,
-  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import { addPetStyles } from "@/styles/addScreenStyles";
-
-const { width, height } = Dimensions.get("window");
 
 interface PetFormData {
   name: string;
@@ -33,6 +31,7 @@ interface PetFormData {
 }
 
 export default function AddPetScreen() {
+  
   const [formData, setFormData] = useState<PetFormData>({
     name: "",
     species: "",
@@ -42,287 +41,298 @@ export default function AddPetScreen() {
     weight: "",
     healthStatus: "",
   });
-  
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { addPet } = usePets();
+
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
+  const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (field: keyof PetFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
+  // 📸 выбрать фото
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  // 💾 сохранить
+  const handleSave = async () => {
     if (!formData.name.trim()) {
-      Alert.alert("Error", "Please enter your pet's name");
+      Alert.alert("Error", "Введите имя питомца");
       return;
     }
 
-    addPet(formData.name.trim());
-    
-    Alert.alert(
-      "Success! 🎉",
-      `${formData.name} has been added to your family`,
-      [{ text: "OK", onPress: () => router.back() }]
-    );
-  };
+    try {
+      setLoading(true);
 
-  const handleCancel = () => {
-    if (formData.name || formData.species || formData.breed) {
-      Alert.alert(
-        "Discard Changes",
-        "Are you sure you want to discard your changes?",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Discard", style: "destructive", onPress: () => router.back() }
-        ]
-      );
-    } else {
-      router.back();
+      // 1. создаём питомца
+      const res = await api.post("/pet-management/api/pets", {
+        name: formData.name,
+        species: formData.species,
+        breed: formData.breed,
+        gender: formData.gender,
+        age: Number(formData.age) || 0,
+        weight: Number(formData.weight) || 0,
+        healthStatus: formData.healthStatus,
+      });
+
+      const petId = res.data.id;
+
+      // 2. загружаем фото
+      if (image) {
+        const formDataImg = new FormData();
+
+        formDataImg.append("file", {
+          uri: image,
+          name: "avatar.jpg",
+          type: "image/jpeg",
+        } as any);
+
+        await api.post(
+          `/pet-management/api/pets/${petId}/avatar`,
+          formDataImg,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      }
+
+      Alert.alert("Success 🎉", "Питомец добавлен", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+
+    } catch (e: any) {
+      console.log("ERROR:", e?.response?.data);
+
+      Alert.alert("Ошибка", "Не удалось создать питомца");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderGenderButton = (gender: "male" | "female", label: string, emoji: string) => (
-    <TouchableOpacity
-      style={[
-        addPetStyles.genderButton,
-        formData.gender === gender && addPetStyles.genderButtonActive,
-      ]}
-      onPress={() => handleInputChange("gender", gender)}
-      activeOpacity={0.8}
-    >
-      <LinearGradient
-        colors={
-          formData.gender === gender
-            ? (gender === "male" ? ["#4ECDC4", "#6BE4DC"] : ["#FF6B6B", "#FF8E8E"])
-            : ["#F8F9FA", "#F8F9FA"]
-        }
-        style={addPetStyles.genderGradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
-        <Text style={addPetStyles.genderEmoji}>{emoji}</Text>
-        <Text
-          style={[
-            addPetStyles.genderText,
-            formData.gender === gender && addPetStyles.genderTextActive,
-          ]}
-        >
-          {label}
-        </Text>
-        {formData.gender === gender && (
-          <View style={addPetStyles.checkmark}>
-            <Feather name="check" size={12} color="#FFF" />
-          </View>
-        )}
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={addPetStyles.container}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={addPetStyles.keyboardView}
-        >
-          <SafeAreaView style={addPetStyles.safeArea}>
-            {/* Header */}
-            <View style={addPetStyles.header}>
-              <TouchableOpacity onPress={handleCancel} style={addPetStyles.backButton}>
-                <Feather name="arrow-left" size={24} color="#1A1A1A" />
-              </TouchableOpacity>
-              <Text style={addPetStyles.headerTitle}>Add New Pet</Text>
-              <View style={addPetStyles.placeholder} />
-            </View>
+    <>
+    <Stack.Screen options={{ headerShown: false }} />
 
-            <ScrollView 
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={addPetStyles.scrollContent}
+
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <SafeAreaView style={styles.container}>
+        
+        {/* HEADER */}
+        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Feather name="arrow-left" size={24} color={colors.text.primary} />
+          </TouchableOpacity>
+
+          <Text style={styles.title}>Add Pet</Text>
+        </View>
+
+        <ScrollView>
+
+          {/* 📸 PHOTO */}
+          <TouchableOpacity onPress={pickImage} style={{ alignItems: "center", marginBottom: 20 }}>
+            <Image
+              source={{
+                uri:
+                  image ||
+                  "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+              }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
+            <Text style={{ marginTop: 8 }}>Add photo</Text>
+          </TouchableOpacity>
+
+          {/* INPUTS */}
+          <TextInput
+            placeholder="Name"
+            placeholderTextColor={colors.text.tertiary}
+            value={formData.name}
+            onChangeText={(v) => handleInputChange("name", v)}
+            style={styles.input}
+          />
+
+          <TextInput
+            placeholder="Species"
+            placeholderTextColor={colors.text.tertiary}
+            value={formData.species}
+            onChangeText={(v) => handleInputChange("species", v)}
+            style={styles.input}
+          />
+
+          <TextInput
+            placeholder="Breed"
+            placeholderTextColor={colors.text.tertiary}
+            value={formData.breed}
+            onChangeText={(v) => handleInputChange("breed", v)}
+            style={styles.input}
+          />
+
+          {/* GENDER */}
+          <View style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}>
+            <TouchableOpacity
+              style={[
+                styles.genderBtn,
+                formData.gender === "male" && styles.genderBtnActive,
+              ]}
+              onPress={() => handleInputChange("gender", "male")}
             >
-              {/* Pet Avatar Section */}
-              <View style={addPetStyles.avatarSection}>
-                <TouchableOpacity 
-                  style={addPetStyles.avatarContainer}
-                  onPress={() => {
-                    // Add image picker functionality here
-                    Alert.alert("Coming Soon", "Photo picker will be available soon");
-                  }}
-                >
-                  <LinearGradient
-                    colors={["#FF6B6B", "#FF8E8E"]}
-                    style={addPetStyles.avatarGradient}
-                  >
-                    {selectedImage ? (
-                      <Image source={{ uri: selectedImage }} style={addPetStyles.avatar} />
-                    ) : (
-                      <>
-                        <MaterialCommunityIcons name="camera-plus" size={32} color="#FFF" />
-                        <Text style={addPetStyles.avatarText}>Add Photo</Text>
-                      </>
-                    )}
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-
-              {/* Welcome Card */}
-              <LinearGradient
-                colors={["#667EEA", "#764BA2"]}
-                style={addPetStyles.welcomeCard}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
+              <Text
+                style={
+                  formData.gender === "male"
+                    ? styles.genderTextActive
+                    : styles.genderText
+                }
               >
-                <MaterialCommunityIcons name="paw" size={32} color="#FFF" />
-                <Text style={addPetStyles.welcomeTitle}>New Family Member 🐾</Text>
-                <Text style={addPetStyles.welcomeSubtitle}>
-                  Tell us about your pet to provide the best care
+                Male
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.genderBtn,
+                formData.gender === "female" && styles.genderBtnActive,
+              ]}
+              onPress={() => handleInputChange("gender", "female")}
+            >
+              <Text
+                style={
+                  formData.gender === "female"
+                    ? styles.genderTextActive
+                    : styles.genderText
+                }
+              >
+                Female
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TextInput
+            placeholder="Age"
+            placeholderTextColor={colors.text.tertiary}
+            keyboardType="numeric"
+            value={formData.age}
+            onChangeText={(v) => handleInputChange("age", v)}
+            style={styles.input}
+          />
+
+          <TextInput
+            placeholder="Weight"
+            placeholderTextColor={colors.text.tertiary}
+            keyboardType="numeric"
+            value={formData.weight}
+            onChangeText={(v) => handleInputChange("weight", v)}
+            style={styles.input}
+          />
+
+          <TextInput
+            placeholder="Health status"
+            placeholderTextColor={colors.text.tertiary}
+            value={formData.healthStatus}
+            onChangeText={(v) => handleInputChange("healthStatus", v)}
+            style={styles.input}
+          />
+
+          {/* SAVE */}
+          <TouchableOpacity onPress={handleSave} disabled={loading}>
+            <LinearGradient
+              colors={colors.primary.gradient}
+              style={styles.button}
+            >
+              {loading ? (
+                <ActivityIndicator color={colors.text.inverse} />
+              ) : (
+                <Text style={{ color: "#fff", fontWeight: "600" }}>
+                  Add Pet
                 </Text>
-              </LinearGradient>
+              )}
+            </LinearGradient>
+          </TouchableOpacity>
 
-              {/* Form Section */}
-              <View style={addPetStyles.formSection}>
-                <Text style={addPetStyles.sectionTitle}>Basic Information</Text>
-                
-                {/* Pet Name */}
-                <View style={addPetStyles.inputWrapper}>
-                  <View style={addPetStyles.inputHeader}>
-                    <MaterialCommunityIcons name="tag" size={20} color="#FF6B6B" />
-                    <Text style={addPetStyles.label}>
-                      Pet Name <Text style={addPetStyles.required}>*</Text>
-                    </Text>
-                  </View>
-                  <TextInput
-                    value={formData.name}
-                    onChangeText={(value) => handleInputChange("name", value)}
-                    placeholder="e.g., Max, Luna, Charlie"
-                    placeholderTextColor="#B6CAEB"
-                    style={addPetStyles.input}
-                  />
-                </View>
-
-                {/* Species & Breed Row */}
-                <View style={addPetStyles.row}>
-                  <View style={[addPetStyles.inputWrapper, addPetStyles.halfWidth]}>
-                    <View style={addPetStyles.inputHeader}>
-                      <MaterialCommunityIcons name="dog" size={20} color="#4ECDC4" />
-                      <Text style={addPetStyles.label}>Species</Text>
-                    </View>
-                    <TextInput
-                      value={formData.species}
-                      onChangeText={(value) => handleInputChange("species", value)}
-                      placeholder="Dog, Cat, Bird"
-                      placeholderTextColor="#B6CAEB"
-                      style={addPetStyles.input}
-                    />
-                  </View>
-
-                  <View style={[addPetStyles.inputWrapper, addPetStyles.halfWidth]}>
-                    <View style={addPetStyles.inputHeader}>
-                      <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#FFE66D" />
-                      <Text style={addPetStyles.label}>Breed</Text>
-                    </View>
-                    <TextInput
-                      value={formData.breed}
-                      onChangeText={(value) => handleInputChange("breed", value)}
-                      placeholder="Labrador, Persian"
-                      placeholderTextColor="#B6CAEB"
-                      style={addPetStyles.input}
-                    />
-                  </View>
-                </View>
-
-                {/* Gender Section */}
-                <View style={addPetStyles.inputWrapper}>
-                  <View style={addPetStyles.inputHeader}>
-                    <MaterialCommunityIcons name="gender-male-female" size={20} color="#A8E6CF" />
-                    <Text style={addPetStyles.label}>Gender</Text>
-                  </View>
-                  <View style={addPetStyles.genderContainer}>
-                    {renderGenderButton("male", "Male", "🐶")}
-                    {renderGenderButton("female", "Female", "🐱")}
-                  </View>
-                </View>
-
-                {/* Age & Weight Row */}
-                <View style={addPetStyles.row}>
-                  <View style={[addPetStyles.inputWrapper, addPetStyles.halfWidth]}>
-                    <View style={addPetStyles.inputHeader}>
-                      <MaterialCommunityIcons name="cake-variant" size={20} color="#FF9A9E" />
-                      <Text style={addPetStyles.label}>Age (years)</Text>
-                    </View>
-                    <TextInput
-                      value={formData.age}
-                      onChangeText={(value) => handleInputChange("age", value)}
-                      keyboardType="numeric"
-                      placeholder="0"
-                      placeholderTextColor="#B6CAEB"
-                      style={addPetStyles.input}
-                    />
-                  </View>
-
-                  <View style={[addPetStyles.inputWrapper, addPetStyles.halfWidth]}>
-                    <View style={addPetStyles.inputHeader}>
-                      <MaterialCommunityIcons name="weight" size={20} color="#FECFEF" />
-                      <Text style={addPetStyles.label}>Weight (kg)</Text>
-                    </View>
-                    <TextInput
-                      value={formData.weight}
-                      onChangeText={(value) => handleInputChange("weight", value)}
-                      keyboardType="numeric"
-                      placeholder="0"
-                      placeholderTextColor="#B6CAEB"
-                      style={addPetStyles.input}
-                    />
-                  </View>
-                </View>
-
-                {/* Health Status */}
-                <View style={addPetStyles.inputWrapper}>
-                  <View style={addPetStyles.inputHeader}>
-                    <MaterialCommunityIcons name="heart-plus" size={20} color="#FF6B6B" />
-                    <Text style={addPetStyles.label}>Health Status</Text>
-                  </View>
-                  <TextInput
-                    value={formData.healthStatus}
-                    onChangeText={(value) => handleInputChange("healthStatus", value)}
-                    placeholder="Healthy, Under treatment, Allergies"
-                    placeholderTextColor="#B6CAEB"
-                    multiline
-                    numberOfLines={3}
-                    textAlignVertical="top"
-                    style={addPetStyles.textArea}
-                  />
-                </View>
-              </View>
-
-              {/* Action Buttons */}
-              <View style={addPetStyles.buttonContainer}>
-                <TouchableOpacity
-                  style={addPetStyles.cancelButton}
-                  onPress={handleCancel}
-                  activeOpacity={0.8}
-                >
-                  <Text style={addPetStyles.cancelButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={addPetStyles.saveButton}
-                  onPress={handleSave}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={["#FF6B6B", "#FF8E8E"]}
-                    style={addPetStyles.saveGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                  >
-                    <Feather name="check" size={20} color="#FFF" />
-                    <Text style={addPetStyles.saveButtonText}>Add Pet</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
-          </SafeAreaView>
-        </KeyboardAvoidingView>
-      </View>
-    </TouchableWithoutFeedback>
+        </ScrollView>
+      </SafeAreaView>
+    </KeyboardAvoidingView>
+    </>
   );
 }
+
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+    padding: 16,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginLeft: 16,
+    color: colors.text.primary,
+  },
+
+  photoText: {
+    marginTop: 8,
+    color: colors.text.secondary,
+  },
+
+  input: {
+    backgroundColor: colors.input.background,
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.input.border,
+    color: colors.text.primary,
+  },
+
+  genderBtn: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: colors.card.default,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.border.medium,
+  },
+
+  genderBtnActive: {
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
+  },
+
+  genderText: {
+    color: colors.text.primary,
+  },
+
+  genderTextActive: {
+    color: colors.text.inverse,
+    fontWeight: "600",
+  },
+
+  button: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 10,
+  },
+});

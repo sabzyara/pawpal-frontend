@@ -1,136 +1,120 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { ThemeColors } from '@/styles/colors';
+import { StyleSheet } from 'react-native';
 
-const { width, height } = Dimensions.get("window");
+export const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    header: {
+      height: 260,
+      borderBottomLeftRadius: 20,
+      borderBottomRightRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingTop: 20,
+    },
 
-export const colors = {
-  primary: "#7A2E4D",      // бордовый (главный)
-  secondary: "#E06387",    // розовый (акцент)
-  background: "#FDF7F9",   // светлый розоватый
-  card: "#FFFFFF",
-  text: "#2A1A22",
-  gray: "#9A8A92",
-  border: "#F1D6DF",
-  error: "#FF6B6B",
-  button: "#7A2E4D",
-};
+    logoWrapper: {
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+      backgroundColor: colors.card.default,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 16,
 
- export const styles = StyleSheet.create({
-  header: {
-    height: 260,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 20,
-  },
+      shadowColor: '#000',
+      shadowOpacity: 0.15,
+      shadowRadius: 15,
+      elevation: 6,
+    },
 
-  logoWrapper: {
-  width: 110,
-  height: 110,
-  borderRadius: 55,
-  backgroundColor: '#FFFFFF', // 💥 ВАЖНО
-  justifyContent: 'center',
-  alignItems: 'center',
-  marginBottom: 16,
+    logo: {
+      width: 70,
+      height: 70,
+    },
 
-  shadowColor: '#000',
-  shadowOpacity: 0.15,
-  shadowRadius: 15,
-  elevation: 6,
-},
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.text.inverse,
+    },
 
-logo: {
-  width: 70,
-  height: 70,
-},
+    subtitle: {
+      fontSize: 14,
+      color: colors.text.inverse,
+      opacity: 0.8,
+      textAlign: 'center',
+    },
 
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
+    form: {
+      backgroundColor: colors.card.default,
+      borderRadius: 20,
+      padding: 20,
 
-  subtitle: {
-    fontSize: 14,
-    color: '#E0E0FF',
-    textAlign: 'center',
-  },
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 20,
+      elevation: 6,
+    },
 
-  card: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-    marginTop: -60,
-  },
+    input: {
+      backgroundColor: colors.input.background,
+      borderRadius: 12,
+      padding: 15,
+      marginBottom: 15,
+      fontSize: 16,
+      color: colors.text.primary,
+      borderWidth: 1,
+      borderColor: colors.input.border,
+    },
 
-  form: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
+    passwordContainer: {
+      position: 'relative',
+    },
 
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 6,
-  },
+    eye: {
+      position: 'absolute',
+      right: 15,
+      top: 18,
+    },
 
-  input: {
-    backgroundColor: '#F5F6FA',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    fontSize: 16,
-  },
+    button: {
+      backgroundColor: colors.primary.main,
+      padding: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+      marginTop: 10,
+    },
 
-  passwordContainer: {
-    position: 'relative',
-  },
+    buttonText: {
+      color: colors.text.inverse,
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
 
-  eye: {
-    position: 'absolute',
-    right: 15,
-    top: 15,
-  },
+    registerRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginTop: 20,
+    },
 
-  button: {
-    backgroundColor: '#7A2E4D',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-  },
+    registerText: {
+      color: colors.text.secondary,
+    },
 
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+    registerLink: {
+      color: colors.primary.main,
+      fontWeight: '600',
+    },
 
-  registerRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
+    errorBox: {
+      backgroundColor: colors.primary.light + '20',
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 15,
+    },
 
-  registerText: {
-    color: '#999',
-  },
-
-  registerLink: {
-    color: '#7A2E4D',
-    fontWeight: '600',
-  },
-
-  errorBox: {
-    backgroundColor: '#FF6B6B20',
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 15,
-  },
-
-  errorText: {
-    color: '#FF6B6B',
-    textAlign: 'center',
-  },
-  
-});
+    errorText: {
+      color: colors.primary.main,
+      textAlign: 'center',
+    },
+  });

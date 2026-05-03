@@ -1,27 +1,26 @@
 // screens/home/HomeScreen.tsx
-import React from 'react';
-import { ScrollView, RefreshControl, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-import { usePets } from "@/store/petStore";
-import { useTheme } from '@/hooks/useTheme';
-import { useGreeting } from '@/hooks/useGreeting';
-import { useSchedule } from '@/hooks/useSchedule';
-import { useNotifications } from '@/hooks/useNotifications';
-import { HomeHeader } from '@/components/home/Header';
-import { StatsCards } from '@/components/home/StatsCard';
 import { CalendarSection } from '@/components/home/Calendar';
+import { FloatingChatButton } from '@/components/home/FloatingChatButton';
+import { HomeHeader } from '@/components/home/Header';
+import { LearnCard } from '@/components/home/LearnCard';
 import { PetsSection } from '@/components/home/PetsList';
 import { ScheduleSection } from '@/components/home/ScheduleSection';
-import { LearnCard } from '@/components/home/LearnCard';
+import { useGreeting } from '@/hooks/useGreeting';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useSchedule } from '@/hooks/useSchedule';
+import { useTheme } from '@/hooks/useTheme';
+import api from "@/services/api";
 import { createHomeStyles } from '@/styles/homeStyles';
-import { ScheduleItem, SCHEDULE_TYPES_CONFIG } from '@/types/home_index';
-import { FloatingChatButton } from '@/components/home/FloatingChatButton';
-
+import { SCHEDULE_TYPES_CONFIG, ScheduleItem } from '@/types/home_index';
+import { useFocusEffect } from "@react-navigation/native";
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { RefreshControl, ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 export default function HomeScreen() {
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
-  const { pets } = usePets();
+
   const { greeting, userName } = useGreeting();
   const {
     selectedDate,
@@ -41,9 +40,16 @@ export default function HomeScreen() {
     router.push(route as any);
   };
 
-  const handlePetPress = (pet: string) => {
-    router.push({ pathname: "/pet", params: { petName: pet } });
-  };
+  
+
+  const handlePetPress = (id: number) => {
+  console.log("GO TO PET:", id);
+
+  router.push({
+    pathname: "/pet",
+    params: { id },
+  });
+};
 
   const handleAddPet = () => {
     router.push("/add");
@@ -60,9 +66,36 @@ export default function HomeScreen() {
   const handleNotificationPress = () => {
     router.push("/notifications");
   };
+  const [pets, setPets] = useState([]);
+ const fetchPets = async () => {
+  try {
+    const res = await api.get("/pet-management/api/pets");
+
+    const data = Array.isArray(res.data)
+      ? res.data.map((p: any) => p.pet ?? p)
+      : [];
+
+    setPets(data);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+useFocusEffect(
+  React.useCallback(() => {
+    fetchPets();
+  }, [])
+);
 
   return (
     <SafeAreaView style={styles.safe}>
+      <HomeHeader
+        greeting={greeting}
+        userName={userName}
+        notificationCount={upcomingTasks}
+        onNotificationPress={handleNotificationPress}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -75,28 +108,16 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.container}>
-          <HomeHeader
-            greeting={greeting}
-            userName={userName}
-            notificationCount={upcomingTasks}
-            onNotificationPress={handleNotificationPress}
-          />
-
-          <StatsCards
-            totalPets={pets.length}
-            completedTasks={completedTasks}
-            pendingTasks={upcomingTasks}
-          />
-
-          <CalendarSection
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-          />
 
           <PetsSection
             pets={pets}
             onAddPress={handleAddPet}
             onPetPress={handlePetPress}
+          />
+
+          <CalendarSection
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
           />
 
           <ScheduleSection

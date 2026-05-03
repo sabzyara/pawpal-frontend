@@ -1,23 +1,20 @@
-// screens/home/components/PetsSection.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { createHomeStyles } from '@/styles/homeStyles';
+import { Feather } from '@expo/vector-icons';
+import React from 'react';
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 
-interface PetsSectionProps {
-  pets: string[];
-  onAddPress: () => void;
-  onPetPress: (pet: string) => void;
+interface Pet {
+  id: number;
+  name: string;
+  avatarUrl?: string;
 }
 
-const PET_IMAGES = [
-  "https://images.unsplash.com/photo-1552053831-7158f46f0c79?w=200&h=200&fit=crop",
-  "https://images.unsplash.com/photo-1583511655826-05700d52f4d9?w=200&h=200&fit=crop",
-  "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=200&h=200&fit=crop",
-  "https://images.unsplash.com/photo-1574158622682-e40e69881006?w=200&h=200&fit=crop",
-];
+interface PetsSectionProps {
+  pets: Pet[];
+  onAddPress: () => void;
+  onPetPress: (petId: number) => void;
+}
 
 export const PetsSection: React.FC<PetsSectionProps> = ({
   pets,
@@ -27,61 +24,74 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
 
-  if (pets.length === 0) {
-    return (
-      <View style={styles.petsSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>My Pets</Text>
-          <TouchableOpacity onPress={onAddPress}>
-            <Feather name="plus-circle" size={24} color={colors.primary.main} />
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.emptyPetsCard} onPress={onAddPress}>
-          <Feather name="plus" size={32} color={colors.text.secondary} />
-          <Text style={styles.emptyPetsText}>Add your first pet</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.petsSection}>
-      <View style={styles.sectionHeader}>
+      
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" ,marginBottom: 12 , paddingHorizontal: 20}}>
         <Text style={styles.sectionTitle}>My Pets</Text>
+
         <TouchableOpacity onPress={onAddPress}>
-          <Feather name="plus-circle" size={24} color={colors.primary.main} />
+          <Feather name="plus" size={20} color={colors.primary.main} />
         </TouchableOpacity>
       </View>
+
+      {pets.length === 0 && (
+        <TouchableOpacity
+          onPress={onAddPress}
+          style={{
+            marginTop: 12,
+            padding: 20,
+            borderRadius: 16,
+            backgroundColor: colors.background.secondary,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: colors.text.secondary }}>
+            Add your first pet 🐾
+          </Text>
+        </TouchableOpacity>
+      )}
 
       <FlatList
         horizontal
-        data={pets}
-        keyExtractor={(item, index) => `${item}-${index}`}
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.petsListContent}
-        renderItem={({ item, index }) => (
+        data={pets}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ paddingTop: 12,
+        paddingHorizontal: 16, }}
+        renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => onPetPress(item)}
-            activeOpacity={0.9}
+            onPress={() => onPetPress(item.id)}
+            style={{
+              marginRight: 16,
+              alignItems: "center",
+              
+            }}
           >
-            <LinearGradient
-              colors={[colors.background.primary, colors.background.secondary]}
-              style={styles.petCard}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+            {/* AVATAR */}
+            <Image
+              source={{
+                uri:
+                  item.avatarUrl ||
+                  "https://cdn-icons-png.flaticon.com/51тз2/616/616408.png",
+              }}
+              style={{
+                width: 70,
+                height: 70,
+                borderRadius: 35,
+                marginBottom: 6,
+              }}
+            />
+
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "600",
+                color: colors.text.primary,
+              }}
             >
-              <View style={styles.petImageContainer}>
-                <Image
-                  source={{ uri: PET_IMAGES[index % PET_IMAGES.length] }}
-                  style={styles.petImage}
-                />
-              </View>
-              <Text style={styles.petName}>{item}</Text>
-              <View style={styles.petStatus}>
-                <View style={styles.activeDot} />
-                <Text style={styles.petStatusText}>Active</Text>
-              </View>
-            </LinearGradient>
+              {item.name}
+            </Text>
           </TouchableOpacity>
         )}
       />

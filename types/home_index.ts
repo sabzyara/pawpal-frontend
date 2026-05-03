@@ -29,22 +29,18 @@ export type GradientColors = [string, string];
 export const SCHEDULE_TYPES_CONFIG = {
   vet: { 
     icon: 'medical-bag' as const, 
-    gradient: ['#F4B183', '#E8925C'] as GradientColors,
     route: '/vet'
   },
   walk: { 
     icon: 'dog' as const, 
-    gradient: ['#6B8AFD', '#4B6BD6'] as GradientColors,
     route: '/tracker'
   },
   medication: { 
     icon: 'pill' as const, 
-    gradient: ['#FF9A9E', '#FECFEF'] as GradientColors,
     route: '/medication'
   },
   grooming: { 
     icon: 'scissors' as const, 
-    gradient: ['#A8E6CF', '#7ECBA1'] as GradientColors,
     route: '/grooming'
   },
 } as const;

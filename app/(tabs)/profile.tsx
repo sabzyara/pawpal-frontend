@@ -39,7 +39,6 @@ useEffect(() => {
 
   const role = profile.user.role;
 
-  // ❗ если профиль не заполнен — редирект
   if (role === Role.OWNER && !profile.petOwner) {
     router.replace('/(tabs)/complete_profile');
   }
@@ -82,9 +81,9 @@ useEffect(() => {
     router.push("/edit_profile");
   };
 
-  const handleMyPets = () => {
-    router.push("/my_pets");
-  };
+const handleMyPets = () => {
+  router.push("/my_pet"); 
+};
 
   const handleMyAppointments = () => {
     router.push("/my_appointments");
