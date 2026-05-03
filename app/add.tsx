@@ -1,22 +1,24 @@
-import { router } from "expo-router";
-import { useState } from "react";
-import {
-  Text,
-  TextInput,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  Image,
-  ActivityIndicator,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from '@/hooks/useTheme';
+import api from "@/services/api";
 import { Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import api from "@/services/api";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, Stack } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface PetFormData {
   name: string;
@@ -29,6 +31,7 @@ interface PetFormData {
 }
 
 export default function AddPetScreen() {
+  
   const [formData, setFormData] = useState<PetFormData>({
     name: "",
     species: "",
@@ -38,6 +41,9 @@ export default function AddPetScreen() {
     weight: "",
     healthStatus: "",
   });
+
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -116,21 +122,23 @@ export default function AddPetScreen() {
   };
 
   return (
+    <>
+    <Stack.Screen options={{ headerShown: false }} />
+
+
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <SafeAreaView style={{ flex: 1, padding: 16 }}>
+      <SafeAreaView style={styles.container}>
         
         {/* HEADER */}
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Feather name="arrow-left" size={24} />
+            <Feather name="arrow-left" size={24} color={colors.text.primary} />
           </TouchableOpacity>
 
-          <Text style={{ fontSize: 20, fontWeight: "600", marginLeft: 16 }}>
-            Add Pet
-          </Text>
+          <Text style={styles.title}>Add Pet</Text>
         </View>
 
         <ScrollView>
@@ -151,6 +159,7 @@ export default function AddPetScreen() {
           {/* INPUTS */}
           <TextInput
             placeholder="Name"
+            placeholderTextColor={colors.text.tertiary}
             value={formData.name}
             onChangeText={(v) => handleInputChange("name", v)}
             style={styles.input}
@@ -158,6 +167,7 @@ export default function AddPetScreen() {
 
           <TextInput
             placeholder="Species"
+            placeholderTextColor={colors.text.tertiary}
             value={formData.species}
             onChangeText={(v) => handleInputChange("species", v)}
             style={styles.input}
@@ -165,6 +175,7 @@ export default function AddPetScreen() {
 
           <TextInput
             placeholder="Breed"
+            placeholderTextColor={colors.text.tertiary}
             value={formData.breed}
             onChangeText={(v) => handleInputChange("breed", v)}
             style={styles.input}
@@ -175,26 +186,43 @@ export default function AddPetScreen() {
             <TouchableOpacity
               style={[
                 styles.genderBtn,
-                formData.gender === "male" && { backgroundColor: "#4ECDC4" },
+                formData.gender === "male" && styles.genderBtnActive,
               ]}
               onPress={() => handleInputChange("gender", "male")}
             >
-              <Text>Male</Text>
+              <Text
+                style={
+                  formData.gender === "male"
+                    ? styles.genderTextActive
+                    : styles.genderText
+                }
+              >
+                Male
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.genderBtn,
-                formData.gender === "female" && { backgroundColor: "#FF6B6B" },
+                formData.gender === "female" && styles.genderBtnActive,
               ]}
               onPress={() => handleInputChange("gender", "female")}
             >
-              <Text>Female</Text>
+              <Text
+                style={
+                  formData.gender === "female"
+                    ? styles.genderTextActive
+                    : styles.genderText
+                }
+              >
+                Female
+              </Text>
             </TouchableOpacity>
           </View>
 
           <TextInput
             placeholder="Age"
+            placeholderTextColor={colors.text.tertiary}
             keyboardType="numeric"
             value={formData.age}
             onChangeText={(v) => handleInputChange("age", v)}
@@ -203,6 +231,7 @@ export default function AddPetScreen() {
 
           <TextInput
             placeholder="Weight"
+            placeholderTextColor={colors.text.tertiary}
             keyboardType="numeric"
             value={formData.weight}
             onChangeText={(v) => handleInputChange("weight", v)}
@@ -211,6 +240,7 @@ export default function AddPetScreen() {
 
           <TextInput
             placeholder="Health status"
+            placeholderTextColor={colors.text.tertiary}
             value={formData.healthStatus}
             onChangeText={(v) => handleInputChange("healthStatus", v)}
             style={styles.input}
@@ -219,11 +249,11 @@ export default function AddPetScreen() {
           {/* SAVE */}
           <TouchableOpacity onPress={handleSave} disabled={loading}>
             <LinearGradient
-              colors={["#FF6B6B", "#FF8E8E"]}
+              colors={colors.primary.gradient}
               style={styles.button}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.text.inverse} />
               ) : (
                 <Text style={{ color: "#fff", fontWeight: "600" }}>
                   Add Pet
@@ -235,27 +265,74 @@ export default function AddPetScreen() {
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
+    </>
   );
 }
 
-const styles = {
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+    padding: 16,
+  },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginLeft: 16,
+    color: colors.text.primary,
+  },
+
+  photoText: {
+    marginTop: 8,
+    color: colors.text.secondary,
+  },
+
   input: {
-    backgroundColor: "#f3f3f3",
+    backgroundColor: colors.input.background,
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.input.border,
+    color: colors.text.primary,
+  },
+
+  genderBtn: {
+    flex: 1,
     padding: 12,
     borderRadius: 10,
-    marginBottom: 12,
+    backgroundColor: colors.card.default,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.border.medium,
   },
+
+  genderBtnActive: {
+    backgroundColor: colors.primary.main,
+    borderColor: colors.primary.main,
+  },
+
+  genderText: {
+    color: colors.text.primary,
+  },
+
+  genderTextActive: {
+    color: colors.text.inverse,
+    fontWeight: "600",
+  },
+
   button: {
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
   },
-  genderBtn: {
-    flex: 1,
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: "#eee",
-    alignItems: "center",
-  },
-};
+});

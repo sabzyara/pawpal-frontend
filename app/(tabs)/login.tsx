@@ -2,7 +2,8 @@ import { useTheme } from '@/hooks/useTheme';
 import api from '@/services/api';
 import { useAuthStore } from '@/store/authStore';
 import { useProfileStore } from '@/store/profileStore';
-import { styles } from '@/styles/loginStyles';
+import { createStyles } from '@/styles/loginStyles';
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -31,6 +32,7 @@ export default function LoginScreen() {
   const { login, isLoading, error, clearError } = useAuthStore();
   const { fetchProfile } = useProfileStore();
   const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   type RoleRoute = {
     endpoint: string;
@@ -65,6 +67,8 @@ export default function LoginScreen() {
 
 
   const handleLogin = async () => {
+    console.log("REQUEST START");
+    
     if (!email.trim() || !password.trim()) {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
       return;
@@ -145,7 +149,7 @@ export default function LoginScreen() {
             keyboardShouldPersistTaps="handled"
           >
               <LinearGradient
-                colors={['#7A2E4D', '#E06387']}
+                colors={colors.primary.gradient}
                 style={[styles.header, { width: '100%' }]}
               >
                 <View style={styles.logoWrapper}>
@@ -173,7 +177,7 @@ export default function LoginScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Email"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={colors.text.tertiary}
                   value={email}
                   onChangeText={(text) => {
                     clearError();
@@ -187,7 +191,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="Пароль"
-                    placeholderTextColor="#999"
+                    placeholderTextColor={colors.text.tertiary}
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={(text) => {
@@ -200,7 +204,11 @@ export default function LoginScreen() {
                     style={styles.eye}
                     onPress={() => setShowPassword(!showPassword)}
                   >
-                    <Text>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+                    <Feather
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color={colors.text.secondary}
+                    />
                   </TouchableOpacity>
                 </View>
 

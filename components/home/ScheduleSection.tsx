@@ -1,22 +1,22 @@
 // screens/home/components/ScheduleSection.tsx
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Feather } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 import { createHomeStyles } from '@/styles/homeStyles';
-import { ScheduleItem, SCHEDULE_TYPES_CONFIG } from '@/types/home_index';
+import { ScheduleItem } from '@/types/home_index';
+import { getScheduleColors } from '@/utils/getScheduleColors';
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+
 
 type MaterialIconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
-// Правильные имена иконок для MaterialCommunityIcons
 const getIconName = (type: ScheduleItem['type']): MaterialIconName => {
   const iconMap: Record<ScheduleItem['type'], MaterialIconName> = {
     vet: 'medical-bag',
     walk: 'dog',
     medication: 'pill',
-    grooming: 'content-cut', // scissors -> content-cut (более правильное имя)
+    grooming: 'content-cut', 
   };
   return iconMap[type];
 };
@@ -74,7 +74,6 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
 
       {schedule.map((item) => {
         const isCompleted = item.done;
-        const typeConfig = SCHEDULE_TYPES_CONFIG[item.type];
         const iconName = getIconName(item.type);
         
         return (
@@ -84,7 +83,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
             activeOpacity={0.9}
           >
             <LinearGradient
-              colors={typeConfig.gradient}
+              colors={getScheduleColors(item.type, colors)}
               style={[styles.scheduleCard, isCompleted && styles.completedCard]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}

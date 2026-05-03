@@ -1,19 +1,20 @@
+import { useTheme } from '@/hooks/useTheme';
+import { useAuthStore } from '@/store/authStore';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
   FlatList,
-  TouchableOpacity,
+  Image,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuthStore } from '@/store/authStore';
 
 type Message = {
   id: string;
@@ -22,6 +23,9 @@ type Message = {
 };
 
 export default function ChatScreen() {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -79,7 +83,6 @@ export default function ChatScreen() {
     const data = await response.json();
     console.log("AI RESPONSE:", data);
 
-    // ❗ удаляем loading
     setMessages(prev => prev.filter(m => m.id !== "loading"));
 
     const aiMessage: Message = {
@@ -129,37 +132,31 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-  <KeyboardAvoidingView
-    style={styles.container}
-    behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-  >
-      {/* 🔝 HEADER */}
-      <View style={styles.header}>
-  
-  {/* 🔙 КНОПКА НАЗАД */}
-  <TouchableOpacity
-    onPress={() => router.back()}
-    style={styles.backButton}
-  >
-    <Ionicons name="chevron-back" size={26} color="#6C63FF" />
-  </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
+            <Ionicons name="chevron-back" size={26} color={colors.text.primary} />
+          </TouchableOpacity>
 
-  {/* 🤖 АВАТАР + ИМЯ */}
-  <View style={styles.headerLeft}>
-    <Image
-  source={require('../../assets/images/pawpalai.jpg')}
-  style={styles.avatar}
-    />
+          <View style={styles.headerLeft}>
+            <Image
+              source={require('../../assets/images/pawpalai.jpg')}
+              style={styles.avatar}
+            />
 
-    <View>
-      <Text style={styles.name}>PawPal AI 🐾</Text>
-      <Text style={styles.status}>online</Text>
-    </View>
-  </View>
+            <View>
+              <Text style={styles.name}>PawPal AI 🐾</Text>
+              <Text style={styles.status}>online</Text>
+            </View>
+          </View>
+        </View>
 
-</View>
-
-      {/* 💬 CHAT */}
       <FlatList
         data={messages}
         keyExtractor={item => item.id}
@@ -167,7 +164,6 @@ export default function ChatScreen() {
         contentContainerStyle={{ padding: 16 }}
       />
 
-      {/* ⌨️ INPUT */}
       <View style={styles.inputContainer}>
         <TextInput
           value={input}
@@ -178,7 +174,7 @@ export default function ChatScreen() {
         />
 
         <TouchableOpacity onPress={sendMessage}>
-          <Ionicons name="send" size={24} color="#6C63FF" />
+          <Ionicons name="send" size={24} color={colors.text.primary} />
         </TouchableOpacity>
       </View>
       </KeyboardAvoidingView>
@@ -186,90 +182,91 @@ export default function ChatScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background.primary,
+    },
 
-  // 🔝 HEADER
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    backgroundColor: '#fff',
-  },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderColor: colors.border.light,
+      backgroundColor: colors.card.default,
+    },
 
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
 
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
+    avatar: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      marginRight: 10,
+    },
 
-  name: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
+    name: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.text.primary,
+    },
 
-  status: {
-    fontSize: 12,
-    color: 'gray',
-  },
+    status: {
+      fontSize: 12,
+      color: colors.text.secondary,
+    },
 
-  // 💬 MESSAGES
-  message: {
-    maxWidth: '75%',
-    padding: 12,
-    borderRadius: 16,
-    marginBottom: 10,
-  },
+    message: {
+      maxWidth: '75%',
+      padding: 12,
+      borderRadius: 16,
+      marginBottom: 10,
+    },
 
-  userMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#6C63FF',
-  },
+    userMessage: {
+      alignSelf: 'flex-end',
+      backgroundColor: colors.primary.main,
+    },
 
-  aiMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#eee',
-  },
+    aiMessage: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.card.elevated,
+    },
 
-  userText: {
-    color: '#fff',
-  },
+    userText: {
+      color: colors.text.inverse,
+    },
 
-  aiText: {
-    color: '#000',
-  },
+    aiText: {
+      color: colors.text.primary,
+    },
 
-  // ⌨️ INPUT
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 12,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-    alignItems: 'center',
-  },
+    // ⌨️ input
+    inputContainer: {
+      flexDirection: 'row',
+      padding: 12,
+      borderTopWidth: 1,
+      borderColor: colors.border.light,
+      alignItems: 'center',
+      backgroundColor: colors.card.default,
+    },
 
-  input: {
-    flex: 1,
-    marginRight: 10,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: '#f5f5f5',
-  },
+    input: {
+      flex: 1,
+      marginRight: 10,
+      padding: 10,
+      borderRadius: 10,
+      backgroundColor: colors.input.background,
+      color: colors.text.primary,
+    },
 
-  backButton: {
-  marginRight: 10,
-  padding: 5,
-},
-
+    backButton: {
+      marginRight: 10,
+      padding: 5,
+    },
 });

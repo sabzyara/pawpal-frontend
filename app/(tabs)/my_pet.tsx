@@ -1,19 +1,20 @@
-import React, { useCallback, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  RefreshControl,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from '@/hooks/useTheme';
+import api from "@/services/api";
 import { Feather } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
-import api from "@/services/api";
+import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
+import React, { useCallback, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Pet = {
   id: number;
@@ -26,6 +27,7 @@ export default function MyPetsScreen() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const { colors } = useTheme();
 
   const fetchPets = async () => {
     try {
@@ -59,13 +61,13 @@ export default function MyPetsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary.main} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
       <FlatList
         data={pets}
         keyExtractor={(item) => item.id.toString()}
@@ -85,12 +87,12 @@ export default function MyPetsScreen() {
               marginBottom: 20,
             }}
           >
-            <Text style={{ fontSize: 28, fontWeight: "700" }}>
+            <Text style={{ fontSize: 28, fontWeight: "700", color: colors.text.primary }}>
               My Pets 🐾
             </Text>
 
             <TouchableOpacity onPress={() => router.push("/add")}>
-              <Feather name="plus" size={26} color="#FF6B6B" />
+              <Feather name="plus" size={26} ccolor={colors.primary.main} />
             </TouchableOpacity>
           </View>
         }
@@ -98,11 +100,11 @@ export default function MyPetsScreen() {
         // 🔥 EMPTY
         ListEmptyComponent={
           <View style={{ alignItems: "center", marginTop: 100 }}>
-            <Text style={{ fontSize: 16, marginBottom: 10 }}>
+            <Text style={{ fontSize: 16, marginBottom: 10, color: colors.text.secondary }}>
               No pets yet
             </Text>
             <TouchableOpacity onPress={() => router.push("/add")}>
-              <Text style={{ color: "#FF6B6B" }}>Add your first pet</Text>
+              <Text style={{ color: colors.primary.main }}>Add your first pet</Text>
             </TouchableOpacity>
           </View>
         }
@@ -120,7 +122,7 @@ export default function MyPetsScreen() {
             style={{ marginBottom: 16 }}
           >
             <LinearGradient
-              colors={["#FF7A7A", "#FFB3B3"]}
+              colors={colors.primary.gradient}
               style={{
                 borderRadius: 24,
                 padding: 16,
@@ -144,14 +146,14 @@ export default function MyPetsScreen() {
                     borderRadius: 32,
                     marginRight: 14,
                     borderWidth: 2,
-                    borderColor: "#fff",
+                    borderColor: colors.text.inverse,
                   }}
                 />
 
                 <View>
                   <Text
                     style={{
-                      color: "#fff",
+                      color: colors.text.inverse,
                       fontSize: 18,
                       fontWeight: "700",
                     }}
@@ -161,7 +163,7 @@ export default function MyPetsScreen() {
 
                   <Text
                     style={{
-                      color: "#fff",
+                      color: colors.text.inverse,
                       opacity: 0.8,
                       marginTop: 4,
                     }}
