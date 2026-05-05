@@ -8,8 +8,10 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -48,9 +50,49 @@ export default function AddPetScreen() {
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const speciesList = [
+    { key: "dog", label: "Dog 🐶" },
+    { key: "cat", label: "Cat 🐱" },
+    { key: "fish", label: "Fish 🐟" },
+    { key: "hamster", label: "Hamster 🐹" },
+    { key: "parrot", label: "Parrot 🦜" },
+    { key: "rabbit", label: "Rabbit 🐰" },
+    { key: "turtle", label: "Turtle 🐢" },
+    { key: "other", label: "Other 🐾" },
+  ];
+
   const handleInputChange = (field: keyof PetFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  const [breeds, setBreeds] = useState<{ id: string; name: string }[]>([]);
+  const [search, setSearch] = useState("");
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
+  const filteredBreeds = breeds.filter((b) =>
+    b.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleSpeciesChange = (value: string) => {
+    handleInputChange("species", value);
+
+    handleInputChange("breed", "");
+
+    if (value === "dog" || value === "cat") {
+      loadBreeds(value); // API
+    } else {
+      setBreeds([]); 
+    }
+  };
+
+  const loadBreeds = async (species: string) => {
+  try {
+    const res = await api.get(`/pet-management/api/breeds?species=${species}`);
+    setBreeds(res.data);
+  } catch (e) {
+    console.log("BREEDS ERROR", e);
+  }
+};
 
   // 📸 выбрать фото
   const pickImage = async () => {
@@ -121,6 +163,16 @@ export default function AddPetScreen() {
     }
   };
 
+  // useEffect(() => {
+  //   const delay = setTimeout(() => {
+  //     // можно дергать API если хочешь серверный поиск
+  //   }, 300);
+
+  //   return () => clearTimeout(delay);
+  // }, [search]);
+
+  
+
   return (
     <>
     <Stack.Screen options={{ headerShown: false }} />
@@ -165,21 +217,100 @@ export default function AddPetScreen() {
             style={styles.input}
           />
 
-          <TextInput
+          {/* <TextInput
             placeholder="Species"
             placeholderTextColor={colors.text.tertiary}
             value={formData.species}
             onChangeText={(v) => handleInputChange("species", v)}
             style={styles.input}
-          />
+          /> */}
+          <View style={{ marginBottom: 12 }}>
+            {speciesList.map((s) => (
+              <TouchableOpacity
+                key={s.key}
+                onPress={() => handleSpeciesChange(s.key)}
+                style={{
+                  padding: 12,
+                  borderRadius: 10,
+                  marginBottom: 6,
+                  backgroundColor:
+                    formData.species === s.key ? "#4CAF50" : "#eee",
+                }}
+              >
+                <Text>{s.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-          <TextInput
+          {/* <TextInput
             placeholder="Breed"
             placeholderTextColor={colors.text.tertiary}
             value={formData.breed}
             onChangeText={(v) => handleInputChange("breed", v)}
             style={styles.input}
-          />
+          /> */}
+
+          {/* BREED SELECT */}
+          {(formData.species === "dog" || formData.species === "cat") && (
+            <>
+              {/* КНОПКА */}
+              <TouchableOpacity
+                onPress={() => setDropdownVisible(true)}
+                style={styles.input}
+              >
+                <Text>
+                  {formData.breed ? formData.breed : "Select breed"}
+                </Text>
+                <Feather name="chevron-down" size={18} />
+              </TouchableOpacity>
+
+              {/* МОДАЛКА */}
+              <Modal visible={dropdownVisible} animationType="slide">
+                <SafeAreaView style={{ flex: 1, padding: 16 }}>
+
+                  {/* HEADER */}
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={{ fontSize: 18, fontWeight: "600" }}>
+                      Select Breed
+                    </Text>
+
+                    <TouchableOpacity onPress={() => setDropdownVisible(false)}>
+                      <Text style={{ color: "red" }}>Close</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* SEARCH */}
+                  <TextInput
+                    placeholder="Search breed..."
+                    value={search}
+                    onChangeText={setSearch}
+                    style={[styles.input, { marginTop: 12 }]}
+                  />
+
+                  {/* LIST */}
+                  <FlatList
+                    data={filteredBreeds}
+                    keyExtractor={(item) => item.id}
+                    renderItem={({ item }) => (
+                      <TouchableOpacity
+                        onPress={() => {
+                          handleInputChange("breed", item.name);
+                          setDropdownVisible(false);
+                        }}
+                        style={{
+                          padding: 14,
+                          borderBottomWidth: 1,
+                          borderColor: "#eee",
+                        }}
+                      >
+                        <Text>{item.name}</Text>
+                      </TouchableOpacity>
+                    )}
+                  />
+                </SafeAreaView>
+              </Modal>
+            </>
+          )}
 
           {/* GENDER */}
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}>
