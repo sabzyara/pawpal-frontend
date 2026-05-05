@@ -68,6 +68,8 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     console.log("REQUEST START");
+
+    await AsyncStorage.removeItem("token");
     
     if (!email.trim() || !password.trim()) {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');

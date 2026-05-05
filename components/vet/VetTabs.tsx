@@ -2,21 +2,34 @@ import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 
-export const VetTabs = ({
-  active,
-  onChange,
-}: {
-  active: string;
-  onChange: (v: any) => void;
-}) => {
+interface VetTabsProps {
+  active: 'about' | 'availability' | 'reviews';
+  onChange: (tab: 'about' | 'availability' | 'reviews') => void;
+}
+
+export const VetTabs: React.FC<VetTabsProps> = ({ active, onChange }) => {
   const { colors, spacing, typography } = useTheme();
 
-  const tabs = ['about', 'availability', 'reviews'];
+  const tabs: Array<'about' | 'availability' | 'reviews'> = ['about', 'availability', 'reviews'];
+
+  const tabLabels = {
+    about: 'About',
+    availability: 'Availability',
+    reviews: 'Reviews',
+  };
 
   return (
-    <View style={{ flexDirection: 'row', marginBottom: spacing.lg }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        backgroundColor: colors.background.tertiary,
+        borderRadius: 999,
+        padding: 4,
+        marginBottom: spacing.lg,
+      }}
+    >
       {tabs.map((tab) => {
-        const isActive = active === tab;
+        const isActive = tab === active;
 
         return (
           <TouchableOpacity
@@ -24,12 +37,10 @@ export const VetTabs = ({
             onPress={() => onChange(tab)}
             style={{
               flex: 1,
-              padding: spacing.sm,
-              borderRadius: spacing.radius.md,
-              backgroundColor: isActive
-                ? colors.primary.main
-                : colors.background.secondary,
-              marginRight: spacing.sm,
+              paddingVertical: spacing.sm,
+              paddingHorizontal: spacing.md,
+              borderRadius: 999,
+              backgroundColor: isActive ? colors.primary.main : 'transparent',
             }}
           >
             <Text
@@ -37,13 +48,11 @@ export const VetTabs = ({
                 typography.body2SemiBold,
                 {
                   textAlign: 'center',
-                  color: isActive
-                    ? colors.text.inverse
-                    : colors.text.primary,
+                  color: isActive ? colors.text.inverse : colors.text.secondary,
                 },
               ]}
             >
-              {tab.toUpperCase()}
+              {tabLabels[tab]}
             </Text>
           </TouchableOpacity>
         );

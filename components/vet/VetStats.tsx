@@ -1,13 +1,20 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
-import { Veterinarian } from '@/types/veterinarian';
 
-export const VetStats = ({ vet }: { vet: Veterinarian }) => {
-  const { colors, spacing, typography, shadows } = useTheme();
+interface VetStatsProps {
+  vet: {
+    experienceYears: number;
+    patientsCount: number;
+    rating: number;
+  };
+}
 
-  const Item = ({ label, value }: any) => (
-    <View style={{ alignItems: 'center' }}>
+export const VetStats: React.FC<VetStatsProps> = ({ vet }) => {
+  const { colors, spacing, typography } = useTheme();
+
+  const StatItem = ({ label, value }: { label: string; value: string | number }) => (
+    <View style={{ alignItems: 'center', flex: 1 }}>
       <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
         {value}
       </Text>
@@ -22,16 +29,22 @@ export const VetStats = ({ vet }: { vet: Veterinarian }) => {
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: colors.card.elevated,
+        backgroundColor: colors.card.default,
         padding: spacing.md,
-        borderRadius: spacing.radius.lg,
+        borderRadius: 999,
         marginBottom: spacing.lg,
-        ...shadows.card,
+        ...(colors.card.default === '#FFFFFF' && {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+          elevation: 2,
+        }),
       }}
     >
-      <Item label="Experience" value={`${vet.experienceYears} yrs`} />
-      <Item label="Patients" value={vet.patientsCount} />
-      <Item label="Rating" value={vet.rating} />
+      <StatItem label="Experience" value={`${vet.experienceYears} yrs`} />
+      <StatItem label="Patients" value={vet.patientsCount} />
+      <StatItem label="Rating" value={vet.rating} />
     </View>
   );
 };
