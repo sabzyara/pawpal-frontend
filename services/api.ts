@@ -9,17 +9,44 @@ const api = axios.create({
   },
 });
 
-// 🔥 ВОТ ЭТО ГЛАВНОЕ
-api.interceptors.request.use(async (config) => {
-  const token = await AsyncStorage.getItem("token");
+// 🔥 REQUEST INTERCEPTOR
+api.interceptors.request.use(
+  async (config) => {
+    const token = await AsyncStorage.getItem("token");
 
-  console.log("TOKEN FROM STORAGE:", token); // 👈 посмотри лог
+    // ❗️ список эндпоинтов, куда НЕ НУЖЕН токен
+    const isAuthRequest =
+      config.url?.includes("/auth/login") ||
+      config.url?.includes("/auth/register");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    console.log("REQUEST:", config.url);
+
+    if (token && !isAuthRequest) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log("TOKEN ATTACHED ✅");
+    } else {
+      console.log("NO TOKEN / AUTH REQUEST ❌");
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// 🔥 RESPONSE INTERCEPTOR (очень полезно)
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    console.log("API ERROR:", error?.response?.status);
+
+    // если токен умер → удаляем
+    if (error?.response?.status === 401) {
+      console.log("TOKEN EXPIRED → REMOVING");
+      await AsyncStorage.removeItem("token");
+    }
+
+    return Promise.reject(error);
   }
-
-  return config;
-});
+);
 
 export default api;

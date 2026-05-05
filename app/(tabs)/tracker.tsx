@@ -1,257 +1,260 @@
-import { CalendarSection } from '@/components/home/Calendar';
-import Donut from '@/components/tracker/Donut';
-import { useTheme } from '@/hooks/useTheme';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
+import React, { useState, useCallback } from "react";
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+  Image,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useTheme } from "@/hooks/useTheme";
+import api from "@/services/api";
+import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { CalendarSection } from "@/components/home/Calendar";
+import Donut from "@/components/tracker/Donut";
 
 export default function TrackerScreen() {
-  const [tab, setTab] = useState<'nutrition' | 'activity'>('nutrition');
-  const [selectedDate, setSelectedDate] = useState(1); 
   const { colors } = useTheme();
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <ScrollView contentContainerStyle={styles.content}>
+  const [pets, setPets] = useState<any[]>([]);
+  const [selectedPet, setSelectedPet] = useState<number | null>(null);
 
-        <Text style={[styles.title, { color: colors.text.primary }]}>
-          {tab === 'nutrition' ? 'Nutrition Tracker' : 'Activity Tracker'}
+  const [nutrition, setNutrition] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+
+  const [tab, setTab] = useState<"nutrition" | "activity">("nutrition");
+
+  // ✅ норм дата (без timezone багов)
+  const today = new Date();
+  const [selectedDate, setSelectedDate] = useState(
+    `${today.getFullYear()}-${
+      String(today.getMonth() + 1).padStart(2, "0")
+    }-${String(today.getDate()).padStart(2, "0")}`
+  );
+
+  const [loading, setLoading] = useState(true);
+
+  // 🔥 грузим только при смене PET
+  const load = async () => {
+    try {
+      setLoading(true);
+
+      const petsRes = await api.get("/pet-management/api/pets");
+      const petsData = petsRes.data.map((p: any) => p.pet ?? p);
+
+      setPets(petsData);
+
+      let petId = selectedPet;
+
+      if (!petId && petsData.length > 0) {
+        petId = petsData[0].id;
+        setSelectedPet(petId);
+      }
+
+      if (petId) {
+        const [nutRes, actRes] = await Promise.all([
+          api.get(`/pet-management/api/nutrition/pet/${petId}`),
+          api.get(`/pet-management/api/activities/pet/${petId}`),
+        ]);
+
+        setNutrition(nutRes.data || []);
+        setActivities(actRes.data || []);
+      }
+    } catch (e) {
+      console.log("ERROR:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [selectedPet])
+  );
+
+  // 🔥 мгновенный фильтр (без API)
+const filteredNutrition = nutrition.filter(
+  (n) => n.date?.slice(0, 10) === selectedDate
+);
+
+const filteredActivities = activities.filter(
+  (a) => a.date?.slice(0, 10) === selectedDate
+);
+console.log("nutrition:", nutrition);
+console.log("selectedDate:", selectedDate);
+
+  // 🔥 donut
+  const totalCalories = filteredNutrition.reduce((sum, n) => {
+  const match = n.summary?.match(/(\d+(\.\d+)?)/);
+  return sum + (match ? parseFloat(match[0]) : 0);
+}, 0);
+
+  const totalActivity = filteredActivities.length * 10;
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+
+        {/* 🐾 PET SELECT */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {pets.map((pet) => (
+            <TouchableOpacity
+              key={pet.id}
+              onPress={() => setSelectedPet(pet.id)}
+              style={{ alignItems: "center", marginRight: 14 }}
+            >
+              <Image
+                source={{
+                  uri:
+                    pet.avatarUrl ||
+                    "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+                }}
+                style={{
+                  width: 70,
+                  height: 70,
+                  borderRadius: 35,
+                  borderWidth: selectedPet === pet.id ? 3 : 0,
+                  borderColor: colors.primary.main,
+                }}
+              />
+              <Text>{pet.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* TITLE */}
+        <Text style={{ fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20 }}>
+          {tab === "nutrition" ? "Nutrition Tracker" : "Activity Tracker"}
         </Text>
 
-      <View style={[
-          styles.tabsContainer,
-          { backgroundColor: colors.card.elevated },
-        ]}>
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            { backgroundColor: tab === 'nutrition'
-              ? colors.primary.main
-              : colors.card.elevated }
-          ]}
-          onPress={() => setTab('nutrition')}
-        >
-          <Text style={[styles.tabText,
-            { color: tab === 'nutrition' ? 'white' : colors.text.secondary },
-          ]}>Nutrition</Text>
-        </TouchableOpacity>
+        {/* TABS */}
+        <View style={{
+          flexDirection: "row",
+          borderRadius: 30,
+          padding: 4,
+          marginBottom: 16,
+          backgroundColor: colors.card.elevated,
+        }}>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              borderRadius: 25,
+              alignItems: "center",
+              backgroundColor: tab === "nutrition" ? colors.primary.main : "transparent",
+            }}
+            onPress={() => setTab("nutrition")}
+          >
+            <Text style={{ color: tab === "nutrition" ? "#fff" : colors.text.secondary }}>
+              Nutrition
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[
-            styles.tab,
-            { backgroundColor: tab === 'activity'
-              ? colors.primary.main
-              : colors.card.elevated }
-          ]}
-          onPress={() => setTab('activity')}
-        >
-          <Text style={[styles.tabText,
-            { color: tab === 'activity' ? 'white' : colors.text.secondary },
-          ]}>Activity</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              borderRadius: 25,
+              alignItems: "center",
+              backgroundColor: tab === "activity" ? colors.primary.main : "transparent",
+            }}
+            onPress={() => setTab("activity")}
+          >
+            <Text style={{ color: tab === "activity" ? "#fff" : colors.text.secondary }}>
+              Activity
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* CALENDAR */}
         <CalendarSection
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
         />
 
+        {/* DONUT */}
         <View style={{ marginBottom: 20 }}>
           <Donut
-            value={tab === 'nutrition' ? 1250 : 75}
-            max={tab === 'nutrition' ? 1860 : 100}
+            value={tab === "nutrition" ? totalCalories : totalActivity}
+            max={tab === "nutrition" ? 2000 : 100}
           />
         </View>
 
-        {tab === 'nutrition' ? (
+        {/* LIST */}
+        {tab === "nutrition" ? (
           <>
+            {filteredNutrition.map((n) => (
+              <View key={n.logId} style={{
+                padding: 16,
+                borderRadius: 16,
+                marginBottom: 12,
+                backgroundColor: colors.card.elevated,
+              }}>
+                <Text>{n.summary}</Text>
+                <Text style={{ opacity: 0.6 }}>
+                  {n.foodItems?.join(", ")}
+                </Text>
+              </View>
+            ))}
+
             <TouchableOpacity
-              style={[
-                styles.simpleCard,
-                { backgroundColor: colors.card.elevated }
-              ]}
+              style={{
+                padding: 14,
+                borderRadius: 16,
+                alignItems: "center",
+                backgroundColor: colors.tracker.primary,
+              }}
               onPress={() =>
-                router.push('/nutrition-form?mode=edit&meal=Kibble&calories=120')
+                router.push(`/nutrition-form?petId=${selectedPet}`)
               }
             >
-              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
-                Kibble
+              <Text style={{ color: "#fff", fontWeight: "700" }}>
+                + Add Nutrition
               </Text>
-
-              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
-                120 kcal
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.simpleCard,
-                { backgroundColor: colors.card.elevated }
-              ]}
-              onPress={() =>
-                router.push('/nutrition-form?mode=edit&meal=Kibble&calories=150')
-              }
-            >
-              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
-                Kibble
-              </Text>
-
-              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
-                150 kcal
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={[
-                  styles.addButton,
-                  { backgroundColor: colors.tracker.primary }
-                ]}
-                onPress={() => router.push('/nutrition-form?mode=add' as const)}
-            >
-              <Text style={styles.addButtonText}>+ Add Nutrition</Text>
             </TouchableOpacity>
           </>
         ) : (
           <>
+            {filteredActivities.map((a) => (
+              <View key={a.activityId} style={{
+                padding: 16,
+                borderRadius: 16,
+                marginBottom: 12,
+                backgroundColor: colors.card.elevated,
+              }}>
+                <Text>{a.summary}</Text>
+              </View>
+            ))}
+
             <TouchableOpacity
-              style={[
-                styles.simpleCard,
-                { backgroundColor: colors.card.elevated }
-              ]}
+              style={{
+                padding: 14,
+                borderRadius: 16,
+                alignItems: "center",
+                backgroundColor: colors.tracker.primary,
+              }}
               onPress={() =>
-                router.push('/activity-form?mode=edit&type=Run&duration=5')
+                router.push(`/activity-form?petId=${selectedPet}`)
               }
             >
-              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
-                Run
+              <Text style={{ color: "#fff", fontWeight: "700" }}>
+                + Add Activity
               </Text>
-
-              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
-                5 min
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.simpleCard,
-                { backgroundColor: colors.card.elevated }
-              ]}
-              onPress={() =>
-                router.push('/activity-form?mode=edit&type=Play&duration=5')
-              }
-            >
-              <Text style={[styles.cardLeft, { color: colors.text.primary }]}>
-                Run
-              </Text>
-
-              <Text style={[styles.cardRight, { color: colors.text.secondary }]}>
-                5 min
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.addButton,
-                { backgroundColor: colors.tracker.primary }
-              ]}
-              onPress={() => router.push('/activity-form?mode=add' as const)}
-            >
-              <Text style={styles.addButtonText}>+ Add Activity</Text>
             </TouchableOpacity>
           </>
         )}
-        
       </ScrollView>
     </SafeAreaView>
-
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
-  content: {
-    padding: 16,
-    paddingTop: 10,
-  },
-
-  title: {
-    fontSize: 26,
-    fontWeight: '700',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-
-  tabsContainer: {
-    flexDirection: 'row',
-    borderRadius: 30,
-    padding: 4,
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-
-  tab: {
-    flex: 1, 
-    paddingVertical: 12,
-    borderRadius: 25,
-    alignItems: 'center',
-  },
-
-  tabText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-
-  mainValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-  },
-
-  subValue: {
-    fontSize: 16,
-    color: '#fff',
-    opacity: 0.9,
-  },
-
-  card: {
-    padding: 12,
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-    
-  simpleCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
-  },
-
-  cardLeft: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  cardRight: {
-    fontSize: 14,
-    opacity: 0.7,
-  },
-
-  addButton: {
-  padding: 14,
-  borderRadius: 16,
-  alignItems: 'center',
-},
-
-addButtonText: {
-  fontSize: 16,
-  fontWeight: '700',
-  color: "#FFFF",
-},
-});
+}

@@ -1,14 +1,12 @@
-// screens/home/components/CalendarSection.tsx
 import { useTheme } from '@/hooks/useTheme';
 import { createHomeStyles } from '@/styles/homeStyles';
-import { DAYS } from '@/types/home_index';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 interface CalendarSectionProps {
-  selectedDate: number;
-  onDateSelect: (date: number) => void;
+  selectedDate: string;
+  onDateSelect: (date: string) => void;
 }
 
 export const CalendarSection: React.FC<CalendarSectionProps> = ({
@@ -18,56 +16,71 @@ export const CalendarSection: React.FC<CalendarSectionProps> = ({
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
 
+  const today = new Date();
+
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(today.getDate() + i);
+
+    const full = `${d.getFullYear()}-${
+      String(d.getMonth() + 1).padStart(2, "0")
+    }-${String(d.getDate()).padStart(2, "0")}`;
+
+    return {
+      full,
+      day: d.toLocaleDateString("en-US", { weekday: "short" }),
+      date: d.getDate(),
+    };
+  });
+
   return (
     <View style={styles.calendarSection}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Calendar</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>See All</Text>
-        </TouchableOpacity>
       </View>
 
-      <ScrollView 
-        horizontal 
+      <ScrollView
+        horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.calendarScrollContent}
       >
-        {DAYS.map((day) => (
+        {days.map((day) => (
           <TouchableOpacity
-            key={day.date}
-            onPress={() => onDateSelect(day.date)}
-            activeOpacity={0.8}
+            key={day.full}
+            onPress={() => onDateSelect(day.full)}
           >
             <LinearGradient
               colors={
-                selectedDate === day.date
-                  ? ([colors.tracker.primary, colors.tracker.secondary] as [string, string])
-                  : ([colors.background.secondary, colors.background.secondary] as [string, string])
+                selectedDate === day.full
+                  ? [colors.tracker.primary, colors.tracker.secondary]
+                  : [colors.background.secondary, colors.background.secondary]
               }
               style={[
                 styles.dayCard,
-                selectedDate === day.date && styles.dayCardActive,
+                selectedDate === day.full && styles.dayCardActive,
               ]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
             >
               <Text
                 style={[
                   styles.dayText,
-                  selectedDate === day.date && styles.dayTextActive,
+                  selectedDate === day.full && styles.dayTextActive,
                 ]}
               >
                 {day.day}
               </Text>
+
               <Text
                 style={[
                   styles.dateText,
-                  selectedDate === day.date && styles.dateTextActive,
+                  selectedDate === day.full && styles.dateTextActive,
                 ]}
               >
                 {day.date}
               </Text>
-              {selectedDate === day.date && <View style={styles.activeIndicator} />}
+
+              {selectedDate === day.full && (
+                <View style={styles.activeIndicator} />
+              )}
             </LinearGradient>
           </TouchableOpacity>
         ))}
