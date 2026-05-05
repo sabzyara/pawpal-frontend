@@ -1,3 +1,4 @@
+
 import { useTheme } from '@/hooks/useTheme';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -9,6 +10,7 @@ interface HomeHeaderProps {
   greeting: string;
   userName: string;
   notificationCount: number;
+  avatarUrl?: string | null; // 🔥 добавили
   onNotificationPress?: () => void;
 }
 
@@ -16,17 +18,18 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   greeting,
   userName,
   notificationCount,
+  avatarUrl,
   onNotificationPress,
 }) => {
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
 
-  const avatarUrl = `https://ui-avatars.com/api/?name=${userName}&background=E3275B&color=fff`;
+  // fallback если нет аватара
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${userName}&background=E3275B&color=fff`;
 
   return (
-    <View
-      style={styles.headerSection}
-    >
+    <View style={styles.headerSection}>
+      
       <View>
         <Text style={styles.greeting}>
           {greeting} 👋
@@ -69,7 +72,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
 
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
-            source={{ uri: avatarUrl }}
+            source={{ uri: avatarUrl || fallbackAvatar }} // 🔥 ключ
             style={{
               width: 42,
               height: 42,
@@ -79,7 +82,9 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
             }}
           />
         </TouchableOpacity>
+
       </View>
     </View>
   );
 };
+

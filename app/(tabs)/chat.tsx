@@ -1,20 +1,24 @@
-import { useTheme } from '@/hooks/useTheme';
-import { useAuthStore } from '@/store/authStore';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
+
+import React, { useEffect, useState } from "react";
 import {
+  View,
+  Text,
   FlatList,
+  TouchableOpacity,
   Image,
+  TextInput,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  ActivityIndicator,
+  Modal,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/hooks/useTheme";
+import api from "@/services/api";
+import { useAuthStore } from "@/store/authStore";
+import { router } from "expo-router";
 
 type Message = {
   id: string;
@@ -26,102 +30,89 @@ export default function ChatScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
+  const token = useAuthStore((s) => s.token);
+
+  const [pets, setPets] = useState<any[]>([]);
+  const [selectedPet, setSelectedPet] = useState<number | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+
   const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hi! I am your AI assistant 🐾 How can I help?',
-      isUser: false,
-    },
+    { id: "1", text: "Hi! I am your AI assistant 🐾", isUser: false },
   ]);
 
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const token = useAuthStore(state => state.token);
+  // 🐾 загрузка петов
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await api.get("/pet-management/api/pets");
+        const data = res.data.map((p: any) => p.pet ?? p);
 
-  const sendMessage = async () => {
-  if (!input.trim()) return;
+        setPets(data);
 
-   if (!token) {
-    console.log("NO TOKEN");
-    return;
-  }
-
-  const userMessage: Message = {
-    id: Date.now().toString(),
-    text: input,
-    isUser: true,
-  };
-
-  setMessages(prev => [...prev, userMessage]);
-  setInput('');
-
-  const loadingMessage: Message = {
-    id: "loading",
-    text: "AI is typing...",
-    isUser: false,
-  };
-
-  setMessages(prev => [...prev, loadingMessage]);
-
-  try {
-    const response = await fetch(
-      "https://pawpal-ai-analytics.onrender.com/ai/chat",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: userMessage.text,
-          petId: "1",
-          token: token,
-        }),
+        if (data.length > 0) {
+          setSelectedPet(data[0].id);
+        }
+      } catch (e) {
+        console.log("PET LOAD ERROR", e);
+      } finally {
+        setLoading(false);
       }
-    );
-    console.log("STATUS:", response.status);
-
-    const data = await response.json();
-    console.log("AI RESPONSE:", data);
-
-    setMessages(prev => prev.filter(m => m.id !== "loading"));
-
-    const aiMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      text:
-      typeof data === "string"
-    ? data
-    : data.response ||
-      data.answer ||
-      data.result ||
-      data.message ||
-      data.text ||
-      JSON.stringify(data),
-      isUser: false,
     };
 
-    setMessages(prev => [...prev, aiMessage]);
+    load();
+  }, []);
 
-  } catch (error) {
-    console.log("CHAT ERROR:", error);
+  // 💬 отправка
+  const sendMessage = async () => {
+    if (!input.trim() || !selectedPet || !token) return;
 
-    setMessages(prev => prev.filter(m => m.id !== "loading"));
-
-    const errorMessage: Message = {
-      id: (Date.now() + 2).toString(),
-      text: "Something went wrong 😢",
-      isUser: false,
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      text: input,
+      isUser: true,
     };
 
-    setMessages(prev => [...prev, errorMessage]);
-  }
-};
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
 
+    try {
+      const res = await fetch(
+        "https://pawpal-ai-analytics.onrender.com/ai/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMsg.text,
+            petId: String(selectedPet), // 🔥 ВАЖНО
+            token: token,               // 🔥 ВАЖНО
+          }),
+        }
+      );
 
-  const renderItem = ({ item }: { item: Message }) => (
+      const data = await res.json();
+
+      const aiMsg: Message = {
+        id: Date.now().toString(),
+        text: data.response || JSON.stringify(data),
+        isUser: false,
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (e) {
+      console.log("CHAT ERROR", e);
+    }
+  };
+
+  const renderMessage = ({ item }: { item: Message }) => (
     <View
       style={[
-        styles.message,
-        item.isUser ? styles.userMessage : styles.aiMessage,
+        styles.msg,
+        item.isUser ? styles.userMsg : styles.aiMsg,
       ]}
     >
       <Text style={item.isUser ? styles.userText : styles.aiText}>
@@ -130,143 +121,200 @@ export default function ChatScreen() {
     </View>
   );
 
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.center}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
+
+  const selectedPetData = pets.find((p) => p.id === selectedPet);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
+        {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="chevron-back" size={26} color={colors.text.primary} />
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-
-          <View style={styles.headerLeft}>
-            <Image
-              source={require('../../assets/images/pawpalai.jpg')}
-              style={styles.avatar}
-            />
-
-            <View>
-              <Text style={styles.name}>PawPal AI 🐾</Text>
-              <Text style={styles.status}>online</Text>
-            </View>
-          </View>
+          <Text style={styles.title}>PawPal AI 🐾</Text>
         </View>
 
-      <FlatList
-        data={messages}
-        keyExtractor={item => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ padding: 16 }}
-      />
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder="Ask something..."
-          placeholderTextColor="#999"
-          style={styles.input}
+        {/* CHAT */}
+        <FlatList
+          data={messages}
+          keyExtractor={(i) => i.id}
+          renderItem={renderMessage}
+          contentContainerStyle={{ padding: 16 }}
         />
 
-        <TouchableOpacity onPress={sendMessage}>
-          <Ionicons name="send" size={24} color={colors.text.primary} />
-        </TouchableOpacity>
-      </View>
+        {/* INPUT */}
+        <View style={styles.inputRow}>
+          
+          {/* 🐾 PET ICON */}
+          <TouchableOpacity onPress={() => setShowPicker(true)}>
+            <Image
+              source={{
+                uri:
+                  selectedPetData?.avatarUrl ||
+                  "https://cdn-icons-png.flaticon.com/512/616/616408.png",
+              }}
+              style={styles.petIcon}
+            />
+          </TouchableOpacity>
+
+          <TextInput
+            value={input}
+            onChangeText={setInput}
+            placeholder="Ask about your pet..."
+            placeholderTextColor="#888"
+            style={styles.input}
+          />
+
+          <TouchableOpacity onPress={sendMessage}>
+            <Ionicons name="send" size={22} color={colors.primary.main} />
+          </TouchableOpacity>
+        </View>
+
+        {/* 🐾 MODAL PICKER */}
+        <Modal visible={showPicker} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modal}>
+              <Text style={styles.modalTitle}>Select Pet</Text>
+
+              <FlatList
+                horizontal
+                data={pets}
+                keyExtractor={(i) => i.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedPet(item.id);
+                      setShowPicker(false);
+                    }}
+                    style={styles.petItem}
+                  >
+                    <Image
+                      source={{ uri: item.avatarUrl }}
+                      style={[
+                        styles.petAvatar,
+                        selectedPet === item.id && styles.activePet,
+                      ]}
+                    />
+                    <Text style={{ color: colors.text.primary }}>
+                      {item.name}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </View>
+        </Modal>
+
       </KeyboardAvoidingView>
-</SafeAreaView>
+    </SafeAreaView>
   );
 }
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background.primary,
-    },
+    container: { flex: 1, backgroundColor: colors.background.primary },
+
+    center: { flex: 1, justifyContent: "center", alignItems: "center" },
 
     header: {
-      flexDirection: 'row',
-      alignItems: 'center',
+      flexDirection: "row",
+      justifyContent: "space-between",
       padding: 16,
-      borderBottomWidth: 1,
-      borderColor: colors.border.light,
-      backgroundColor: colors.card.default,
     },
 
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-
-    avatar: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      marginRight: 10,
-    },
-
-    name: {
-      fontSize: 16,
-      fontWeight: '600',
+    title: {
+      fontSize: 18,
+      fontWeight: "700",
       color: colors.text.primary,
     },
 
-    status: {
-      fontSize: 12,
-      color: colors.text.secondary,
-    },
-
-    message: {
-      maxWidth: '75%',
+    msg: {
       padding: 12,
       borderRadius: 16,
       marginBottom: 10,
+      maxWidth: "75%",
     },
 
-    userMessage: {
-      alignSelf: 'flex-end',
+    userMsg: {
+      alignSelf: "flex-end",
       backgroundColor: colors.primary.main,
     },
 
-    aiMessage: {
-      alignSelf: 'flex-start',
+    aiMsg: {
+      alignSelf: "flex-start",
       backgroundColor: colors.card.elevated,
     },
 
-    userText: {
-      color: colors.text.inverse,
-    },
+    userText: { color: "#fff" },
+    aiText: { color: colors.text.primary },
 
-    aiText: {
-      color: colors.text.primary,
-    },
-
-    // ⌨️ input
-    inputContainer: {
-      flexDirection: 'row',
+    inputRow: {
+      flexDirection: "row",
+      alignItems: "center",
       padding: 12,
       borderTopWidth: 1,
       borderColor: colors.border.light,
-      alignItems: 'center',
-      backgroundColor: colors.card.default,
     },
 
     input: {
       flex: 1,
-      marginRight: 10,
+      marginHorizontal: 10,
       padding: 10,
       borderRadius: 10,
       backgroundColor: colors.input.background,
       color: colors.text.primary,
     },
 
-    backButton: {
-      marginRight: 10,
-      padding: 5,
+    petIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
     },
-});
+
+    modalOverlay: {
+      flex: 1,
+      justifyContent: "flex-end",
+      backgroundColor: "rgba(0,0,0,0.5)",
+    },
+
+    modal: {
+      backgroundColor: colors.background.secondary,
+      padding: 16,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+    },
+
+    modalTitle: {
+      color: colors.text.primary,
+      fontSize: 16,
+      marginBottom: 10,
+    },
+
+    petItem: {
+      alignItems: "center",
+      marginRight: 16,
+    },
+
+    petAvatar: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+    },
+
+    activePet: {
+      borderWidth: 3,
+      borderColor: colors.primary.main,
+    },
+  });
+
