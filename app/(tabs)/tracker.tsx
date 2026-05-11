@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback ,  } from "react";
 import {
   ScrollView,
   Text,
@@ -49,9 +49,13 @@ export default function TrackerScreen() {
       let petId = selectedPet;
 
       if (!petId && petsData.length > 0) {
-        petId = petsData[0].id;
-        setSelectedPet(petId);
-      }
+  petId = petsData[0].id;
+
+  setSelectedPet((prev) => {
+    if (prev === petId) return prev;
+    return petId;
+  });
+}
 
       if (petId) {
         const [nutRes, actRes] = await Promise.all([
@@ -69,11 +73,11 @@ export default function TrackerScreen() {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [selectedPet])
-  );
+useFocusEffect(
+  useCallback(() => {
+    load();
+  }, [])
+);
 
   // 🔥 мгновенный фильтр (без API)
 const filteredNutrition = nutrition.filter(
@@ -128,7 +132,9 @@ console.log("selectedDate:", selectedDate);
                   borderColor: colors.primary.main,
                 }}
               />
-              <Text>{pet.name}</Text>
+              <Text style={{ color: colors.text.primary }}>
+              {pet.name}
+          </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -201,7 +207,9 @@ console.log("selectedDate:", selectedDate);
                 marginBottom: 12,
                 backgroundColor: colors.card.elevated,
               }}>
-                <Text>{n.summary}</Text>
+                <Text style={{ color: colors.text.primary }}>
+  {n.summary}
+</Text>
                 <Text style={{ opacity: 0.6 }}>
                   {n.foodItems?.join(", ")}
                 </Text>
@@ -233,7 +241,9 @@ console.log("selectedDate:", selectedDate);
                 marginBottom: 12,
                 backgroundColor: colors.card.elevated,
               }}>
-                <Text>{a.summary}</Text>
+                <Text style={{ color: colors.text.primary }}>
+                {a.summary}
+</Text>
               </View>
             ))}
 

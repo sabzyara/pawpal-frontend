@@ -7,16 +7,14 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
-import { useTheme } from '@/hooks/useTheme';
+
 import { useAuthStore } from "@/store/authStore";
 import { useThemeStore } from '@/store/themeStore';
 import { useEffect } from "react";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
+
 
 export default function RootLayout() {
 
@@ -26,7 +24,7 @@ export default function RootLayout() {
     loadUser();
   }, []);
 
-  const { theme } = useTheme();
+  const theme = useThemeStore((s) => s.theme);
 
   const loadTheme = useThemeStore((s) => s.loadTheme);
 
@@ -45,21 +43,31 @@ export default function RootLayout() {
               options={{ presentation: "modal", title: "Modal" }}
             />
 
-            <Stack.Screen
-              name="activity-form"
-              options={{
-                presentation: 'transparentModal', 
-                headerShown: false,
-              }}
-            />
+       <Stack.Screen
+  name="nutrition-form"
+  options={{
+    presentation: "transparentModal",
+    animation: "none",
+    headerShown: false,
 
-            <Stack.Screen
-              name="nutrition-form"
-              options={{
-                presentation: 'transparentModal',
-                headerShown: false,
-              }}
-            />
+    contentStyle: {
+      backgroundColor: "transparent",
+    },
+  }}
+/>
+
+<Stack.Screen
+  name="activity-form"
+  options={{
+    presentation: "transparentModal",
+    animation: "none",
+    headerShown: false,
+
+    contentStyle: {
+      backgroundColor: "transparent",
+    },
+  }}
+/>
 
           </Stack>
         <StatusBar style="auto" />

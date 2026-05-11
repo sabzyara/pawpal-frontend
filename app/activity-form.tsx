@@ -1,7 +1,7 @@
-import { ThemedText } from '@/components/themed-text';
-import { useTheme } from '@/hooks/useTheme';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import api from "@/services/api";
+import { useTheme } from "@/hooks/useTheme";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Keyboard,
@@ -14,16 +14,17 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-} from 'react-native';
+} from "react-native";
 
-export default function NutritionForm() {
+export default function ActivityForm() {
+  const { petId } = useLocalSearchParams();
+
   const { colors } = useTheme();
-  const styles = createStyles(colors);  
-  const { mode, type, distance, duration, id } = useLocalSearchParams();
-  
-  const [activityType, setActivityType] = useState( typeof type === 'string' ? type : '' );
-  const [distanceValue, setDistanceValue] = useState( typeof distance === 'string' ? distance : '' );
-  const [durationValue, setDurationValue] = useState( typeof duration === 'string' ? duration : '' );
+  const styles = createStyles(colors);
+
+  const [activityType, setActivityType] = useState("");
+  const [distanceValue, setDistanceValue] = useState("");
+  const [durationValue, setDurationValue] = useState("");
 
   const translateY = useRef(new Animated.Value(500)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
@@ -49,6 +50,7 @@ export default function NutritionForm() {
         duration: 250,
         useNativeDriver: true,
       }),
+
       Animated.timing(overlayOpacity, {
         toValue: 0,
         duration: 250,
@@ -59,31 +61,35 @@ export default function NutritionForm() {
 
   const handleSave = async () => {
     try {
-      if (mode === 'edit') {
-        //  UPDATE
-        console.log('UPDATE', { id, type, distance, duration });
+      await api.post("/pet-management/api/activities", {
+        petId: Number(petId),
+        date: new Date().toISOString().split("T")[0],
 
-      } else {
-        //  CREATE
-        console.log('CREATE', { type, distance, duration });
-
-      }
+        activityType,
+        distance: Number(distanceValue),
+        durationInMinutes: Number(durationValue),
+      });
 
       handleClose();
     } catch (e) {
-      console.log('Error:', e);
+      console.log("Error:", e);
     }
   };
 
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => g.dy > 5,
+
       onPanResponderMove: (_, g) => {
-        if (g.dy > 0) translateY.setValue(g.dy);
+        if (g.dy > 0) {
+          translateY.setValue(g.dy);
+        }
       },
+
       onPanResponderRelease: (_, g) => {
-        if (g.dy > 120) handleClose();
-        else {
+        if (g.dy > 120) {
+          handleClose();
+        } else {
           Animated.spring(translateY, {
             toValue: 0,
             useNativeDriver: true,
@@ -95,67 +101,92 @@ export default function NutritionForm() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'none' }} />
+    
 
-      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={handleClose}>
-        <Animated.View style={[styles.overlayBg, { opacity: overlayOpacity }]} />
+      <TouchableOpacity
+        style={styles.overlay}
+        activeOpacity={1}
+        onPress={handleClose}
+      >
+        <Animated.View
+          style={[
+            styles.overlayBg,
+            {
+              opacity: overlayOpacity,
+            },
+          ]}
+        />
       </TouchableOpacity>
 
       <View style={styles.container}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <Animated.View
             style={[
               styles.sheet,
               {
-                transform: [{ translateY }]              
+                transform: [{ translateY }],
               },
             ]}
           >
-            <View {...panResponder.panHandlers} style={styles.handle} />
+            <View
+              {...panResponder.panHandlers}
+              style={styles.handle}
+            />
 
             <View style={styles.header}>
-              <Text style={styles.title}>
-                {mode === 'edit' ? 'Edit Activity' : 'Add Activity'}
+              <Text style={styles.title}>Add Activity</Text>
+
+              <Text style={styles.subtitle}>
+                Track your pet’s daily activity
               </Text>
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.form}>
+
                 <Text style={styles.label}>Activity Type</Text>
-                <TextInput 
-                value={activityType}
-                onChangeText={setActivityType}
-                style={styles.input}
-                placeholder="Enter type of activity"
+
+                <TextInput
+                  value={activityType}
+                  onChangeText={setActivityType}
+                  style={styles.input}
+                  placeholder="Walk"
+                  placeholderTextColor={colors.text.secondary}
                 />
 
                 <Text style={styles.label}>Distance</Text>
-                <TextInput 
-                value={distanceValue}
-                onChangeText={setDistanceValue}
-                style={styles.input}
-                placeholder="Enter the distance"
+
+                <TextInput
+                  value={distanceValue}
+                  onChangeText={setDistanceValue}
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="2.5 km"
+                  placeholderTextColor={colors.text.secondary}
                 />
 
                 <Text style={styles.label}>Duration</Text>
-                <TextInput 
-                value={durationValue}
-                onChangeText={setDurationValue}
-                style={styles.input}
-                placeholder="Enter duration in minutes"
-                keyboardType="numeric"
+
+                <TextInput
+                  value={durationValue}
+                  onChangeText={setDurationValue}
+                  style={styles.input}
+                  keyboardType="numeric"
+                  placeholder="45 minutes"
+                  placeholderTextColor={colors.text.secondary}
                 />
-                
+
                 <TouchableOpacity
                   style={styles.saveButton}
                   onPress={handleSave}
                 >
-                  <ThemedText style={styles.saveButtonText}>
-                    {mode === 'edit' ? 'Save Changes' : 'Add'}
-                  </ThemedText>
+                  <Text style={styles.saveButtonText}>
+                    Add Activity
+                  </Text>
                 </TouchableOpacity>
+
               </View>
             </TouchableWithoutFeedback>
           </Animated.View>
@@ -168,13 +199,22 @@ export default function NutritionForm() {
 const createStyles = (colors: any) =>
   StyleSheet.create({
     title: {
-      fontSize: 26,
-      fontWeight: '700',
-      textAlign: 'center',
+      fontSize: 28,
+      fontWeight: "700",
+      textAlign: "center",
+      color: colors.text.primary,
     },
+
+    subtitle: {
+      color: colors.text.secondary,
+      textAlign: "center",
+      marginTop: 6,
+      fontSize: 14,
+    },
+
     container: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent: "flex-end",
     },
 
     overlay: {
@@ -183,64 +223,70 @@ const createStyles = (colors: any) =>
 
     overlayBg: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0,0,0,0.4)', // можно оставить
+      backgroundColor: "rgba(0,0,0,0.45)",
     },
 
     sheet: {
-      padding: 16,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      minHeight: '50%',
+      paddingTop: 14,
+      paddingBottom: 30,
+      borderTopLeftRadius: 32,
+      borderTopRightRadius: 32,
+      minHeight: "58%",
       backgroundColor: colors.background.primary,
     },
 
     handle: {
-      width: 150,
-      height: 6,
+      width: 52,
+      height: 5,
       backgroundColor: colors.border.medium,
-      borderRadius: 3,
-      alignSelf: 'center',
-      marginBottom: 12,
+      borderRadius: 10,
+      alignSelf: "center",
+      marginBottom: 18,
     },
 
     header: {
-      alignItems: 'center',
-      paddingVertical: 10,
+      alignItems: "center",
+      paddingBottom: 10,
     },
 
     form: {
-      paddingHorizontal: 16,
+      paddingHorizontal: 20,
+      paddingTop: 8,
     },
 
     label: {
-      marginTop: 16,
+      marginTop: 18,
+      marginBottom: 6,
       color: colors.text.secondary,
       fontSize: 13,
+      fontWeight: "500",
     },
 
     input: {
-      padding: 14,
-      borderRadius: 12,
-      marginTop: 6,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderRadius: 18,
 
       backgroundColor: colors.input.background,
       borderWidth: 1,
       borderColor: colors.input.border,
+
       color: colors.text.primary,
+      fontSize: 15,
     },
 
     saveButton: {
-      padding: 16,
-      borderRadius: 14,
-      alignItems: 'center',
-      marginTop: 30,
+      padding: 18,
+      borderRadius: 20,
+      alignItems: "center",
+      marginTop: 34,
       marginBottom: 10,
       backgroundColor: colors.primary.main,
     },
 
     saveButtonText: {
       color: colors.text.inverse,
-      fontWeight: '600',
-      fontSize: 15,
+      fontWeight: "700",
+      fontSize: 16,
     },
   });

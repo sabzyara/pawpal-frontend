@@ -1,6 +1,7 @@
-import { useTheme } from '@/hooks/useTheme';
-import { router, Stack, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import api from "@/services/api";
+import { useTheme } from "@/hooks/useTheme";
+import { router, Stack, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Keyboard,
@@ -13,20 +14,17 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-} from 'react-native';
+} from "react-native";
 
 export default function NutritionForm() {
-  const { mode, meal, calories, id } = useLocalSearchParams();
+  const { petId } = useLocalSearchParams();
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
 
-//   const [mealType, setMealType] = useState(meal || '');
-//   const [caloriesValue, setCaloriesValue] = useState(calories || '');
-
-  const [mealType, setMealType] = useState( typeof meal === 'string' ? meal : '' );
-  
-  const [caloriesValue, setCaloriesValue] = useState( typeof calories === 'string' ? calories : '' );
+  const [mealType, setMealType] = useState("");
+  const [caloriesValue, setCaloriesValue] = useState("");
+  const [foodValue, setFoodValue] = useState("");
 
   const translateY = useRef(new Animated.Value(500)).current;
   const overlayOpacity = useRef(new Animated.Value(0)).current;
@@ -52,6 +50,7 @@ export default function NutritionForm() {
         duration: 250,
         useNativeDriver: true,
       }),
+
       Animated.timing(overlayOpacity, {
         toValue: 0,
         duration: 250,
@@ -62,31 +61,39 @@ export default function NutritionForm() {
 
   const handleSave = async () => {
     try {
-      if (mode === 'edit') {
-        //  UPDATE
-        console.log('UPDATE', { id, mealType, caloriesValue });
+      await api.post("/pet-management/api/nutrition", {
+        petId: Number(petId),
+        date: new Date().toISOString().split("T")[0],
 
-      } else {
-        //  CREATE
-        console.log('CREATE', { mealType, caloriesValue });
+        mealType,
+        calories: Number(caloriesValue),
 
-      }
+        foodItems: foodValue
+          .split(",")
+          .map((i) => i.trim())
+          .filter(Boolean),
+      });
 
       handleClose();
     } catch (e) {
-      console.log('Error:', e);
+      console.log("Error:", e);
     }
   };
 
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => g.dy > 5,
+
       onPanResponderMove: (_, g) => {
-        if (g.dy > 0) translateY.setValue(g.dy);
+        if (g.dy > 0) {
+          translateY.setValue(g.dy);
+        }
       },
+
       onPanResponderRelease: (_, g) => {
-        if (g.dy > 120) handleClose();
-        else {
+        if (g.dy > 120) {
+          handleClose();
+        } else {
           Animated.spring(translateY, {
             toValue: 0,
             useNativeDriver: true,
@@ -98,15 +105,26 @@ export default function NutritionForm() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false, animation: 'none' }} />
+    
 
-      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={handleClose}>
-        <Animated.View style={[styles.overlayBg, { opacity: overlayOpacity }]} />
+      <TouchableOpacity
+        style={styles.overlay}
+        activeOpacity={1}
+        onPress={handleClose}
+      >
+        <Animated.View
+          style={[
+            styles.overlayBg,
+            {
+              opacity: overlayOpacity,
+            },
+          ]}
+        />
       </TouchableOpacity>
 
       <View style={styles.container}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <Animated.View
             style={[
@@ -116,29 +134,51 @@ export default function NutritionForm() {
               },
             ]}
           >
-            <View {...panResponder.panHandlers} style={styles.handle} />
+            <View
+              {...panResponder.panHandlers}
+              style={styles.handle}
+            />
 
             <View style={styles.header}>
-              <Text style={styles.title}>
-                {mode === 'edit' ? 'Edit Nutrition' : 'Add Nutrition'}
+              <Text style={styles.title}>Add Nutrition</Text>
+
+              <Text style={styles.subtitle}>
+                Track your pet’s daily meals
               </Text>
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.form}>
+
                 <Text style={styles.label}>Meal Type</Text>
+
                 <TextInput
                   value={mealType}
                   onChangeText={setMealType}
                   style={styles.input}
+                  placeholder="Breakfast"
+                  placeholderTextColor={colors.text.secondary}
                 />
 
                 <Text style={styles.label}>Calories</Text>
+
                 <TextInput
                   value={caloriesValue}
                   onChangeText={setCaloriesValue}
                   style={styles.input}
                   keyboardType="numeric"
+                  placeholder="450"
+                  placeholderTextColor={colors.text.secondary}
+                />
+
+                <Text style={styles.label}>Food Items</Text>
+
+                <TextInput
+                  value={foodValue}
+                  onChangeText={setFoodValue}
+                  style={styles.input}
+                  placeholder="Chicken, Rice, Salmon"
+                  placeholderTextColor={colors.text.secondary}
                 />
 
                 <TouchableOpacity
@@ -146,9 +186,10 @@ export default function NutritionForm() {
                   onPress={handleSave}
                 >
                   <Text style={styles.saveButtonText}>
-                    {mode === 'edit' ? 'Save Changes' : 'Add'}
+                    Add Nutrition
                   </Text>
                 </TouchableOpacity>
+
               </View>
             </TouchableWithoutFeedback>
           </Animated.View>
@@ -161,13 +202,22 @@ export default function NutritionForm() {
 const createStyles = (colors: any) =>
   StyleSheet.create({
     title: {
-      fontSize: 26,
-      fontWeight: '700',
-      textAlign: 'center',
+      fontSize: 28,
+      fontWeight: "700",
+      textAlign: "center",
+      color: colors.text.primary,
     },
+
+    subtitle: {
+      color: colors.text.secondary,
+      textAlign: "center",
+      marginTop: 6,
+      fontSize: 14,
+    },
+
     container: {
       flex: 1,
-      justifyContent: 'flex-end',
+      justifyContent: "flex-end",
     },
 
     overlay: {
@@ -176,64 +226,70 @@ const createStyles = (colors: any) =>
 
     overlayBg: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: 'rgba(0,0,0,0.4)', // можно оставить
+      backgroundColor: "rgba(0,0,0,0.45)",
     },
 
     sheet: {
-      padding: 16,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      minHeight: '50%',
+      paddingTop: 14,
+      paddingBottom: 30,
+      borderTopLeftRadius: 32,
+      borderTopRightRadius: 32,
+      minHeight: "58%",
       backgroundColor: colors.background.primary,
     },
 
     handle: {
-      width: 150,
-      height: 6,
+      width: 52,
+      height: 5,
       backgroundColor: colors.border.medium,
-      borderRadius: 3,
-      alignSelf: 'center',
-      marginBottom: 12,
+      borderRadius: 10,
+      alignSelf: "center",
+      marginBottom: 18,
     },
 
     header: {
-      alignItems: 'center',
-      paddingVertical: 10,
+      alignItems: "center",
+      paddingBottom: 10,
     },
 
     form: {
-      paddingHorizontal: 16,
+      paddingHorizontal: 20,
+      paddingTop: 8,
     },
 
     label: {
-      marginTop: 16,
+      marginTop: 18,
+      marginBottom: 6,
       color: colors.text.secondary,
       fontSize: 13,
+      fontWeight: "500",
     },
 
     input: {
-      padding: 14,
-      borderRadius: 12,
-      marginTop: 6,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderRadius: 18,
 
       backgroundColor: colors.input.background,
       borderWidth: 1,
       borderColor: colors.input.border,
+
       color: colors.text.primary,
+      fontSize: 15,
     },
 
     saveButton: {
-      padding: 16,
-      borderRadius: 14,
-      alignItems: 'center',
-      marginTop: 30,
+      padding: 18,
+      borderRadius: 20,
+      alignItems: "center",
+      marginTop: 34,
       marginBottom: 10,
       backgroundColor: colors.primary.main,
     },
 
     saveButtonText: {
       color: colors.text.inverse,
-      fontWeight: '600',
-      fontSize: 15,
+      fontWeight: "700",
+      fontSize: 16,
     },
   });
