@@ -1,19 +1,19 @@
-import React, { useState, useCallback ,  } from "react";
+import { CalendarSection } from "@/components/home/Calendar";
+import Donut from "@/components/tracker/Donut";
+import { useTheme } from "@/hooks/useTheme";
+import api from "@/services/api";
+import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
+import React, { useCallback, useState, } from "react";
 import {
+  ActivityIndicator,
+  Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
-  ActivityIndicator,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useTheme } from "@/hooks/useTheme";
-import api from "@/services/api";
-import { router } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
-import { CalendarSection } from "@/components/home/Calendar";
-import Donut from "@/components/tracker/Donut";
 
 export default function TrackerScreen() {
   const { colors } = useTheme();
@@ -26,7 +26,6 @@ export default function TrackerScreen() {
 
   const [tab, setTab] = useState<"nutrition" | "activity">("nutrition");
 
-  // ✅ норм дата (без timezone багов)
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(
     `${today.getFullYear()}-${
@@ -36,7 +35,6 @@ export default function TrackerScreen() {
 
   const [loading, setLoading] = useState(true);
 
-  // 🔥 грузим только при смене PET
   const load = async () => {
     try {
       setLoading(true);
@@ -79,7 +77,6 @@ useFocusEffect(
   }, [])
 );
 
-  // 🔥 мгновенный фильтр (без API)
 const filteredNutrition = nutrition.filter(
   (n) => n.date?.slice(0, 10) === selectedDate
 );
@@ -90,7 +87,6 @@ const filteredActivities = activities.filter(
 console.log("nutrition:", nutrition);
 console.log("selectedDate:", selectedDate);
 
-  // 🔥 donut
   const totalCalories = filteredNutrition.reduce((sum, n) => {
   const match = n.summary?.match(/(\d+(\.\d+)?)/);
   return sum + (match ? parseFloat(match[0]) : 0);
@@ -107,7 +103,7 @@ console.log("selectedDate:", selectedDate);
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary, }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
 
         {/* 🐾 PET SELECT */}
@@ -140,7 +136,7 @@ console.log("selectedDate:", selectedDate);
         </ScrollView>
 
         {/* TITLE */}
-        <Text style={{ fontSize: 26, fontWeight: "700", textAlign: "center", marginBottom: 20 }}>
+        <Text style={{ fontSize: 26, fontWeight: "700", textAlign: "center", marginTop: 20,  marginBottom: 20, color: colors.text.primary }}>
           {tab === "nutrition" ? "Nutrition Tracker" : "Activity Tracker"}
         </Text>
 
@@ -162,7 +158,7 @@ console.log("selectedDate:", selectedDate);
             }}
             onPress={() => setTab("nutrition")}
           >
-            <Text style={{ color: tab === "nutrition" ? "#fff" : colors.text.secondary }}>
+            <Text style={{ fontWeight: "700", fontSize: 16, color: tab === "nutrition" ? "#fff" : colors.text.secondary }}>
               Nutrition
             </Text>
           </TouchableOpacity>
@@ -177,7 +173,7 @@ console.log("selectedDate:", selectedDate);
             }}
             onPress={() => setTab("activity")}
           >
-            <Text style={{ color: tab === "activity" ? "#fff" : colors.text.secondary }}>
+            <Text style={{ fontWeight: "700", fontSize: 16, color: tab === "activity" ? "#fff" : colors.text.secondary }}>
               Activity
             </Text>
           </TouchableOpacity>
@@ -258,7 +254,7 @@ console.log("selectedDate:", selectedDate);
                 router.push(`/activity-form?petId=${selectedPet}`)
               }
             >
-              <Text style={{ color: "#fff", fontWeight: "700" }}>
+              <Text style={{ fontWeight: "700", fontSize: 26, color: "#fff" }}>
                 + Add Activity
               </Text>
             </TouchableOpacity>

@@ -72,7 +72,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
 
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
-            source={{ uri: avatarUrl || fallbackAvatar }} // 🔥 ключ
+            source={{ uri: avatarUrl || fallbackAvatar }} 
             style={{
               width: 42,
               height: 42,

@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
-import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
-import { PetSelector } from '@/components/book/PetSelector';
-import { DateTimeSelector } from '@/components/book/DateTimeSelector';
-import { ServiceSelector } from '@/components/book/ServiceSelector';
 import { BookingSummary } from '@/components/book/BookingSummary';
+import { DateTimeSelector } from '@/components/book/DateTimeSelector';
+import { PetSelector } from '@/components/book/PetSelector';
+import { ServiceSelector } from '@/components/book/ServiceSelector';
 
 interface Pet {
   id: string;
@@ -184,7 +183,7 @@ export default function BookAppointmentScreen() {
       [
         {
           text: 'OK',
-          onPress: () => router.push('/(tabs)/my_appointments'),
+          onPress: () => router.push('/my_appointments'),
         },
       ]
     );

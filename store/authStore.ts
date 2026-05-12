@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { RegisterData, LoginData, AuthResponse } from '@/types/auth';
-import { router } from 'expo-router';
 import api from '@/services/api';
+import { AuthResponse, LoginData, RegisterData } from '@/types/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { create } from 'zustand';
 
 interface AuthStore {
   user: AuthResponse['user'] | null;
@@ -14,7 +14,7 @@ interface AuthStore {
   login: (data: LoginData) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
-  loadUser: () => Promise<void>; // 👈 ДОБАВИЛИ
+  loadUser: () => Promise<void>; 
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -103,7 +103,7 @@ register: async (data: RegisterData) => {
   logout: async () => {
     await AsyncStorage.removeItem("token"); // 👈 очистка
     set({ user: null, token: null });
-    router.replace('/(tabs)/login');
+    router.replace('/(auth)/login');
   },
 
   clearError: () => set({ error: null }),

@@ -68,6 +68,7 @@ export default function AddPetScreen() {
   const [breeds, setBreeds] = useState<{ id: string; name: string }[]>([]);
   const [search, setSearch] = useState("");
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [speciesModalVisible, setSpeciesModalVisible] = useState(false);
 
   const filteredBreeds = breeds.filter((b) =>
     b.name.toLowerCase().includes(search.toLowerCase())
@@ -217,100 +218,223 @@ export default function AddPetScreen() {
             style={styles.input}
           />
 
-          {/* <TextInput
-            placeholder="Species"
-            placeholderTextColor={colors.text.tertiary}
-            value={formData.species}
-            onChangeText={(v) => handleInputChange("species", v)}
-            style={styles.input}
-          /> */}
-          <View style={{ marginBottom: 12 }}>
-            {speciesList.map((s) => (
-              <TouchableOpacity
-                key={s.key}
-                onPress={() => handleSpeciesChange(s.key)}
+          {/* SPECIES SELECT */}
+          <TouchableOpacity
+            style={styles.selectBox}
+            onPress={() => setSpeciesModalVisible(true)}
+          >
+            <Text
+              style={{
+                color: formData.species
+                  ? colors.text.primary
+                  : colors.text.tertiary,
+              }}
+            >
+              {formData.species
+                ? speciesList.find((s) => s.key === formData.species)?.label
+                : "Select species"}
+            </Text>
+
+            <Feather
+              name="chevron-down"
+              size={20}
+              color={colors.text.secondary}
+            />
+
+            {/* SPECIES MODAL */}
+            <Modal visible={speciesModalVisible} animationType="slide">
+              <SafeAreaView
                 style={{
-                  padding: 12,
-                  borderRadius: 10,
-                  marginBottom: 6,
-                  backgroundColor:
-                    formData.species === s.key ? "#4CAF50" : "#eee",
+                  flex: 1,
+                  backgroundColor: colors.background.primary,
+                  padding: 20,
                 }}
               >
-                <Text>{s.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                {/* HEADER */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 24,
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => setSpeciesModalVisible(false)}
+                  >
+                    <Feather
+                      name="arrow-left"
+                      size={24}
+                      color={colors.text.primary}
+                    />
+                  </TouchableOpacity>
 
-          {/* <TextInput
-            placeholder="Breed"
-            placeholderTextColor={colors.text.tertiary}
-            value={formData.breed}
-            onChangeText={(v) => handleInputChange("breed", v)}
-            style={styles.input}
-          /> */}
+                  <Text
+                    style={{
+                      fontSize: 22,
+                      fontWeight: "700",
+                      marginLeft: 16,
+                      color: colors.text.primary,
+                    }}
+                  >
+                    Select Species
+                  </Text>
+                </View>
 
-          {/* BREED SELECT */}
-          {(formData.species === "dog" || formData.species === "cat") && (
-            <>
-              {/* КНОПКА */}
-              <TouchableOpacity
-                onPress={() => setDropdownVisible(true)}
-                style={styles.input}
-              >
-                <Text>
-                  {formData.breed ? formData.breed : "Select breed"}
-                </Text>
-                <Feather name="chevron-down" size={18} />
-              </TouchableOpacity>
-
-              {/* МОДАЛКА */}
-              <Modal visible={dropdownVisible} animationType="slide">
-                <SafeAreaView style={{ flex: 1, padding: 16 }}>
-
-                  {/* HEADER */}
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    <Text style={{ fontSize: 18, fontWeight: "600" }}>
-                      Select Breed
-                    </Text>
-
-                    <TouchableOpacity onPress={() => setDropdownVisible(false)}>
-                      <Text style={{ color: "red" }}>Close</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  {/* SEARCH */}
-                  <TextInput
-                    placeholder="Search breed..."
-                    value={search}
-                    onChangeText={setSearch}
-                    style={[styles.input, { marginTop: 12 }]}
-                  />
-
-                  {/* LIST */}
-                  <FlatList
-                    data={filteredBreeds}
-                    keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        onPress={() => {
-                          handleInputChange("breed", item.name);
-                          setDropdownVisible(false);
-                        }}
+                <FlatList
+                  data={speciesList}
+                  keyExtractor={(item) => item.key}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      onPress={() => {
+                        handleSpeciesChange(item.key);
+                        setSpeciesModalVisible(false);
+                      }}
+                      style={{
+                        paddingVertical: 18,
+                        paddingHorizontal: 16,
+                        borderRadius: 16,
+                        marginBottom: 12,
+                        backgroundColor:
+                          formData.species === item.key
+                            ? colors.primary.main
+                            : colors.card.default,
+                      }}
+                    >
+                      <Text
                         style={{
-                          padding: 14,
-                          borderBottomWidth: 1,
-                          borderColor: "#eee",
+                          fontSize: 16,
+                          color:
+                            formData.species === item.key
+                              ? "#fff"
+                              : colors.text.primary,
+                          fontWeight: "600",
                         }}
                       >
-                        <Text>{item.name}</Text>
+                        {item.label}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </SafeAreaView>
+            </Modal>
+          </TouchableOpacity>
+
+          {/* BREED SELECT */}
+
+          {/* BREED FIELD */}
+          {formData.species === "dog" ||
+          formData.species === "cat" ? (
+            <>
+              <TouchableOpacity
+                onPress={() => setDropdownVisible(true)}
+                style={styles.selectBox}
+              >
+                <Text
+                  style={{
+                    color: formData.breed
+                      ? colors.text.primary
+                      : colors.text.tertiary,
+                  }}
+                >
+                  {formData.breed || "Select breed"}
+                </Text>
+
+                <Feather
+                  name="chevron-down"
+                  size={20}
+                  color={colors.text.secondary}
+                />
+
+                {/* BREED MODAL */}
+                <Modal visible={dropdownVisible} animationType="slide">
+                  <SafeAreaView
+                    style={{
+                      flex: 1,
+                      backgroundColor: colors.background.primary,
+                      padding: 20,
+                    }}
+                  >
+                    {/* HEADER */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 24,
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => setDropdownVisible(false)}
+                      >
+                        <Feather
+                          name="arrow-left"
+                          size={24}
+                          color={colors.text.primary}
+                        />
                       </TouchableOpacity>
-                    )}
-                  />
-                </SafeAreaView>
-              </Modal>
+
+                      <Text
+                        style={{
+                          fontSize: 22,
+                          fontWeight: "700",
+                          marginLeft: 16,
+                          color: colors.text.primary,
+                        }}
+                      >
+                        Select Breed
+                      </Text>
+                    </View>
+
+                    {/* SEARCH */}
+                    <TextInput
+                      placeholder="Search breed..."
+                      placeholderTextColor={colors.text.tertiary}
+                      value={search}
+                      onChangeText={setSearch}
+                      style={styles.input}
+                    />
+
+                    {/* LIST */}
+                    <FlatList
+                      data={filteredBreeds}
+                      keyExtractor={(item) => item.id}
+                      showsVerticalScrollIndicator={false}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => {
+                            handleInputChange("breed", item.name);
+                            setDropdownVisible(false);
+                          }}
+                          style={{
+                            paddingVertical: 18,
+                            borderBottomWidth: 1,
+                            borderColor: colors.border.light,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              color: colors.text.primary,
+                            }}
+                          >
+                            {item.name}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </SafeAreaView>
+                </Modal>
+              </TouchableOpacity>
             </>
-          )}
+          ) : formData.species ? (
+            <TextInput
+              placeholder="Breed"
+              placeholderTextColor={colors.text.tertiary}
+              value={formData.breed}
+              onChangeText={(v) => handleInputChange("breed", v)}
+              style={styles.input}
+            />
+          ) : null}
+          
 
           {/* GENDER */}
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}>
@@ -465,5 +589,17 @@ const createStyles = (colors: any) =>
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
+  },
+
+  selectBox: {
+    backgroundColor: colors.input.background,
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.input.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 });

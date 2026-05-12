@@ -37,9 +37,9 @@ export default function LoginScreen() {
   type RoleRoute = {
     endpoint: string;
     complete:
-      | "/(tabs)/complete_profile"
-      | "/(tabs)/complete_vet"
-      | "/(tabs)/complete_service";
+      | "/complete_profile"
+      | "/complete_vet"
+      | "/complete_service";
   };
 
   const getRouteByRole = (role: string): RoleRoute | null => {
@@ -47,24 +47,64 @@ export default function LoginScreen() {
       case 'OWNER':
         return {
           endpoint: '/pet-management/api/pet-owners/me',
-          complete: '/(tabs)/complete_profile',
+          complete: '/complete_profile',
         };
       case 'VET':
         return {
           endpoint: '/specialist-service/api/veterinarians/me',
-          complete: '/(tabs)/complete_vet',
+          complete: '/complete_vet',
         };
       case 'SERVICE':
         return {
           endpoint: '/specialist-service/api/service-providers/me',
-          complete: '/(tabs)/complete_service',
+          complete: '/complete_service',
         };
       default:
         return null;
     }
   };
 
+// const getMainRouteByRole = (role: string) => {
+//   switch (role) {
+//     case 'OWNER':
+//       // return '/(owner)';
+//       return '/index';
 
+//     case 'ADMIN':
+//       // return '/(admin)';
+//       return '/admin-main';
+
+//     case 'VET':
+//       // return '/(specialist)';
+//       return 'vets-list';
+
+//     case 'SERVICE':
+//       // return '/(specialist)';
+//       return '/vets-list';
+
+//     default:
+//       return '/(auth)/login';
+//   }
+// };
+
+  const getMainRouteByRole = (role: string) => {
+    switch (role) {
+      case "OWNER":
+        return "/";
+
+      case "ADMIN":
+        return "/admin-main";
+
+      case "VET":
+        return "/vet-profile";
+
+      case "SERVICE":
+        return "/vet-profile";
+
+      default:
+        return "/login";
+    }
+  };
 
   const handleLogin = async () => {
     console.log("REQUEST START");
@@ -95,6 +135,12 @@ export default function LoginScreen() {
 
 
         const role = me.data.role?.name || me.data.role;
+
+        if (role === "ADMIN") {
+          router.replace('/(admin)/admin-main');
+          return;
+        }
+
         const config = getRouteByRole(role);
 
         if (!config) {
@@ -111,7 +157,8 @@ export default function LoginScreen() {
 
           await fetchProfile(); 
 
-          router.replace('/(tabs)');
+          // router.replace('/(tabs)');
+          router.replace(getMainRouteByRole(role) as any);
 
       
 
@@ -120,7 +167,7 @@ export default function LoginScreen() {
             router.replace(config.complete);
           } else if (e.response?.status === 401) {
             Alert.alert("Ошибка", "Сессия истекла");
-            router.replace('/(tabs)/login');
+            router.replace('/(auth)/login');
           } else {
             console.log(e);
             Alert.alert('Ошибка', 'Ошибка проверки профиля');
@@ -228,7 +275,7 @@ export default function LoginScreen() {
 
                 <View style={styles.registerRow}>
                   <Text style={styles.registerText}>Нет аккаунта? </Text>
-                  <TouchableOpacity onPress={() => router.push('/(tabs)/register')}>
+                  <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
                     <Text style={styles.registerLink}>Зарегистрироваться</Text>
                   </TouchableOpacity>
                 </View>

@@ -58,7 +58,7 @@ export default function RegisterScreen() {
       });
 
     if (success) {
-      router.replace('/(tabs)/login'); // следующий шаг
+      router.replace('/(auth)/login'); // следующий шаг
     }
   };
 
@@ -162,7 +162,7 @@ export default function RegisterScreen() {
 
             <TouchableOpacity
               style={registerStyles.loginLink}
-              onPress={() => router.push('/(tabs)/login')}
+              onPress={() => router.push('/(auth)/login')}
             >
               <Text style={registerStyles.loginLinkText}>
                 Уже есть аккаунт? Войти

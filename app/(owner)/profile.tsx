@@ -40,15 +40,15 @@ useEffect(() => {
   const role = profile.user.role;
 
   if (role === Role.OWNER && !profile.petOwner) {
-    router.replace('/(tabs)/complete_profile');
+    router.replace('/complete_profile');
   }
 
   if (role === Role.VET && !profile.veterinarian) {
-    router.replace('/(tabs)/complete_vet');
+    router.replace('/complete_vet');
   }
 
   if (role === Role.SERVICE && !profile.serviceProvider) {
-    router.replace('/(tabs)/complete_service');
+    router.replace('/complete_service');
   }
 
 }, [profile]);
@@ -320,7 +320,7 @@ const handleMyPets = () => {
                 end={{ x: 1, y: 0 }}
               >
                 <View style={styles.actionLeft}>
-                  <Feather name="calendar" size={24} color={colors.text.tertiary} />
+                  <Feather name="calendar" size={24} color="#FFF" />
                   <View style={styles.actionTextContainer}>
                     <Text style={styles.actionTitle}>Appointments</Text>
                     <Text style={styles.actionSubtitle}>View your booking history</Text>
