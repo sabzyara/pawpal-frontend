@@ -454,24 +454,6 @@ const handleMyPets = () => {
           </View>
         </View>
 
-        {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <View key={index} style={styles.statCard}>
-              <LinearGradient
-                colors={[colors.card.default, colors.card.elevated]}
-                style={styles.statGradient}
-              >
-                <View style={styles.statIcon}>
-                  <Feather name={stat.icon as any} size={24} color={colors.primary.main} />
-                </View>
-                <Text style={styles.statNumber}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
-              </LinearGradient>
-            </View>
-          ))}
-        </View>
-
         {/* Role Specific Information */}
         {profile?.user.role === Role.OWNER && renderOwnerInfo()}
         {profile?.user.role === Role.VET && renderVetInfo()}

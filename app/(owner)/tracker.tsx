@@ -96,9 +96,30 @@ console.log("selectedDate:", selectedDate);
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.background.secondary,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator
+          size="large"
+          color={colors.primary.main}
+        />
+
+        <Text
+          style={{
+            marginTop: 16,
+            fontSize: 15,
+            color: colors.text.secondary,
+            fontWeight: "500",
+          }}
+        >
+          Loading tracker...
+        </Text>
+      </View>
     );
   }
 
@@ -254,7 +275,7 @@ console.log("selectedDate:", selectedDate);
                 router.push(`/activity-form?petId=${selectedPet}`)
               }
             >
-              <Text style={{ fontWeight: "700", fontSize: 26, color: "#fff" }}>
+              <Text style={{ color: "#fff", fontWeight: "700" }}>
                 + Add Activity
               </Text>
             </TouchableOpacity>
