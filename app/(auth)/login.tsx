@@ -109,7 +109,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     console.log("REQUEST START");
 
-    await AsyncStorage.removeItem("token");
+    // await AsyncStorage.removeItem("token");
     
     if (!email.trim() || !password.trim()) {
       Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
@@ -117,6 +117,9 @@ export default function LoginScreen() {
     }
 
     const success = await login({ email, password });
+
+    const savedToken = await AsyncStorage.getItem("token");
+    console.log("SAVED TOKEN:", savedToken);
 
     if (success) {
       try {
@@ -131,6 +134,9 @@ export default function LoginScreen() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+        useAuthStore.setState({
+          user: me.data,
         });
 
 
@@ -275,7 +281,7 @@ export default function LoginScreen() {
 
                 <View style={styles.registerRow}>
                   <Text style={styles.registerText}>Нет аккаунта? </Text>
-                  <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+                  <TouchableOpacity onPress={() => router.push('/register')}>
                     <Text style={styles.registerLink}>Зарегистрироваться</Text>
                   </TouchableOpacity>
                 </View>
