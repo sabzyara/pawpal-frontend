@@ -113,13 +113,31 @@
 //   return <Stack />;
 // }
 
-import { Stack } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+// import { Stack } from "expo-router";
+// import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+// export default function RootLayout() {
+//   return (
+//     <GestureHandlerRootView style={{ flex: 1 }}>
+//       <Stack screenOptions={{ headerShown: false }} />
+//     </GestureHandlerRootView>
+//   );
+// }
+import { useAuthStore } from "@/store/authStore";
+import { Redirect, Stack, useSegments } from "expo-router";
 
 export default function RootLayout() {
-  return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }} />
-    </GestureHandlerRootView>
-  );
+  const { user, isLoading } = useAuthStore();
+
+  const segments = useSegments();
+
+  const inAuthGroup = segments[0] === "(auth)";
+
+  if (isLoading) return null;
+
+  if (!user && !inAuthGroup) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  return <Stack screenOptions={{ headerShown: false }} />;
 }
