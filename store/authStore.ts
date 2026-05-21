@@ -24,13 +24,26 @@ export const useAuthStore = create<AuthStore>((set) => ({
   error: null,
 
   // 🔥 ЗАГРУЗКА TOKEN ПРИ СТАРТЕ
-  loadUser: async () => {
-    const token = await AsyncStorage.getItem("token");
+loadUser: async () => {
+  set({ isLoading: true });
 
-    if (token) {
-      set({ token });
-    }
-  },
+  try {
+    const storedToken = await AsyncStorage.getItem("token");
+
+    set((state) => {
+      if (state.token === storedToken) {
+        return { isLoading: false };
+      }
+
+      return {
+        token: storedToken,
+        isLoading: false,
+      };
+    });
+  } catch (e) {
+    set({ isLoading: false });
+  }
+},
 
   // 🔐 LOGIN
   login: async (data: LoginData) => {

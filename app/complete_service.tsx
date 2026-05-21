@@ -49,7 +49,7 @@ export default function CompleteServiceScreen() {
         }
       );
 
-      router.replace('/(tabs)');
+      router.replace('/(owner)'); // следующий шаг
     } catch (e: any) {
       console.log(e?.response?.data);
       Alert.alert('Ошибка', 'Не удалось сохранить профиль');

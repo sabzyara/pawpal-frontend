@@ -173,7 +173,7 @@ export default function LoginScreen() {
             router.replace(config.complete);
           } else if (e.response?.status === 401) {
             Alert.alert("Ошибка", "Сессия истекла");
-            router.replace('/(auth)/login');
+            router.replace('/login');
           } else {
             console.log(e);
             Alert.alert('Ошибка', 'Ошибка проверки профиля');

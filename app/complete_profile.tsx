@@ -47,7 +47,7 @@ export default function CompleteProfileScreen() {
         }
       );
 
-      router.replace('/(tabs)'); 
+      router.replace('/(owner)'); // следующий шаг
     } catch (e: any) {
       console.log('❌ ERROR:', e?.response?.data);
 

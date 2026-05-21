@@ -53,7 +53,7 @@ export default function CompleteVetScreen() {
         }
       );
 
-      router.replace('/(tabs)');
+      router.replace('/(owner)');
     } catch (e: any) {
       console.log(e?.response?.data);
       Alert.alert('Ошибка', 'Не удалось сохранить профиль');

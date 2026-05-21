@@ -16,11 +16,11 @@ export const createStyles = (colors: ThemeColors) =>
 
     // HEADER
     header: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginBottom: 30,
-      paddingHorizontal: 10,
-    },
+  flexDirection: "column",
+  alignItems: "flex-start",
+  marginBottom: 30,
+  paddingHorizontal: 10,
+},
 
     backIcon: {
       width: 40,

@@ -16,8 +16,8 @@ api.interceptors.request.use(
 
     // ❗️ список эндпоинтов, куда НЕ НУЖЕН токен
     const isAuthRequest =
-      config.url?.includes("/auth/login") ||
-      config.url?.includes("/auth/register");
+      config.url?.includes("/(auth)/login") ||
+      config.url?.includes("/(auth)/register");
 
     console.log("REQUEST:", config.url);
 

@@ -16,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from "@expo/vector-icons";
 
 export default function RegisterScreen() {
   const { colors } = useTheme();
@@ -58,44 +59,62 @@ export default function RegisterScreen() {
       });
 
     if (success) {
-      router.replace('/(auth)/login'); // следующий шаг
+      router.replace('/login'); // следующий шаг
     }
   };
 
   if (step === 'role') {
-    return (
-      <SafeAreaView>
-        <ScrollView style={registerStyles.container}>
-          <View style={registerStyles.header}>
-            <Text style={registerStyles.title}>Выберите роль</Text>
-            <Text style={registerStyles.subtitle}>Кем вы будете?</Text>
-          </View>
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: 20 }}>
+        <View style={registerStyles.header}>
+          <Text style={registerStyles.title}>
+            Выберите роль
+          </Text>
 
-          {roles.map((role) => (
-            <TouchableOpacity
-              key={role.id}
-              style={registerStyles.roleCard}
-              onPress={() => handleRoleSelect(role.id)}
-            >
-              <Text style={registerStyles.roleIcon}>{role.icon}</Text>
-              <Text style={registerStyles.roleName}>{role.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
+          <Text style={registerStyles.subtitle}>
+            Кем вы будете?
+          </Text>
+        </View>
+
+        {roles.map((role) => (
+          <TouchableOpacity
+            key={role.id}
+            style={registerStyles.roleCard}
+            onPress={() => handleRoleSelect(role.id)}
+          >
+            <Text style={registerStyles.roleIcon}>
+              {role.icon}
+            </Text>
+
+            <Text style={registerStyles.roleName}>
+              {role.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={registerStyles.container}
       >
-        <ScrollView contentContainerStyle={registerStyles.scrollContent}>
+        <ScrollView contentContainerStyle={[registerStyles.scrollContent, { paddingTop: 30 }]}>
           <View style={registerStyles.header}>
-            <TouchableOpacity onPress={() => setStep('role')}>
-              <Text>← Назад</Text>
+            <TouchableOpacity
+              onPress={() => setStep('role')}
+              style={{
+                marginBottom: 12,
+                paddingVertical: 4,
+              }}
+            >
+              <Text style={{ fontSize: 18 }}>
+                ←
+              </Text>
             </TouchableOpacity>
 
             <Text style={registerStyles.title}>
@@ -128,22 +147,29 @@ export default function RegisterScreen() {
 
             {/* Password */}
             <View style={registerStyles.inputGroup}>
-              <Text style={registerStyles.label}>Пароль</Text>
+  <Text style={registerStyles.label}>Пароль</Text>
 
-              <View style={registerStyles.passwordContainer}>
-                <TextInput
-                  style={[registerStyles.input, registerStyles.passwordInput]}
-                  placeholder="••••••••"
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={setPassword}
+            <View style={registerStyles.passwordContainer}>
+              <TextInput
+                style={[registerStyles.input, registerStyles.passwordInput]}
+                placeholder="••••••••"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+
+              <TouchableOpacity
+                style={registerStyles.eyeButton}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Feather
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={colors.text.secondary}
                 />
-
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Text>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             </View>
+          </View>
 
             {/* Button */}
             <TouchableOpacity
@@ -162,7 +188,7 @@ export default function RegisterScreen() {
 
             <TouchableOpacity
               style={registerStyles.loginLink}
-              onPress={() => router.push('/(auth)/login')}
+              onPress={() => router.push('/login')}
             >
               <Text style={registerStyles.loginLinkText}>
                 Уже есть аккаунт? Войти
