@@ -3,19 +3,19 @@ import api from "@/services/api";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 type User = {
   id: number;
   email: string;
-  role: "PET_OWNER" | "VET" | "SERVICE_PROVIDER";
+  role: "OWNER" | "VET" | "SERVICE";
   status: string;
   createdAt: string;
 };
@@ -97,7 +97,7 @@ export default function AdminUsersScreen() {
 
       {/* 🎯 FILTER */}
       <View style={styles.filters}>
-        {["ALL", "PET_OWNER", "VET", "SERVICE_PROVIDER"].map((role) => (
+        {["ALL", "OWNER", "VET", "SERVICE"].map((role) => (
           <TouchableOpacity
             key={role}
             style={[
