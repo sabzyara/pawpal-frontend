@@ -60,9 +60,9 @@ export default function SpecialistTabs() {
       /> */}
 
       <Tabs.Screen
-        name="profile"
+        name="specialist-profile"
         options={{
-          title: "Профиль",
+          title: "Profile",
 
           tabBarIcon: ({ color, size }) => (
             <Feather
