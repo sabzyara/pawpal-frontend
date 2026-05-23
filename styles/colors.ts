@@ -6,13 +6,13 @@ export const Colors = {
       main: '#E3275B',
       light: '#EE819F',
       dark: '#B01946',
-      gradient: ['#E3275B', '#F4AEC1'] as const,
+      gradient: ['#E3275B', '#F4AEC1'],
     },
     secondary: {
       main: '#F4AEC1',
       light: '#FADBE3',
       dark: '#E85A7D',
-      gradient: ['#F4AEC1', '#FADBE3'] as const,
+      gradient: ['#F4AEC1', '#FADBE3'],
     },
     background: {
       primary: '#FFFFFF',
@@ -61,13 +61,13 @@ export const Colors = {
       main: '#7B2CBF',
       light: '#9D4EDD',
       dark: '#5A189A',
-      gradient: ['#7B2CBF', '#3A0CA3'] as const,
+      gradient: ['#7B2CBF', '#3A0CA3'],
     },
     secondary: {
       main: '#3A0CA3',
       light: '#5A189A',
       dark: '#240046',
-      gradient: ['#3A0CA3', '#5A189A'] as const,
+      gradient: ['#3A0CA3', '#5A189A'] ,
     },
     background: {
       primary: '#000823',

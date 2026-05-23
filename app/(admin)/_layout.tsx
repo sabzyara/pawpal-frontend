@@ -1,5 +1,6 @@
+import { Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Platform, Text } from "react-native";
+import { Platform } from "react-native";
 
 import { useTheme } from "@/hooks/useTheme";
 
@@ -35,26 +36,30 @@ export default function AdminTabs() {
         options={{
           title: "Dashboard",
 
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 22 }}>
-              📋
-            </Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              name="home"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
 
-      {/* <Tabs.Screen
-        name="admin-user-profile"
+      <Tabs.Screen
+        name="admin-profile"
         options={{
-          title: "Users",
+          title: "Profile",
 
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 22 }}>
-              👥
-            </Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              name="user"
+              size={size}
+              color={color}
+            />
           ),
         }}
-      /> */}
+      />
     </Tabs>
   );
 }

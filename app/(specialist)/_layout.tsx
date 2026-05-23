@@ -1,5 +1,6 @@
+import { Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { Platform, Text } from "react-native";
+import { Platform } from "react-native";
 
 import { useTheme } from "@/hooks/useTheme";
 
@@ -35,10 +36,12 @@ export default function SpecialistTabs() {
         options={{
           title: "Список",
 
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 22 }}>
-              📅
-            </Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              name="calendar"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
@@ -57,14 +60,16 @@ export default function SpecialistTabs() {
       /> */}
 
       <Tabs.Screen
-        name="vet-profile"
+        name="specialist-profile"
         options={{
-          title: "Профиль",
+          title: "Profile",
 
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 22 }}>
-              👤
-            </Text>
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              name="user"
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
