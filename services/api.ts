@@ -9,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// 🔥 REQUEST INTERCEPTOR
+
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("token");
@@ -33,7 +33,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 🔥 RESPONSE INTERCEPTOR (очень полезно)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {

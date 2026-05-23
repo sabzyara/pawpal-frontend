@@ -19,6 +19,10 @@ import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 import { router } from "expo-router";
+import { useProfileStore }
+from "@/store/profileStore";
+import AsyncStorage
+from "@react-native-async-storage/async-storage";
 
 type Message = {
   id: string;
@@ -31,7 +35,8 @@ export default function ChatScreen() {
   const styles = createStyles(colors);
 
   const token = useAuthStore((s) => s.token);
-
+  const { profile } =
+  useProfileStore();
   const [pets, setPets] = useState<any[]>([]);
   const [selectedPet, setSelectedPet] = useState<number | null>(null);
   const [showPicker, setShowPicker] = useState(false);
@@ -42,6 +47,7 @@ export default function ChatScreen() {
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
+  
 
   // 🐾 загрузка петов
   useEffect(() => {
@@ -49,7 +55,17 @@ export default function ChatScreen() {
       try {
         const res = await api.get("/pet-management/api/pets");
         const data = res.data.map((p: any) => p.pet ?? p);
+          const saved =
+  await AsyncStorage.getItem(
+    "chat_history"
+  );
 
+if (saved) {
+
+  setMessages(
+    JSON.parse(saved)
+  );
+}
         setPets(data);
 
         if (data.length > 0) {
@@ -65,48 +81,83 @@ export default function ChatScreen() {
     load();
   }, []);
 
-  // 💬 отправка
-  const sendMessage = async () => {
-    if (!input.trim() || !selectedPet || !token) return;
+const sendMessage = async () => {
 
-    const userMsg: Message = {
-      id: Date.now().toString(),
-      text: input,
-      isUser: true,
+  if (
+    !input.trim() ||
+    !selectedPet ||
+    !token
+  ) return;
+
+  const userMsg: Message = {
+    id: Date.now().toString(),
+    text: input,
+    isUser: true,
+  };
+
+  setInput("");
+
+  try {
+
+    const res = await fetch(
+      "https://pawpal-ai-analytics.onrender.com/ai/chat",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+
+        body: JSON.stringify({
+          message: userMsg.text,
+
+          petId:
+            String(selectedPet),
+
+          token: token,
+
+          userId:
+            profile?.user?.id,
+        }),
+      }
+    );
+
+    const data =
+      await res.json();
+
+    const aiMsg: Message = {
+      id:
+        Date.now().toString(),
+
+      text:
+        data.response ||
+        JSON.stringify(data),
+
+      isUser: false,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
+    const updated = [
+      ...messages,
+      userMsg,
+      aiMsg,
+    ];
 
-    try {
-      const res = await fetch(
-        "https://pawpal-ai-analytics.onrender.com/ai/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userMsg.text,
-            petId: String(selectedPet), // 🔥 ВАЖНО
-            token: token,               // 🔥 ВАЖНО
-          }),
-        }
-      );
+    setMessages(updated);
 
-      const data = await res.json();
+    await AsyncStorage.setItem(
+      "chat_history",
+      JSON.stringify(updated)
+    );
 
-      const aiMsg: Message = {
-        id: Date.now().toString(),
-        text: data.response || JSON.stringify(data),
-        isUser: false,
-      };
+  } catch (e) {
 
-      setMessages((prev) => [...prev, aiMsg]);
-    } catch (e) {
-      console.log("CHAT ERROR", e);
-    }
-  };
+    console.log(
+      "CHAT ERROR",
+      e
+    );
+  }
+};
 
   const renderMessage = ({ item }: { item: Message }) => (
     <View

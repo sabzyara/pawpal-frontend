@@ -106,7 +106,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async () => { 
     console.log("REQUEST START");
 
     // await AsyncStorage.removeItem("token");

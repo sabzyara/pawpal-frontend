@@ -27,6 +27,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // 🔥 ВАЖНО
 import { useProfileStore } from '@/store/profileStore';
 
+import {
+  getNotifications,
+} from "@/services/notificationService";
+
 export default function HomeScreen() {
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
@@ -47,6 +51,11 @@ export default function HomeScreen() {
 
   // 🔥 ПЕТЫ
   const [pets, setPets] = useState<any[]>([]);
+  
+  const [
+  notificationCount,
+  setNotificationCount,
+] = useState(0);
 
   const fetchPets = async () => {
     try {
@@ -60,16 +69,52 @@ export default function HomeScreen() {
     }
   };
 
+  const fetchNotifications =
+  async () => {
+
+    try {
+
+      if (!profile?.user?.id)
+        return;
+
+      const notifications =
+        await getNotifications(
+          profile.user.id
+        );
+
+      const unread =
+        notifications.filter(
+          (n: any) => !n.read
+        );
+
+      setNotificationCount(
+        unread.length
+      );
+
+    } catch (e) {
+
+      console.log(
+        "NOTIFICATION ERROR:",
+        e
+      );
+    }
+  };
+
   // 🔥 ПРОФИЛЬ ИЗ STORE (КАК В PROFILE SCREEN)
   const { profile, fetchProfile } = useProfileStore();
 
   // 🔄 ОБНОВЛЕНИЕ
   useFocusEffect(
-    useCallback(() => {
-      fetchPets();
-      fetchProfile(); // 🔥 вот ключ
-    }, [])
-  );
+  useCallback(() => {
+
+    fetchPets();
+
+    fetchProfile();
+
+    fetchNotifications();
+
+  }, [profile])
+);
 
   // 🧠 ИМЯ
   const getDisplayName = () => {
@@ -113,7 +158,9 @@ export default function HomeScreen() {
     profile?.serviceProvider?.avatarUrl ||
     null
   }
-  notificationCount={upcomingTasks}
+  notificationCount={
+  notificationCount
+}
   onNotificationPress={handleNotificationPress}
 />
 ```
