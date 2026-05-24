@@ -84,7 +84,13 @@ export const VetCard: React.FC<VetCardProps> = ({ vet, onPress }) => {
           {/* Name and rating */}
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
-              Dr. {vet.firstName} {vet.lastName}
+             {vet.specialty !==
+              'Service Provider'
+                ? 'Dr. '
+                : ''}
+              {vet.firstName}
+              {' '}
+              {vet.lastName}
             </Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
               {renderStars()}
@@ -97,7 +103,13 @@ export const VetCard: React.FC<VetCardProps> = ({ vet, onPress }) => {
           {/* Specialty & Experience & Distance */}
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Ionicons name="medical-outline" size={12} color={colors.text.secondary} />
+              <Ionicons
+                name={
+                  vet.specialty ===
+                  'Veterinarian'
+                    ? 'medical-outline'
+                    : 'cut-outline'
+                } size={12} color={colors.text.secondary} />
               <Text style={[typography.caption, { color: colors.text.secondary }]}>
                 {vet.specialty}
               </Text>

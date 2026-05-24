@@ -8,11 +8,18 @@ interface VetHeaderProps {
   vet: {
     firstName: string;
     lastName: string;
-    avatarUrl: string;
+    avatarUrl?: string;
+    specialty?: string;
+    serviceType?: string;
   };
+
+  type?: 'vet' | 'service';
 }
 
-export const VetHeader: React.FC<VetHeaderProps> = ({ vet }) => {
+export const VetHeader: React.FC<VetHeaderProps> = ({
+  vet,
+  type = 'vet',
+}) => {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
@@ -39,10 +46,12 @@ export const VetHeader: React.FC<VetHeaderProps> = ({ vet }) => {
           }}
         />
         <Text style={[typography.h3, { color: colors.text.primary }]}>
-          Dr. {vet.firstName} {vet.lastName}
+          {type === 'vet' ? 'Dr.' : ''}
+            {' '}
+            {vet.firstName} {vet.lastName}
         </Text>
         <Text style={[typography.body2, { color: colors.text.secondary, marginTop: 4 }]}>
-          Veterinarian
+          {type === 'vet' ? 'Veterinarian' : 'Service Provider'}
         </Text>
       </View>
     </View>

@@ -14,17 +14,30 @@ export default function OwnerTabs() {
         headerShown: false,
 
         tabBarStyle: {
-          backgroundColor: colors.background.primary,
-          borderTopColor: colors.border.light,
+          backgroundColor:
+            colors.background.primary,
 
-          paddingBottom: Platform.OS === "ios" ? 20 : 10,
+          borderTopColor:
+            colors.border.light,
+
+          paddingBottom:
+            Platform.OS === "ios"
+              ? 20
+              : 10,
+
           paddingTop: 10,
 
-          height: Platform.OS === "ios" ? 85 : 65,
+          height:
+            Platform.OS === "ios"
+              ? 85
+              : 65,
         },
 
-        tabBarActiveTintColor: colors.icon.active,
-        tabBarInactiveTintColor: colors.icon.inactive,
+        tabBarActiveTintColor:
+          colors.icon.active,
+
+        tabBarInactiveTintColor:
+          colors.icon.inactive,
 
         tabBarLabelStyle: {
           fontSize: 12,
@@ -36,7 +49,11 @@ export default function OwnerTabs() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Feather
               name="home"
               size={size}
@@ -50,7 +67,11 @@ export default function OwnerTabs() {
         name="tracker"
         options={{
           title: "Tracker",
-          tabBarIcon: ({ color, size }) => (
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Feather
               name="activity"
               size={size}
@@ -64,9 +85,31 @@ export default function OwnerTabs() {
         name="appointments"
         options={{
           title: "Appointments",
-          tabBarIcon: ({ color, size }) => (
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Feather
               name="calendar"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="specialist-list"
+        options={{
+          title: "Specialists",
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
+            <Feather
+              name="users"
               size={size}
               color={color}
             />
@@ -78,7 +121,11 @@ export default function OwnerTabs() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => (
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Feather
               name="user"
               size={size}

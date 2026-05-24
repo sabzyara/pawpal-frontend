@@ -5,12 +5,12 @@ import { useTheme } from '@/hooks/useTheme';
 
 interface VetAboutProps {
   vet: {
-    about: string;
-    address: string;
-    education: string;
-    languages: string[];
-    phoneNumber: string;
-    clinicName: string;
+    about?: string;
+    address?: string;
+    education?: string;
+    languages?: string[];
+    phoneNumber?: string;
+    clinicName?: string;
   };
 }
 
@@ -55,7 +55,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
     >
       {/* About Text */}
       <Text style={[typography.body1, { color: colors.text.primary, lineHeight: 24 }]}>
-        {vet.about}
+        {vet.about || 'No description'}
       </Text>
 
       {/* Clinic Name */}
@@ -66,7 +66,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
             Clinic
           </Text>
           <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.clinicName}
+            {vet.clinicName || 'Not specified'}
           </Text>
         </View>
       </View>
@@ -82,7 +82,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
             Location
           </Text>
           <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.address}
+            {vet.address || 'Not specified'}
           </Text>
         </View>
         <Ionicons name="open-outline" size={14} color={colors.text.secondary} />
@@ -99,7 +99,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
             Phone Number
           </Text>
           <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.phoneNumber}
+            {vet.phoneNumber || 'Not specified'}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={14} color={colors.text.secondary} />
@@ -113,7 +113,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
             Education
           </Text>
           <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.education}
+            {vet.education || 'Not specified'}
           </Text>
         </View>
       </View>
@@ -126,7 +126,8 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
             Languages Spoken
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-            {vet.languages.map((language, index) => (
+            {(vet.languages || []).map(
+                (language, index) => (
               <View
                 key={index}
                 style={{
