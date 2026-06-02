@@ -1,4 +1,3 @@
-// screens/home/types/index.ts
 export type ScheduleType = 'vet' | 'walk' | 'medication' | 'grooming';
 
 export interface ScheduleItem {

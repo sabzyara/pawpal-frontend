@@ -433,7 +433,7 @@ useEffect(() => {
            onPress={() =>
     router.push({
     pathname:
-      '/specialist-owner-profile',
+      '/specialist-profile',
 
     params: {
       id: item.id,

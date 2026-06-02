@@ -31,7 +31,7 @@ export const PetSelector: React.FC<PetSelectorProps> = ({
   selectedPetId,
   onSelectPet,
 }) => {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, typography } = useTheme();
 
   const getPetIcon = (type: string) => {
     return type === 'Dog' ? '🐕' : '🐈';
@@ -108,10 +108,10 @@ export const PetSelector: React.FC<PetSelectorProps> = ({
   return (
     <View>
       <Text style={[typography.h3, { color: colors.text.primary, marginBottom: 8 }]}>
-        Select Your Pet
+        Выберите питомца
       </Text>
       <Text style={[typography.body2, { color: colors.text.secondary, marginBottom: 20 }]}>
-        Choose which pet needs the appointment
+        Выберите питомца для приема
       </Text>
 
       <FlatList
@@ -130,7 +130,7 @@ export const PetSelector: React.FC<PetSelectorProps> = ({
           >
             <Ionicons name="paw-outline" size={48} color={colors.text.secondary} />
             <Text style={[typography.body1, { color: colors.text.primary, marginTop: 12 }]}>
-              No pets added yet
+              Нет добавленных питомцев
             </Text>
             <TouchableOpacity
               style={{
@@ -141,7 +141,7 @@ export const PetSelector: React.FC<PetSelectorProps> = ({
                 borderRadius: 20,
               }}
             >
-              <Text style={{ color: colors.text.inverse }}>Add a Pet</Text>
+              <Text style={{ color: colors.text.inverse }}>Добавить питомца</Text>
             </TouchableOpacity>
           </View>
         )}

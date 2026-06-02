@@ -7,6 +7,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -21,6 +22,12 @@ export default function CompleteServiceScreen() {
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [serviceCategory, setServiceCategory] = useState('');
+  const [experienceYears, setExperienceYears] = useState('');
+  const [education, setEducation] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [pricePerVisit, setPricePerVisit] = useState('');
+  const [about, setAbout] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
@@ -32,49 +39,126 @@ export default function CompleteServiceScreen() {
     try {
       setLoading(true);
 
-      const token = await AsyncStorage.getItem('token');
-
+      // ✅ Исправлен эндпоинт (убрал /api)
       await api.post(
-        '/specialist-service/api/service-providers/me',
+        '/specialist-service/service-providers/me',
         {
           firstName,
           lastName,
-          phoneNumber,
-          serviceCategory,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          phoneNumber: phoneNumber || null,
+          serviceCategory: serviceCategory || null,
+          experienceYears: experienceYears ? parseInt(experienceYears) : null,
+          education: education || null,
+          address: address || null,
+          city: city || null,
+          pricePerVisit: pricePerVisit ? parseFloat(pricePerVisit) : null,
+          about: about || null,
         }
       );
 
-      router.replace('/(owner)'); // следующий шаг
+      Alert.alert('Успех', 'Профиль успешно создан', [
+        { text: 'OK', onPress: () => router.replace('/specialist-profile') }
+      ]);
     } catch (e: any) {
       console.log(e?.response?.data);
-      Alert.alert('Ошибка', 'Не удалось сохранить профиль');
+      Alert.alert('Ошибка', e?.response?.data?.message || 'Не удалось сохранить профиль');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Сервис-профиль 🛠</Text>
 
-      <TextInput placeholder="Имя" placeholderTextColor={colors.text.tertiary} value={firstName} onChangeText={setFirstName} style={styles.input} />
-      <TextInput placeholder="Фамилия" placeholderTextColor={colors.text.tertiary} value={lastName} onChangeText={setLastName} style={styles.input} />
-      <TextInput placeholder="Телефон" placeholderTextColor={colors.text.tertiary} value={phoneNumber} onChangeText={setPhoneNumber} style={styles.input} />
+      <TextInput 
+        placeholder="Имя *" 
+        placeholderTextColor={colors.text.tertiary} 
+        value={firstName} 
+        onChangeText={setFirstName} 
+        style={styles.input} 
+      />
+      
+      <TextInput 
+        placeholder="Фамилия *" 
+        placeholderTextColor={colors.text.tertiary} 
+        value={lastName} 
+        onChangeText={setLastName} 
+        style={styles.input} 
+      />
+      
+      <TextInput 
+        placeholder="Телефон" 
+        placeholderTextColor={colors.text.tertiary} 
+        value={phoneNumber} 
+        onChangeText={setPhoneNumber} 
+        style={styles.input} 
+        keyboardType="phone-pad"
+      />
+      
       <TextInput
-        placeholder="Категория услуг (груминг и т.д.)"
+        placeholder="Категория услуг (груминг, дрессировка и т.д.)"
+        placeholderTextColor={colors.text.tertiary}
         value={serviceCategory}
         onChangeText={setServiceCategory}
         style={styles.input}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
+      <TextInput
+        placeholder="Опыт работы (лет)"
+        placeholderTextColor={colors.text.tertiary}
+        value={experienceYears}
+        onChangeText={setExperienceYears}
+        style={styles.input}
+        keyboardType="numeric"
+      />
+
+      <TextInput
+        placeholder="Образование"
+        placeholderTextColor={colors.text.tertiary}
+        value={education}
+        onChangeText={setEducation}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Адрес"
+        placeholderTextColor={colors.text.tertiary}
+        value={address}
+        onChangeText={setAddress}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Город"
+        placeholderTextColor={colors.text.tertiary}
+        value={city}
+        onChangeText={setCity}
+        style={styles.input}
+      />
+
+      <TextInput
+        placeholder="Цена за визит"
+        placeholderTextColor={colors.text.tertiary}
+        value={pricePerVisit}
+        onChangeText={setPricePerVisit}
+        style={styles.input}
+        keyboardType="numeric"
+      />
+
+      <TextInput
+        placeholder="О себе"
+        placeholderTextColor={colors.text.tertiary}
+        value={about}
+        onChangeText={setAbout}
+        style={[styles.input, { minHeight: 80, textAlignVertical: 'top' }]}
+        multiline
+        numberOfLines={4}
+      />
+
+      <TouchableOpacity style={styles.button} onPress={handleSave} disabled={loading}>
         {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Сохранить</Text>}
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
-};
+}

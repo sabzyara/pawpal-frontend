@@ -35,7 +35,7 @@ interface Review {
 }
 
 interface VetReviewsProps {
-  vetId: string;
+  vetId: number;
 
   type?: 'vet' | 'service';
 }

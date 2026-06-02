@@ -16,37 +16,40 @@ interface Pet {
   age: number;
 }
 
-interface Service {
-  id: string;
-  name: string;
-  price: number;
-  duration: number;
-}
-
 interface BookingSummaryProps {
   pet?: Pet;
-  vetName: string;
+  specialistName: string;
   date: Date | null;
   timeSlot: string | null;
-  service?: Service;
   onConfirm: () => void;
   loading: boolean;
 }
 
 export const BookingSummary: React.FC<BookingSummaryProps> = ({
   pet,
-  vetName,
+  specialistName,
   date,
   timeSlot,
-  service,
   onConfirm,
   loading,
 }) => {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, typography } = useTheme();
 
-  const totalPrice = service?.price || 0;
-  const tax = totalPrice * 0.08;
-  const grandTotal = totalPrice + tax;
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('ru-RU', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minutes} ${ampm}`;
+  };
 
   const SummaryRow = ({ label, value, icon }: { label: string; value: string; icon: string }) => (
     <View
@@ -67,29 +70,16 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
     </View>
   );
 
-  const PriceRow = ({ label, price }: { label: string; price: number }) => (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 8,
-      }}
-    >
-      <Text style={[typography.body2, { color: colors.text.secondary }]}>{label}</Text>
-      <Text style={[typography.body2, { color: colors.text.primary }]}>${price.toFixed(2)}</Text>
-    </View>
-  );
-
   return (
     <View>
       <Text style={[typography.h3, { color: colors.text.primary, marginBottom: 8 }]}>
-        Confirm Appointment
+        Подтверждение записи
       </Text>
       <Text style={[typography.body2, { color: colors.text.secondary, marginBottom: 20 }]}>
-        Please review your booking details
+        Пожалуйста, проверьте детали записи
       </Text>
 
-      {/* Booking Details */}
+      {/* Детали записи */}
       <View
         style={{
           backgroundColor: colors.card.default,
@@ -106,86 +96,50 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
         }}
       >
         <Text style={[typography.body1SemiBold, { color: colors.text.primary, marginBottom: 16 }]}>
-          Appointment Details
+          Детали приема
         </Text>
 
         <SummaryRow
-          label="Pet"
+          label="Питомец"
           value={`${pet?.name} (${pet?.breed})`}
           icon="paw"
         />
         <SummaryRow
-          label="Veterinarian"
-          value={vetName}
+          label="Специалист"
+          value={specialistName}
           icon="person"
         />
         <SummaryRow
-          label="Date"
-          value={date ? date.toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-          }) : 'Not selected'}
+          label="Дата"
+          value={date ? formatDate(date) : 'Не выбрана'}
           icon="calendar"
         />
         <SummaryRow
-          label="Time"
-          value={timeSlot || 'Not selected'}
+          label="Время"
+          value={timeSlot ? formatTime(timeSlot) : 'Не выбрано'}
           icon="time"
         />
-        <SummaryRow
-          label="Service"
-          value={service?.name || 'Not selected'}
-          icon="medkit"
-        />
-        <SummaryRow
-          label="Duration"
-          value={service?.duration ? `${service.duration} min` : 'N/A'}
-          icon="hourglass"
-        />
       </View>
 
-      {/* Price Breakdown */}
+      {/* Информация */}
       <View
         style={{
-          backgroundColor: colors.card.default,
-          borderRadius: 20,
-          padding: 16,
+          backgroundColor: colors.primary.main + '10',
+          borderRadius: 12,
+          padding: 12,
           marginBottom: 20,
-          ...(colors.card.default === '#FFFFFF' && {
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 3,
-            elevation: 2,
-          }),
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
         }}
       >
-        <Text style={[typography.body1SemiBold, { color: colors.text.primary, marginBottom: 16 }]}>
-          Payment Summary
+        <Ionicons name="information-circle" size={20} color={colors.primary.main} />
+        <Text style={[typography.caption, { color: colors.text.secondary, flex: 1 }]}>
+          Специалист подтвердит вашу запись. Вы получите уведомление после подтверждения.
         </Text>
-
-        <PriceRow label="Service Fee" price={totalPrice} />
-        <PriceRow label="Tax (8%)" price={tax} />
-        
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            paddingTop: 12,
-            marginTop: 8,
-            borderTopWidth: 1,
-            borderTopColor: colors.border.light,
-          }}
-        >
-          <Text style={[typography.h4, { color: colors.text.primary }]}>Total</Text>
-          <Text style={[typography.h4, { color: colors.primary.main }]}>
-            ${grandTotal.toFixed(2)}
-          </Text>
-        </View>
       </View>
 
-      {/* Confirm Button */}
+      {/* Кнопка подтверждения */}
       <TouchableOpacity
         onPress={onConfirm}
         disabled={loading}
@@ -201,7 +155,7 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
           <ActivityIndicator color={colors.text.inverse} />
         ) : (
           <Text style={[typography.button, { color: colors.text.inverse }]}>
-            Confirm & Pay
+            Подтвердить запись
           </Text>
         )}
       </TouchableOpacity>

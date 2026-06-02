@@ -31,11 +31,11 @@ export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
   };
 
   const handleLocationPress = () => {
-    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(vet.address)}`;
-    Linking.openURL(mapsUrl).catch((err) => 
-      console.error('Error opening maps:', err)
-    );
-  };
+  const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(vet.address || '')}`;
+  Linking.openURL(mapsUrl).catch((err) => 
+    console.error('Error opening maps:', err)
+  );
+};
 
   return (
     <View

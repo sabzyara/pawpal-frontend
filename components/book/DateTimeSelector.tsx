@@ -1,203 +1,210 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
+import { timeSlotApi } from '@/services/appointmentApi'; 
+import type { TimeSlot } from '@/services/appointmentApi';
+import { useUser } from '@/hooks/useUser';
 
 interface DateTimeSelectorProps {
+  specialistId: number;
+  specialistType: 'VET' | 'SERVICE';
   selectedDate: Date | null;
   selectedTime: string | null;
   onSelectDate: (date: Date) => void;
   onSelectTime: (time: string) => void;
 }
 
-const generateDates = () => {
-  const dates = [];
-  for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    dates.push({
-      day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-      date: date.getDate(),
-      month: date.toLocaleDateString('en-US', { month: 'short' }),
-      full: date,
-      isToday: i === 0,
-    });
-  }
-  return dates;
-};
-
-const timeSlots = [
-  '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM',
-  '11:00 AM', '11:30 AM', '01:00 PM', '01:30 PM',
-  '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM',
-  '04:00 PM', '04:30 PM',
-];
-
 export const DateTimeSelector: React.FC<DateTimeSelectorProps> = ({
+  specialistId,
+  specialistType,
   selectedDate,
   selectedTime,
   onSelectDate,
   onSelectTime,
 }) => {
-  const { colors, spacing, typography } = useTheme();
-  const dates = generateDates();
+  const { colors, typography, spacing } = useTheme();
+  const { isAuthenticated } = useUser();
+  const [dates, setDates] = useState<any[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]); 
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  useEffect(() => {
+    const generatedDates = [];
+    for (let i = 0; i < 14; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      generatedDates.push({
+        full: date,
+        day: date.toLocaleDateString('ru-RU', { weekday: 'short' }),
+        dateNum: date.getDate(),
+        month: date.toLocaleDateString('ru-RU', { month: 'short' }),
+        isToday: i === 0,
+      });
+    }
+    setDates(generatedDates);
+  }, []);
+
+  useEffect(() => {
+    if (selectedDate && isAuthenticated) {
+      loadAvailableSlots();
+    }
+  }, [selectedDate, specialistId, specialistType, isAuthenticated]);
+
+  const loadAvailableSlots = async () => {
+    if (!selectedDate) return;
+    try {
+      setLoadingSlots(true);
+      const formattedDate = selectedDate.toISOString().split('T')[0];
+      const result = await timeSlotApi.getAvailableSlotsForDate(
+        specialistId, 
+        specialistType, 
+        formattedDate
+      );
+      setAvailableSlots(result.content);  
+    } catch (error) {
+      console.error('Failed to load slots:', error);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  const formatTime = (time: string) => {
+    const [hours, minutes] = time.split(':');
+    return `${hours}:${minutes}`;
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <View style={{ 
+        padding: spacing.xl, 
+        alignItems: 'center',
+        backgroundColor: colors.background.tertiary,
+        borderRadius: spacing.md,
+      }}>
+        <Ionicons name="lock-closed-outline" size={48} color={colors.text.secondary} />
+        <Text style={[typography.body1, { color: colors.text.primary, marginTop: spacing.md, textAlign: 'center' }]}>
+          Авторизуйтесь для записи
+        </Text>
+        <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs, textAlign: 'center' }]}>
+          Чтобы записаться на прием, необходимо войти в аккаунт
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View>
-      <Text style={[typography.h3, { color: colors.text.primary, marginBottom: 8 }]}>
-        Select Date & Time
+      <Text style={[typography.h3, { color: colors.text.primary, marginBottom: spacing.xs }]}>
+        Выберите дату и время
       </Text>
-      <Text style={[typography.body2, { color: colors.text.secondary, marginBottom: 20 }]}>
-        Choose a convenient time for your appointment
+      <Text style={[typography.body2, { color: colors.text.secondary, marginBottom: spacing.lg }]}>
+        Выберите удобное время для приема
       </Text>
 
-      {/* Date Selection */}
-      <Text style={[typography.body1SemiBold, { color: colors.text.primary, marginBottom: 12 }]}>
-        Select Date
-      </Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 12, marginBottom: 24 }}
+      {/* Дата пикер */}
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={{ gap: spacing.sm, marginBottom: spacing.lg }}
       >
         {dates.map((item, idx) => {
           const isSelected = selectedDate?.toDateString() === item.full.toDateString();
-          
           return (
             <TouchableOpacity
               key={idx}
               onPress={() => onSelectDate(item.full)}
               style={{
                 alignItems: 'center',
-                paddingVertical: 12,
-                paddingHorizontal: 16,
-                borderRadius: 16,
+                paddingVertical: spacing.sm,
+                paddingHorizontal: spacing.md,
+                borderRadius: spacing.md,
                 backgroundColor: isSelected ? colors.primary.main : colors.card.default,
                 borderWidth: isSelected ? 0 : 1,
                 borderColor: colors.border.light,
                 minWidth: 70,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: isSelected ? colors.text.inverse : colors.text.secondary,
-                }}
-              >
+              <Text style={{ 
+                fontSize: 12, 
+                color: isSelected ? colors.text.inverse : colors.text.secondary 
+              }}>
                 {item.day}
               </Text>
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: '600',
-                  color: isSelected ? colors.text.inverse : colors.text.primary,
-                  marginVertical: 4,
-                }}
-              >
-                {item.date}
+              <Text style={{ 
+                fontSize: 20, 
+                fontWeight: '600', 
+                color: isSelected ? colors.text.inverse : colors.text.primary, 
+                marginVertical: spacing.xs 
+              }}>
+                {item.dateNum}
               </Text>
-              <Text
-                style={{
-                  fontSize: 10,
-                  color: isSelected ? colors.text.inverse : colors.text.secondary,
-                }}
-              >
+              <Text style={{ 
+                fontSize: 10, 
+                color: isSelected ? colors.text.inverse : colors.text.secondary 
+              }}>
                 {item.month}
               </Text>
-              {item.isToday && !isSelected && (
-                <Text
-                  style={{
-                    fontSize: 8,
-                    color: colors.primary.main,
-                    marginTop: 2,
-                  }}
-                >
-                  Today
-                </Text>
-              )}
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
-      {/* Time Selection */}
-      <Text style={[typography.body1SemiBold, { color: colors.text.primary, marginBottom: 12 }]}>
-        Select Time
+      {/* Время слоты */}
+      <Text style={[typography.body1SemiBold, { color: colors.text.primary, marginBottom: spacing.sm }]}>
+        Выберите время
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
-        {timeSlots.map((time) => {
-          const isSelected = selectedTime === time;
-          const isAvailable = !['12:00 PM', '12:30 PM'].includes(time); // Mock unavailable slots
-          
-          return (
-            <TouchableOpacity
-              key={time}
-              onPress={() => isAvailable && onSelectTime(time)}
-              style={{
-                paddingVertical: 10,
-                paddingHorizontal: 16,
-                borderRadius: 12,
-                backgroundColor: isSelected
-                  ? colors.primary.main
-                  : isAvailable
-                  ? colors.background.tertiary
-                  : colors.background.secondary,
-                borderWidth: isSelected ? 0 : 1,
-                borderColor: colors.border.light,
-                opacity: isAvailable ? 1 : 0.5,
-              }}
-              disabled={!isAvailable}
-            >
-              <Text
+      
+      {loadingSlots ? (
+        <View style={{ padding: spacing.xl, alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary.main} />
+        </View>
+      ) : availableSlots.length === 0 ? (
+        <View style={{ 
+          padding: spacing.xl, 
+          alignItems: 'center', 
+          backgroundColor: colors.background.tertiary, 
+          borderRadius: spacing.md 
+        }}>
+          <Ionicons name="calendar-outline" size={48} color={colors.text.secondary} />
+          <Text style={[typography.body1, { color: colors.text.primary, marginTop: spacing.md }]}>
+            Нет доступных слотов
+          </Text>
+          <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs, textAlign: 'center' }]}>
+            На выбранную дату нет свободного времени
+          </Text>
+        </View>
+      ) : (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm }}>
+          {availableSlots.map((slot) => {
+            const isSelected = selectedTime === slot.startTime;
+            return (
+              <TouchableOpacity
+                key={slot.id}
+                onPress={() => onSelectTime(slot.startTime)}
                 style={{
-                  color: isSelected
-                    ? colors.text.inverse
-                    : isAvailable
-                    ? colors.text.primary
-                    : colors.text.tertiary,
-                  fontWeight: isSelected ? '600' : '400',
+                  paddingVertical: spacing.sm,
+                  paddingHorizontal: spacing.md,
+                  borderRadius: spacing.sm,
+                  backgroundColor: isSelected ? colors.primary.main : colors.background.tertiary,
+                  borderWidth: isSelected ? 0 : 1,
+                  borderColor: colors.border.light,
                 }}
               >
-                {time}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      {/* Selected Summary */}
-      {selectedDate && selectedTime && (
-        <View
-          style={{
-            marginTop: 24,
-            padding: 16,
-            backgroundColor: colors.primary.main + '15',
-            borderRadius: 16,
-            borderWidth: 1,
-            borderColor: colors.primary.main + '30',
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <Ionicons name="calendar" size={20} color={colors.primary.main} />
-            <Text style={[typography.body2, { color: colors.text.primary }]}>
-              {selectedDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
-            <Ionicons name="time" size={20} color={colors.primary.main} />
-            <Text style={[typography.body2, { color: colors.text.primary }]}>
-              {selectedTime}
-            </Text>
-          </View>
+                <Text style={{ 
+                  color: isSelected ? colors.text.inverse : colors.text.primary 
+                }}>
+                  {formatTime(slot.startTime)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       )}
     </View>
