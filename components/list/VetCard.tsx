@@ -13,7 +13,7 @@ interface VetCardProps {
     experienceYears: number;
     rating: number;
     reviewsCount: number;
-    pricePerHour: number;
+    pricePerVisit: number;
     distance?: number;
     clinicName: string;
     isAvailableToday: boolean;
@@ -154,7 +154,7 @@ export const VetCard: React.FC<VetCardProps> = ({ vet, onPress }) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 2 }}>
               <Text style={[typography.h4, { color: colors.primary.main }]}>
-                ${vet.pricePerHour}
+                ${vet.pricePerVisit}
               </Text>
               <Text style={[typography.caption, { color: colors.text.secondary }]}>/hr</Text>
             </View>

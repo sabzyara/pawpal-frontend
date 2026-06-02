@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,374 +6,343 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Alert,
+  Modal,
+  TextInput,
+  ScrollView,
 } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
-import { useRouter } from 'expo-router';
+import { useOwnerAppointments } from '@/hooks/useAppointments';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { AppointmentStatus } from '@/types/appointment.types';
 
-interface Appointment {
-  id: string;
-  petId: string;
-  petName: string;
-  petType: string;
-  petAvatar: string;
-  vetId: string;
-  vetName: string;
-  vetSpecialty: string;
-  serviceId: string;
-  serviceName: string;
-  servicePrice: number;
-  date: string;
-  timeSlot: string;
-  status: 'upcoming' | 'completed' | 'cancelled' | 'pending';
-  notes?: string;
-  createdAt: string;
-}
+const statusColors: Record<AppointmentStatus, string> = {
+  CREATED: '#FF9800',
+  CONFIRMED: '#2196F3',
+  COMPLETED: '#4CAF50',
+  CANCELLED_BY_USER: '#F44336',
+  CANCELLED_BY_SPECIALIST: '#F44336',
+  NO_SHOW: '#9E9E9E',
+};
 
-export default function AppointmentsScreen() {
-  const { colors, spacing, typography } = useTheme();
+const statusLabels: Record<AppointmentStatus, string> = {
+  CREATED: 'Ожидает подтверждения',
+  CONFIRMED: 'Подтверждено',
+  COMPLETED: 'Завершено',
+  CANCELLED_BY_USER: 'Отменено вами',
+  CANCELLED_BY_SPECIALIST: 'Отменено специалистом',
+  NO_SHOW: 'Неявка',
+};
+
+export default function MyAppointmentsScreen() {
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus | undefined>();
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<number | null>(null);
+  const [cancelReason, setCancelReason] = useState('');
 
-  // Mock appointments data
-  const mockAppointments: Appointment[] = [
-    {
-      id: '1',
-      petId: '1',
-      petName: 'Max',
-      petType: 'Dog',
-      petAvatar: 'https://i.pravatar.cc/150?img=9',
-      vetId: '1',
-      vetName: 'Dr. Leslie Alexander',
-      vetSpecialty: 'Pediatrician',
-      serviceId: '1',
-      serviceName: 'General Checkup',
-      servicePrice: 85,
-      date: '2024-06-15',
-      timeSlot: '10:30 AM',
-      status: 'upcoming',
-      notes: 'Regular checkup',
-      createdAt: '2024-06-01',
-    },
-    {
-      id: '2',
-      petId: '2',
-      petName: 'Luna',
-      petType: 'Cat',
-      petAvatar: 'https://i.pravatar.cc/150?img=11',
-      vetId: '2',
-      vetName: 'Dr. Ronald Richards',
-      vetSpecialty: 'Cardiologist',
-      serviceId: '2',
-      serviceName: 'Vaccination',
-      servicePrice: 65,
-      date: '2024-06-20',
-      timeSlot: '02:00 PM',
-      status: 'upcoming',
-      notes: 'Annual vaccination',
-      createdAt: '2024-06-02',
-    },
-    {
-      id: '3',
-      petId: '3',
-      petName: 'Charlie',
-      petType: 'Dog',
-      petAvatar: 'https://i.pravatar.cc/150?img=13',
-      vetId: '3',
-      vetName: 'Dr. Annette Black',
-      vetSpecialty: 'Pediatrician',
-      serviceId: '3',
-      serviceName: 'Dental Cleaning',
-      servicePrice: 150,
-      date: '2024-05-10',
-      timeSlot: '11:00 AM',
-      status: 'completed',
-      notes: 'Dental cleaning done',
-      createdAt: '2024-05-01',
-    },
-    {
-      id: '4',
-      petId: '1',
-      petName: 'Max',
-      petType: 'Dog',
-      petAvatar: 'https://i.pravatar.cc/150?img=9',
-      vetId: '5',
-      vetName: 'Dr. James Wilson',
-      vetSpecialty: 'Emergency Care',
-      serviceId: '5',
-      serviceName: 'Emergency Visit',
-      servicePrice: 200,
-      date: '2024-06-25',
-      timeSlot: '09:00 AM',
-      status: 'pending',
-      notes: 'Follow-up required',
-      createdAt: '2024-06-03',
-    },
-  ];
+  const {
+    appointments = [], 
+    loading,
+    refreshing,
+    hasMore,
+    loadMore,
+    refresh,
+    cancelAppointment,
+  } = useOwnerAppointments({ status: selectedStatus });
 
-  useEffect(() => {
-    setTimeout(() => {
-      setAppointments(mockAppointments);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const handleCancel = () => {
+    if (!cancelAppointment) {
+      Alert.alert('Ошибка', 'Функция отмены недоступна');
+      return;
+    }
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setAppointments(mockAppointments);
-    setRefreshing(false);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'upcoming': return '#4CAF50';
-      case 'completed': return '#2196F3';
-      case 'cancelled': return '#FF5252';
-      case 'pending': return '#FFC107';
-      default: return colors.text.secondary;
+    if (selectedAppointmentId && cancelReason.trim()) {
+      cancelAppointment(selectedAppointmentId, cancelReason);
+      setShowCancelModal(false);
+      setCancelReason('');
+      setSelectedAppointmentId(null);
+    } else {
+      Alert.alert('Ошибка', 'Укажите причину отмены');
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'upcoming': return 'Upcoming';
-      case 'completed': return 'Completed';
-      case 'cancelled': return 'Cancelled';
-      case 'pending': return 'Pending';
-      default: return status;
+  const formatTime = (time?: string) => {
+    if (!time) return '--:--';
+    return time.substring(0, 5);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Дата не указана';
+    try {
+      return new Date(dateString).toLocaleDateString('ru-RU');
+    } catch {
+      return 'Дата не указана';
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
+  const navigateToAppointment = (appointmentId: number) => {
+    router.push({
+      pathname: '/appointment-details',
+      params: { id: appointmentId.toString() }
     });
   };
 
-  const AppointmentCard = ({ item }: { item: Appointment }) => {
-    const isPast = new Date(item.date) < new Date() && item.status === 'upcoming';
+  const renderStatusFilter = () => (
+    <ScrollView 
+      horizontal 
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.xs, marginBottom: spacing.md }}
+    >
+      <TouchableOpacity
+        onPress={() => setSelectedStatus(undefined)}
+        style={{
+          paddingVertical: spacing.xs,
+          paddingHorizontal: spacing.md,
+          borderRadius: 20,
+          backgroundColor: !selectedStatus ? colors.primary.main : colors.background.tertiary,
+        }}
+      >
+        <Text style={{ 
+          color: !selectedStatus ? colors.text.inverse : colors.text.primary,
+          fontWeight: !selectedStatus ? '600' : '400',
+        }}>
+          Все
+        </Text>
+      </TouchableOpacity>
+      {Object.entries(statusLabels).map(([key, label]) => (
+        <TouchableOpacity
+          key={key}
+          onPress={() => setSelectedStatus(key as AppointmentStatus)}
+          style={{
+            paddingVertical: spacing.xs,
+            paddingHorizontal: spacing.md,
+            borderRadius: 20,
+            backgroundColor: selectedStatus === key ? colors.primary.main : colors.background.tertiary,
+          }}
+        >
+          <Text style={{ 
+            color: selectedStatus === key ? colors.text.inverse : colors.text.primary,
+            fontWeight: selectedStatus === key ? '600' : '400',
+          }}>
+            {label}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
+
+  const renderAppointmentCard = ({ item }: { item: any }) => {
+    const canCancel = (item.status === 'CREATED' || item.status === 'CONFIRMED') && cancelAppointment;
+    const statusColor = statusColors[item.status as AppointmentStatus] || colors.text.secondary;
+    const errorColor = colors.error?.main || '#F44336';
     
     return (
       <TouchableOpacity
+        onPress={() => navigateToAppointment(item.id)}
         activeOpacity={0.7}
-        onPress={() => router.push({
-          pathname: '/appointment-details',
-          params: { id: item.id }
-        })}
         style={{
           backgroundColor: colors.card.default,
-          borderRadius: 20,
-          padding: 16,
-          marginBottom: 16,
-          ...(colors.card.default === '#FFFFFF' && {
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 3,
-            elevation: 2,
-          }),
+          borderRadius: spacing.md,
+          padding: spacing.md,
+          marginBottom: spacing.sm,
+          marginHorizontal: spacing.md,
+          borderWidth: 1,
+          borderColor: colors.border.light,
         }}
       >
-        {/* Header */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: getStatusColor(item.status) }} />
-            <Text style={[typography.caption, { color: getStatusColor(item.status), fontWeight: '600' }]}>
-              {getStatusText(item.status)}
-            </Text>
-          </View>
-          <Text style={[typography.caption, { color: colors.text.tertiary }]}>
-            ID: #{item.id}
+        <View style={{ 
+          flexDirection: 'row', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: spacing.xs 
+        }}>
+          <Text style={[typography.body1SemiBold, { color: colors.text.primary, flex: 1 }]}>
+            {item.specialistName || 'Специалист'}
           </Text>
-        </View>
-
-        {/* Pet Info */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-          <Text style={{ fontSize: 32 }}>{item.petType === 'Dog' ? '🐕' : '🐈'}</Text>
-          <View>
-            <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
-              {item.petName}
-            </Text>
-            <Text style={[typography.caption, { color: colors.text.secondary }]}>
-              {item.serviceName} • {item.vetName}
+          <View
+            style={{
+              backgroundColor: statusColor + '20',
+              paddingHorizontal: spacing.sm,
+              paddingVertical: spacing.xs,
+              borderRadius: spacing.sm,
+            }}
+          >
+            <Text style={{ color: statusColor, fontSize: 12, fontWeight: '500' }}>
+              {statusLabels[item.status as AppointmentStatus] || item.status}
             </Text>
           </View>
         </View>
 
-        {/* Date and Time */}
-        <View style={{ flexDirection: 'row', gap: 16, marginBottom: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Ionicons name="calendar-outline" size={14} color={colors.text.secondary} />
+        <View style={{ 
+          flexDirection: 'row', 
+          gap: spacing.md, 
+          marginBottom: spacing.sm 
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <Ionicons name="calendar-outline" size={16} color={colors.text.secondary} />
             <Text style={[typography.caption, { color: colors.text.secondary }]}>
               {formatDate(item.date)}
             </Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Ionicons name="time-outline" size={14} color={colors.text.secondary} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
+            <Ionicons name="time-outline" size={16} color={colors.text.secondary} />
             <Text style={[typography.caption, { color: colors.text.secondary }]}>
-              {item.timeSlot}
+              {formatTime(item.startTime)} - {formatTime(item.endTime)}
             </Text>
           </View>
         </View>
 
-        {/* Price */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={[typography.h4, { color: colors.primary.main }]}>
-            ${item.servicePrice}
-          </Text>
-          {item.status === 'upcoming' && !isPast && (
-            <TouchableOpacity
-              onPress={() => router.push({
-                pathname: '/book-appointment',
-                params: { 
-                  editId: item.id,
-                  vetId: item.vetId,
-                  vetName: item.vetName,
-                }
-              })}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 4,
-                paddingVertical: 6,
-                paddingHorizontal: 12,
-                borderRadius: 20,
-                backgroundColor: colors.background.tertiary,
-              }}
-            >
-              <Ionicons name="create-outline" size={14} color={colors.primary.main} />
-              <Text style={[typography.caption, { color: colors.primary.main, fontWeight: '600' }]}>
-                Reschedule
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        <Text style={[typography.body2, { color: colors.text.primary, marginBottom: spacing.xs }]}>
+          Питомец: {item.petName || 'Не указан'} ({item.petType || 'Не указан'})
+        </Text>
 
-        {/* Past appointment note */}
-        {isPast && (
-          <Text style={[typography.caption, { color: colors.text.tertiary, marginTop: 8 }]}>
-            This appointment has passed
+        {item.ownerNotes && (
+          <Text style={[typography.caption, { color: colors.text.secondary }]} numberOfLines={2}>
+            Заметки: {item.ownerNotes}
           </Text>
+        )}
+
+        {canCancel && (
+          <TouchableOpacity
+            onPress={() => {
+              setSelectedAppointmentId(item.id);
+              setShowCancelModal(true);
+            }}
+            style={{
+              marginTop: spacing.sm,
+              paddingVertical: spacing.xs,
+              alignItems: 'center',
+              backgroundColor: errorColor + '20',
+              borderRadius: spacing.xs,
+            }}
+          >
+            <Text style={{ color: errorColor, fontSize: 14, fontWeight: '500' }}>
+              Отменить запись
+            </Text>
+          </TouchableOpacity>
         )}
       </TouchableOpacity>
     );
   };
 
-  const EmptyState = () => (
-    <View
-      style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 80,
-      }}
-    >
-      <Ionicons name="calendar-outline" size={64} color={colors.text.tertiary} />
-      <Text style={[typography.h4, { color: colors.text.primary, marginTop: 20 }]}>
-        No Appointments
-      </Text>
-      <Text style={[typography.body2, { color: colors.text.secondary, marginTop: 8, textAlign: 'center' }]}>
-        You don't have any appointments yet.
-      </Text>
-      <TouchableOpacity
-        onPress={() => router.push('/vets-list')}
-        style={{
-          marginTop: 20,
-          paddingVertical: 12,
-          paddingHorizontal: 24,
-          backgroundColor: colors.primary.main,
-          borderRadius: 25,
-        }}
-      >
-        <Text style={{ color: colors.text.inverse, fontWeight: '600' }}>
-          Find a Vet
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  // Separate appointments by status
-  const upcomingAppointments = appointments.filter(a => a.status === 'upcoming' && new Date(a.date) >= new Date());
-  const pastAppointments = appointments.filter(a => a.status !== 'upcoming' || new Date(a.date) < new Date());
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.background.secondary, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={colors.primary.main} />
-      </View>
-    );
-  }
+  const showFooter = loading && !refreshing;
+  const showEmpty = !loading && !refreshing && appointments.length === 0;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background.secondary }}>
-      {/* Header */}
-      <View
-        style={{
-          paddingTop: 60,
-          paddingHorizontal: 20,
-          paddingBottom: 16,
-          backgroundColor: colors.background.primary,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border.light,
-        }}
-      >
-        <Text style={[typography.h2, { color: colors.text.primary }]}>
-          My Appointments
-        </Text>
-        <Text style={[typography.body2, { color: colors.text.secondary, marginTop: 4 }]}>
-          {appointments.length} total appointments
-        </Text>
+      <View style={{
+        paddingTop: 60,
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.md,
+        backgroundColor: colors.background.primary,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border.light,
+      }}>
+        <Text style={[typography.h2, { color: colors.text.primary }]}>Мои записи</Text>
       </View>
 
-      {/* Tabs */}
-      <View
-        style={{
-          flexDirection: 'row',
-          backgroundColor: colors.background.primary,
-          borderBottomWidth: 1,
-          borderBottomColor: colors.border.light,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            paddingVertical: 12,
-            alignItems: 'center',
-            borderBottomWidth: 2,
-            borderBottomColor: colors.primary.main,
-          }}
-        >
-          <Text style={[typography.body2, { color: colors.primary.main, fontWeight: '600' }]}>
-            All
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {renderStatusFilter()}
 
-      {/* List */}
       <FlatList
-        data={appointments}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <AppointmentCard item={item} />}
-        contentContainerStyle={{
-          padding: 20,
-          paddingBottom: 40,
-        }}
-        showsVerticalScrollIndicator={false}
+        data={appointments}  
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderAppointmentCard}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={refresh}
             tintColor={colors.primary.main}
             colors={[colors.primary.main]}
           />
         }
-        ListEmptyComponent={EmptyState}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={
+          showFooter ? (
+            <View style={{ padding: spacing.lg, alignItems: 'center' }}>
+              <ActivityIndicator size="small" color={colors.primary.main} />
+            </View>
+          ) : null
+        }
+        ListEmptyComponent={
+          showEmpty ? (
+            <View style={{ padding: spacing.xl, alignItems: 'center' }}>
+              <Ionicons name="calendar-outline" size={48} color={colors.text.secondary} />
+              <Text style={[typography.body1, { color: colors.text.primary, marginTop: spacing.md }]}>
+                У вас нет записей
+              </Text>
+              <TouchableOpacity
+                onPress={() => router.push('/')}
+                style={{ 
+                  marginTop: spacing.md, 
+                  backgroundColor: colors.primary.main, 
+                  paddingHorizontal: spacing.lg, 
+                  paddingVertical: spacing.sm, 
+                  borderRadius: 20 
+                }}
+              >
+                <Text style={{ color: colors.text.inverse, fontWeight: '600' }}>Записаться</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null
+        }
       />
+
+      {/* Cancel Modal */}
+      <Modal 
+        visible={showCancelModal} 
+        transparent 
+        animationType="fade"
+        onRequestClose={() => setShowCancelModal(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+          <View style={{
+            backgroundColor: colors.background.primary,
+            borderRadius: spacing.lg,
+            padding: spacing.lg,
+            width: '80%',
+          }}>
+            <Text style={[typography.h4, { color: colors.text.primary, marginBottom: spacing.md }]}>
+              Причина отмены
+            </Text>
+            <TextInput
+              value={cancelReason}
+              onChangeText={setCancelReason}
+              placeholder="Укажите причину отмены"
+              placeholderTextColor={colors.text.tertiary}
+              multiline
+              style={{
+                borderWidth: 1,
+                borderColor: colors.border.light,
+                borderRadius: spacing.sm,
+                padding: spacing.sm,
+                minHeight: 80,
+                textAlignVertical: 'top',
+                backgroundColor: colors.background.secondary,
+                color: colors.text.primary,
+              }}
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: spacing.lg, gap: spacing.sm }}>
+              <TouchableOpacity onPress={() => setShowCancelModal(false)}>
+                <Text style={[typography.body1, { color: colors.text.secondary }]}>Отмена</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleCancel}>
+                <Text style={[typography.body1SemiBold, { color: colors.error?.main || '#F44336' }]}>
+                  Отменить запись
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

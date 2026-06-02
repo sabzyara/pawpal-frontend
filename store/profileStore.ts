@@ -18,7 +18,6 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   loading: false,
   error: null,
 
-  // 🔥 ГЛАВНЫЙ МЕТОД
   fetchProfile: async () => {
     try {
       set({ loading: true, error: null });

@@ -11,7 +11,6 @@ export enum UserStatus {
   BANNED = "BANNED",
 }
 
-// Базовый пользователь
 export interface User {
   id: number;
   email: string;
@@ -30,18 +29,24 @@ export interface PetOwner {
   avatarUrl?: string;
 }
 
-// Ветеринар
 export interface Veterinarian {
-  id: number;
+  vetId: number;                    
+  userId: number;
   firstName: string;
   lastName: string;
-  avatarUrl?: string;
+  phoneNumber?: string;             
+  licenseNumber?: string;           
   clinicName?: string;
-  experienceYears: number;
+  experienceYears?: number;         
   avatarUrl?: string;
-  rating: number;
-  patientsCount: number;
+  patientsCount?: number;           
   about?: string;
+  education?: string;
+  pricePerVisit?: number;
+  ratingAverage?: number;           
+  reviewsCount?: number;            
+  address?: string;                 
+  city?: string;                    
 }
 
 // Сервис-провайдер
@@ -50,9 +55,18 @@ export interface ServiceProvider {
   userId: number;
   firstName: string;
   lastName: string;
-  phoneNumber: string;
-  serviceCategory: string;
+  phoneNumber?: string;
+  serviceCategory?: string;         
+  experienceYears?: number;         
+  education?: string;
   avatarUrl?: string;
+  ratingAverage?: number;           
+  reviewsCount?: number;            
+  address?: string;                 
+  city?: string;                    
+  pricePerVisit?: number;
+  about?: string;                   
+  patientsCount?: number;           
 }
 
 // Полный профиль пользователя

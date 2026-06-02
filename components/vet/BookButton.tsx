@@ -1,23 +1,31 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, Alert } from 'react-native';
+import { View, TouchableOpacity, Text } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
+import { useRouter } from 'expo-router';
 
 interface BookButtonProps {
-  vetId: string;
+  specialistId: number;
+  specialistType: 'VET' | 'SERVICE';
+  specialistName?: string;
 }
 
-export const BookButton: React.FC<BookButtonProps> = ({ vetId }) => {
+export const BookButton: React.FC<BookButtonProps> = ({ 
+  specialistId, 
+  specialistType, 
+  specialistName 
+}) => {
   const { colors, spacing, typography } = useTheme();
+  const router = useRouter();
 
   const handleBookPress = () => {
-    Alert.alert(
-      'Book Appointment',
-      'Would you like to schedule an appointment with this veterinarian?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Book', onPress: () => console.log('Booking appointment for vet:', vetId) },
-      ]
-    );
+    router.push({
+      pathname: '/book-appointment',
+      params: {
+        specialistId: specialistId.toString(),
+        specialistType: specialistType,
+        specialistName: specialistName || (specialistType === 'VET' ? 'Ветеринар' : 'Специалист'),
+      },
+    });
   };
 
   return (
@@ -43,7 +51,7 @@ export const BookButton: React.FC<BookButtonProps> = ({ vetId }) => {
         }}
       >
         <Text style={[typography.button, { color: colors.text.inverse }]}>
-          Book Appointment
+          Записаться на прием
         </Text>
       </TouchableOpacity>
     </View>
