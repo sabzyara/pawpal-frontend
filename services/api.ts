@@ -9,21 +9,23 @@ const api = axios.create({
   },
 });
 
+
 api.interceptors.request.use(
   async (config) => {
     const token = await AsyncStorage.getItem("token");
 
+    // ❗️ список эндпоинтов, куда НЕ НУЖЕН токен
     const isAuthRequest =
-      config.url?.includes("/auth/login") ||
-      config.url?.includes("/auth/register");
+      config.url?.includes("/(auth)/login") ||
+      config.url?.includes("/(auth)/register");
 
     console.log("REQUEST:", config.url);
 
     if (token && !isAuthRequest) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("TOKEN ATTACHED ");
+      console.log("TOKEN ATTACHED ✅");
     } else {
-      console.log("NO TOKEN / AUTH REQUEST ");
+      console.log("NO TOKEN / AUTH REQUEST ❌");
     }
 
     return config;
@@ -36,10 +38,10 @@ api.interceptors.response.use(
   async (error) => {
     console.log("API ERROR:", error?.response?.status);
 
+    // если токен умер → удаляем
     if (error?.response?.status === 401) {
       console.log("TOKEN EXPIRED → REMOVING");
       await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("user"); 
     }
 
     return Promise.reject(error);

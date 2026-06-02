@@ -62,7 +62,6 @@ export default function SpecialistAppointmentsScreen() {
     addRecommendations,
   } = useSpecialistAppointments({ status: filterStatus });
 
-  // ✅ Навигация на детали записи
   const navigateToAppointment = (appointmentId: number) => {
     router.push({
       pathname: '/appointment-details',

@@ -51,12 +51,12 @@ export default function LoginScreen() {
         };
       case 'VET':
         return {
-          endpoint: '/specialist-service/api/veterinarians/me',
+          endpoint: '/specialist-service/veterinarians/me',
           complete: '/complete_vet',
         };
       case 'SERVICE':
         return {
-          endpoint: '/specialist-service/api/service-providers/me',
+          endpoint: '/specialist-service/service-providers/me',
           complete: '/complete_service',
         };
       default:
@@ -96,10 +96,10 @@ export default function LoginScreen() {
         return "/admin-main";
 
       case "VET":
-        return "/vet-profile";
+        return "/specialist-profile";
 
       case "SERVICE":
-        return "/vet-profile";
+        return "/specialist-profile";
 
       default:
         return "/login";

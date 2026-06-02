@@ -44,7 +44,7 @@ export default function MyAppointmentsScreen() {
   const [cancelReason, setCancelReason] = useState('');
 
   const {
-    appointments = [], // ✅ Значение по умолчанию - пустой массив
+    appointments = [], 
     loading,
     refreshing,
     hasMore,
@@ -247,7 +247,7 @@ export default function MyAppointmentsScreen() {
       {renderStatusFilter()}
 
       <FlatList
-        data={appointments}  // ✅ Теперь appointments всегда массив (благодаря значению по умолчанию)
+        data={appointments}  
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderAppointmentCard}
         refreshControl={

@@ -61,9 +61,9 @@ export class ValidationError extends Error {
 
 // ============ КОНСТАНТЫ ============
 
-const APPOINTMENTS_URL = '/appointments';
-const SCHEDULES_URL = '/schedules';
-const SLOTS_URL = '/slots';
+const APPOINTMENTS_URL = '/appointment-service/appointments';
+const SCHEDULES_URL = '/appointment-service/schedules';
+const SLOTS_URL = '/appointment-service/slots';
 
 // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
 
