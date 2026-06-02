@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState , useRef } from "react";
 import {
   View,
   Text,
@@ -40,7 +40,7 @@ export default function ChatScreen() {
   const [pets, setPets] = useState<any[]>([]);
   const [selectedPet, setSelectedPet] = useState<number | null>(null);
   const [showPicker, setShowPicker] = useState(false);
-
+  const flatListRef = useRef<FlatList>(null);
   const [messages, setMessages] = useState<Message[]>([
     { id: "1", text: "Hi! I am your AI assistant 🐾", isUser: false },
   ]);
@@ -61,10 +61,13 @@ export default function ChatScreen() {
   );
 
 if (saved) {
+  setMessages(JSON.parse(saved));
 
-  setMessages(
-    JSON.parse(saved)
-  );
+  setTimeout(() => {
+    flatListRef.current?.scrollToEnd({
+      animated: false,
+    });
+  }, 300);
 }
         setPets(data);
 
@@ -95,6 +98,9 @@ const sendMessage = async () => {
     isUser: true,
   };
 
+  // СРАЗУ показываем сообщение пользователя
+  setMessages(prev => [...prev, userMsg]);
+
   setInput("");
 
   try {
@@ -123,8 +129,10 @@ const sendMessage = async () => {
       }
     );
 
-    const data =
-      await res.json();
+  const data = await res.json();
+
+console.log("STATUS:", res.status);
+console.log("DATA:", data);
 
     const aiMsg: Message = {
       id:
@@ -137,18 +145,16 @@ const sendMessage = async () => {
       isUser: false,
     };
 
-    const updated = [
-      ...messages,
-      userMsg,
-      aiMsg,
-    ];
+  setMessages(prev => {
+  const updated = [...prev, aiMsg];
 
-    setMessages(updated);
+  AsyncStorage.setItem(
+    "chat_history",
+    JSON.stringify(updated)
+  );
 
-    await AsyncStorage.setItem(
-      "chat_history",
-      JSON.stringify(updated)
-    );
+  return updated;
+});
 
   } catch (e) {
 
@@ -197,12 +203,18 @@ const sendMessage = async () => {
         </View>
 
         {/* CHAT */}
-        <FlatList
-          data={messages}
-          keyExtractor={(i) => i.id}
-          renderItem={renderMessage}
-          contentContainerStyle={{ padding: 16 }}
-        />
+       <FlatList
+  ref={flatListRef}
+  data={messages}
+  keyExtractor={(i) => i.id}
+  renderItem={renderMessage}
+  contentContainerStyle={{ padding: 16 }}
+  onContentSizeChange={() =>
+    flatListRef.current?.scrollToEnd({
+      animated: true,
+    })
+  }
+/>
 
         {/* INPUT */}
         <View style={styles.inputRow}>

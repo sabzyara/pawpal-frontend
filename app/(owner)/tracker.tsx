@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useCallback, useState, } from "react";
+import React, { useCallback,useEffect, useState, } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -76,6 +76,22 @@ useFocusEffect(
     load();
   }, [])
 );
+
+if (pets.length === 0) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text>
+        You don't have any pets yet
+      </Text>
+    </View>
+  );
+}
 
 const filteredNutrition = nutrition.filter(
   (n) => n.date?.slice(0, 10) === selectedDate
