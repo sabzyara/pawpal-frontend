@@ -80,6 +80,23 @@ export default function OwnerTabs() {
           ),
         }}
       />
+      <Tabs.Screen
+  name="analysis"
+  options={{
+    title: 'AI',
+
+    tabBarIcon: ({
+      color,
+      size,
+    }) => (
+      <Feather
+        name="cpu"
+        size={size}
+        color={color}
+      />
+    ),
+  }}
+/>
 
       <Tabs.Screen
         name="appointments"

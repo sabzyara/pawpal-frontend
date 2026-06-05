@@ -26,6 +26,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { profile, loading, error, fetchProfile, logout } = useProfileStore();
   const [refreshing, setRefreshing] = useState(false);
+  
 
   useEffect(() => {
   const load = async () => {
