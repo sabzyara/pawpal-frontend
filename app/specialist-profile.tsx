@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -6,11 +7,10 @@ import {
   ActivityIndicator,
   Alert,
   TouchableOpacity,
-  Text, 
+  Text,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/useTheme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 
 import { VetHeader } from '@/components/vet/VetHeader';
@@ -23,12 +23,13 @@ import { VetEditProfile } from '@/components/vet/VetEditProfile';
 import { VetManage } from '@/components/vet/VetManage';
 import { BookButton } from '@/components/vet/BookButton';
 import api from '@/services/api';
+import { useAuthStore } from '@/store/authStore';
 
 type TabType = 'about' | 'availability' | 'reviews' | 'edit' | 'manage';
 
 interface SpecialistProfile {
-  id: number;
-  userId: number;
+  id: number;          // vetId или serviceProviderId (ID из specialist-service)
+  userId: number;      // ID пользователя из auth (для связи с appointment-service)
   firstName: string;
   lastName: string;
   experienceYears: number;
@@ -48,39 +49,22 @@ interface SpecialistProfile {
 }
 
 export default function VetProfileScreen() {
-  const { colors, typography, spacing } = useTheme(); 
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
   const { id, type } = useLocalSearchParams();
+  
+  const currentUser = useAuthStore((state) => state.user);
 
   const [tab, setTab] = useState<TabType>('about');
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<SpecialistProfile | null>(null);
   const [isOwner, setIsOwner] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null); // ✅ Добавлен error state
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    if (currentUserId !== null) {
-      loadProfile();
-    }
-  }, [id, type, currentUserId]);
-
-  const loadCurrentUser = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setCurrentUserId(payload.userId);
-      }
-    } catch (error) {
-      console.error('Error loading user:', error);
-    }
-  };
+    loadProfile();
+  }, [id, type, currentUser]);
 
   const loadProfile = async () => {
     try {
@@ -88,48 +72,78 @@ export default function VetProfileScreen() {
       setError(null);
 
       let endpoint: string;
-      if (id && id !== 'me') {
-        endpoint = type === 'service'
-          ? `/specialist-service/service-providers/${id}`
-          : `/specialist-service/veterinarians/profile/${id}`;
+      let responseData: any;
+      
+      const isOwnProfile = !id || id === 'me';
+      
+      if (isOwnProfile) {
+        // Загружаем свой профиль
+        if (type === 'service') {
+          endpoint = `/specialist-service/service-providers/me`;
+        } else {
+          endpoint = `/specialist-service/veterinarians/me`;
+        }
+        console.log('📤 Loading own profile:', endpoint);
+        const response = await api.get(endpoint);
+        responseData = response.data;
       } else {
-        endpoint = type === 'service'
-          ? `/specialist-service/service-providers/me`
-          : `/specialist-service/veterinarians/me`;
+        // Загружаем профиль по userId (из auth)
+        if (type === 'service') {
+          endpoint = `/specialist-service/service-providers/user/${id}`;
+        } else {
+          endpoint = `/specialist-service/veterinarians/user/${id}`;
+        }
+        console.log('📤 Loading profile by userId:', endpoint);
+        const response = await api.get(endpoint);
+        responseData = response.data;
       }
 
-      const response = await api.get(endpoint);
-    const data = response.data;
+      // Нормализуем данные профиля
+      const profileData: SpecialistProfile = {
+        id: Number(type === 'service' 
+          ? responseData.serviceProviderId || responseData.serviceId || responseData.id 
+          : responseData.vetId || responseData.id),
+        userId: responseData.userId || 0,
+        firstName: responseData.firstName || '',
+        lastName: responseData.lastName || '',
+        experienceYears: responseData.experienceYears || 0,
+        rating: responseData.ratingAverage || responseData.rating || 0,
+        patientsCount: responseData.patientsCount || 0,
+        avatarUrl: responseData.avatarUrl,
+        about: responseData.about || responseData.description || '',
+        address: responseData.address || '',
+        clinicName: responseData.clinicName || responseData.businessName || '',
+        phoneNumber: responseData.phoneNumber || '',
+        education: responseData.education || '',
+        specialty: type === 'service' ? responseData.serviceCategory : 'Veterinarian',
+        serviceType: responseData.serviceType || '',
+        pricePerVisit: responseData.pricePerVisit,
+        city: responseData.city,
+        licenseNumber: responseData.licenseNumber,
+      };
 
-    const profileData: SpecialistProfile = {
-      id: Number(type === 'service' ? data.serviceProviderId || data.serviceId || data.id : data.vetId || data.id),
-      userId: data.userId || 0,
-      firstName: data.firstName || '',
-      lastName: data.lastName || '',
-      experienceYears: data.experienceYears || 0,
-      rating: data.ratingAverage || data.rating || 0,
-      patientsCount: data.patientsCount || 0,
-      avatarUrl: data.avatarUrl,
-      about: data.about || data.description || '',
-      address: data.address || '',
-      clinicName: data.clinicName || data.businessName || '',
-      phoneNumber: data.phoneNumber || '',
-      education: data.education || '',
-      specialty: type === 'service' ? data.serviceCategory : 'Veterinarian',
-      serviceType: data.serviceType || '',
-      pricePerVisit: data.pricePerVisit,
-      city: data.city,
-      licenseNumber: data.licenseNumber,
-    };
-
+      console.log('✅ Profile loaded:', {
+        id: profileData.id,
+        userId: profileData.userId,
+        name: `${profileData.firstName} ${profileData.lastName}`,
+      });
       
       setProfile(profileData);
-      const isProfileOwner = currentUserId === profileData.userId;
+      
+      // Проверяем, владелец ли профиля (сравниваем userId из профиля с текущим пользователем)
+      const isProfileOwner = currentUser?.id === profileData.userId;
       setIsOwner(isProfileOwner);
+      
     } catch (error: any) {
-      console.error('Error loading profile:', error);
-      setError(error?.message || 'Не удалось загрузить профиль');
-      Alert.alert('Ошибка', error?.message || 'Не удалось загрузить профиль');
+      console.error('❌ Error loading profile:', error?.response?.status, error?.response?.data);
+      
+      if (error?.response?.status === 404) {
+        setError('Профиль не найден');
+      } else if (error?.response?.status === 401) {
+        setError('Сессия истекла. Пожалуйста, войдите заново');
+      } else {
+        setError(error?.response?.data?.message || error?.message || 'Не удалось загрузить профиль');
+      }
     } finally {
       setLoading(false);
     }
@@ -150,10 +164,10 @@ export default function VetProfileScreen() {
     return `${profile.firstName} ${profile.lastName}`.trim();
   };
 
-  const handleProfileUpdate = useCallback(() => {
+  const handleProfileUpdate = () => {
     loadProfile();
     setTab('about');
-  }, [loadProfile]);
+  };
 
   const handleDeleteProfile = useCallback(async () => {
     Alert.alert(
@@ -174,7 +188,8 @@ export default function VetProfileScreen() {
               Alert.alert('Успех', 'Профиль успешно удален');
               router.replace('/');
             } catch (error: any) {
-              Alert.alert('Ошибка', error?.message || 'Не удалось удалить профиль');
+              console.error('❌ Delete error:', error?.response?.data);
+              Alert.alert('Ошибка', error?.response?.data?.message || 'Не удалось удалить профиль');
             }
           },
         },
@@ -185,10 +200,11 @@ export default function VetProfileScreen() {
   const shouldShowBookButton = useCallback(() => {
     if (!profile) return false;
     if (isOwner) return false;
-    if (id === 'me') return false;
+    if (!id || id === 'me') return false;
     return true;
   }, [profile, isOwner, id]);
 
+  // Состояние загрузки
   if (loading) {
     return (
       <View
@@ -204,6 +220,7 @@ export default function VetProfileScreen() {
     );
   }
 
+  // Ошибка
   if (error && !profile) {
     return (
       <View
@@ -245,29 +262,14 @@ export default function VetProfileScreen() {
   return (
     <View
       style={{
-        flex: 1,
         backgroundColor: colors.background.secondary,
+        flex: 1,
       }}
     >
-      {/* Кнопка назад */}
-      <TouchableOpacity
-        onPress={() => router.back()}
-        style={{
-          position: 'absolute',
-          top: 60,
-          left: 20,
-          zIndex: 10,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          borderRadius: 20,
-          padding: 8,
-        }}
-      >
-        <Ionicons name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
-
       <ScrollView
         contentContainerStyle={{
-          padding: spacing.md,
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.lg,
           paddingBottom: shouldShowBookButton() ? 120 : 40,
         }}
         showsVerticalScrollIndicator={false}
@@ -280,12 +282,15 @@ export default function VetProfileScreen() {
           />
         }
       >
+        {/* Верхняя часть */}
         <VetHeader
           vet={profile}
           type={type === 'service' ? 'service' : 'vet'}
         />
-
+        
         <VetStats vet={profile} />
+
+        <View style={{ height: spacing.md }} />
 
         <VetTabs
           active={tab}
@@ -293,43 +298,45 @@ export default function VetProfileScreen() {
           isOwner={isOwner}
         />
 
-        {tab === 'about' && <VetAbout vet={profile} />}
+        {/* Контент вкладок */}
+        <View style={{ marginTop: spacing.sm }}>
+          {tab === 'about' && <VetAbout vet={profile} />}
 
-        {tab === 'availability' && (
-          <VetAvailability
-            specialistId={profile.id}
-            specialistType={getSpecialistType()}
-          />
-        )}
+          {tab === 'availability' && (
+            <VetAvailability
+              userId={profile.userId}  // ✅ передаем userId (41)
+              specialistType={getSpecialistType()}
+            />
+          )}
 
-        {tab === 'reviews' && (
-          <VetReviews
-            vetId={profile.id}
-            type={type === 'service' ? 'service' : 'vet'}
-          />
-        )}
+          {tab === 'reviews' && (
+            <VetReviews
+              vetId={profile.id}
+              type={type === 'service' ? 'service' : 'vet'}
+            />
+          )}
 
-        {tab === 'edit' && isOwner && (
-          <VetEditProfile
-            profile={profile}
-            type={type === 'service' ? 'service' : 'vet'}
-            onUpdate={handleProfileUpdate}
-          />
-        )}
+          {tab === 'edit' && isOwner && (
+            <VetEditProfile
+              profile={profile}
+              type={type === 'service' ? 'service' : 'vet'}
+              onUpdate={handleProfileUpdate}
+            />
+          )}
 
-        {tab === 'manage' && isOwner && (
-          <VetManage
-            specialistId={profile.id}
-            specialistType={getSpecialistType()}
-            onDelete={handleDeleteProfile}
-          />
-        )}
+          {tab === 'manage' && isOwner && (
+            <VetManage
+              userId={profile.userId}  // ✅ передаем userId (41)
+              onDelete={handleDeleteProfile}
+            />
+          )}
+        </View>
       </ScrollView>
 
       {/* Кнопка бронирования */}
       {shouldShowBookButton() && (
         <BookButton
-          specialistId={profile.id}
+          userId={profile.userId}  // ✅ передаем userId (41)
           specialistType={getSpecialistType()}
           specialistName={getSpecialistName()}
         />

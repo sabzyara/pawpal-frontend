@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useCallback, useState, } from "react";
+import React, { useCallback,useEffect, useState, } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -14,6 +14,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Modal } from 'react-native';
+
+
 
 export default function TrackerScreen() {
   const { colors } = useTheme();
@@ -25,6 +28,9 @@ export default function TrackerScreen() {
   const [activities, setActivities] = useState<any[]>([]);
 
   const [tab, setTab] = useState<"nutrition" | "activity">("nutrition");
+
+  const [historyVisible, setHistoryVisible] =
+  useState(false);
 
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(
@@ -77,6 +83,22 @@ useFocusEffect(
   }, [])
 );
 
+if (pets.length === 0) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text>
+        You don't have any pets yet
+      </Text>
+    </View>
+  );
+}
+
 const filteredNutrition = nutrition.filter(
   (n) => n.date?.slice(0, 10) === selectedDate
 );
@@ -122,6 +144,31 @@ console.log("selectedDate:", selectedDate);
       </View>
     );
   }
+
+  const history =
+  tab === 'nutrition'
+    ? nutrition
+        .sort(
+          (a, b) =>
+            new Date(
+              b.date
+            ).getTime() -
+            new Date(
+              a.date
+            ).getTime()
+        )
+        .slice(0, 30)
+    : activities
+        .sort(
+          (a, b) =>
+            new Date(
+              b.date
+            ).getTime() -
+            new Date(
+              a.date
+            ).getTime()
+        )
+        .slice(0, 30);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary, }}>
@@ -214,6 +261,30 @@ console.log("selectedDate:", selectedDate);
           />
         </View>
 
+        <TouchableOpacity
+  onPress={() =>
+    setHistoryVisible(true)
+  }
+  style={{
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor:
+      colors.card.elevated,
+  }}
+>
+  <Text
+    style={{
+      color:
+        colors.text.primary,
+      fontWeight: '700',
+    }}
+  >
+    View Last 30 Days
+  </Text>
+</TouchableOpacity>
+
         {/* LIST */}
         {tab === "nutrition" ? (
           <>
@@ -282,6 +353,108 @@ console.log("selectedDate:", selectedDate);
           </>
         )}
       </ScrollView>
+
+      <Modal
+  visible={historyVisible}
+  animationType="slide"
+  onRequestClose={() =>
+    setHistoryVisible(false)
+  }
+>
+  <SafeAreaView
+    style={{
+      flex: 1,
+      paddingTop: 30,
+      backgroundColor:
+        colors.background.primary,
+    }}
+  >
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent:
+          'space-between',
+        alignItems: 'center',
+        padding: 20,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: '700',
+          color:
+            colors.text.primary,
+        }}
+      >
+        Last 30 Days
+      </Text>
+
+      <TouchableOpacity
+        onPress={() =>
+          setHistoryVisible(false)
+        }
+      >
+        <Text
+          style={{
+            fontSize: 18,
+            color:
+              colors.primary.main,
+          }}
+        >
+          Close
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    <ScrollView
+      contentContainerStyle={{
+        padding: 16,
+      }}
+    >
+      {history.map(
+        (item: any) => (
+          <View
+            key={
+              item.logId ||
+              item.activityId
+            }
+            style={{
+              backgroundColor:
+                colors.card.elevated,
+              padding: 16,
+              borderRadius: 16,
+              marginBottom: 12,
+            }}
+          >
+            <Text
+              style={{
+                fontWeight: '700',
+                color:
+                  colors.text.primary,
+              }}
+            >
+              {item.date?.slice(
+                0,
+                10
+              )}
+            </Text>
+
+            <Text
+              style={{
+                marginTop: 6,
+                color:
+                  colors.text.secondary,
+              }}
+            >
+              {item.summary}
+            </Text>
+          </View>
+        )
+      )}
+    </ScrollView>
+  </SafeAreaView>
+</Modal>
     </SafeAreaView>
+    
   );
 }

@@ -1,135 +1,272 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '@/services/api';
-import { UserProfile } from '@/types/profile';
+import { 
+  UserProfile, 
+  CompleteProfileData, 
+  Role,
+  User,
+  PetOwner,
+  Veterinarian,
+  ServiceProvider,
+  UserStatus
+
+} from '@/types/profile';
+
+
+
+// ✅ Типизируем ответы API
+type ApiResponse = PetOwner | Veterinarian | ServiceProvider;
 
 interface ProfileStore {
   profile: UserProfile | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
-
-  fetchProfile: () => Promise<void>;
-  updateProfile: (data: any) => Promise<void>;
-  logout: () => Promise<void>;
+  
+  fetchProfile: (authUser: User | null) => Promise<void>;
+  createProfile: (authUser: User | null, data: CompleteProfileData) => Promise<boolean>;
+  updateProfile: (authUser: User | null, data: Partial<CompleteProfileData>) => Promise<boolean>;
+  clearProfile: () => void;
 }
+
+const extractRoleString = (authUser: User | null): string => {
+  if (!authUser?.role) {
+    throw new Error('User or role is missing');
+  }
+  
+  // ✅ Возвращаем значение enum как строку
+  return authUser.role as string;
+};
+
+const getProfileEndpoint = (roleString: string): string => {
+  switch (roleString) {
+    case Role.OWNER:
+      return '/pet-management/api/pet-owners/me';
+    case Role.VET:
+      return '/specialist-service/veterinarians/me';
+    case Role.SERVICE:
+      return '/specialist-service/service-providers/me';
+    default:
+      throw new Error(`Unknown role: ${roleString}`);
+  }
+};
+
+// ✅ Улучшенное разбиение имени с регулярным выражением
+const splitFullName = (fullName: string): { firstName: string; lastName: string } => {
+  const parts = fullName?.trim().split(/\s+/) || [];
+  const firstName = parts[0] || '';
+  const lastName = parts.slice(1).join(' ');
+  return { firstName, lastName };
+};
+
+// ✅ Типизированная трансформация данных под ваши DTO
+const transformProfileData = (
+  roleString: Role, 
+  data: CompleteProfileData
+): Omit<PetOwner, 'id' | 'userId' | 'avatarUrl'> | 
+   Omit<Veterinarian, 'vetId' | 'userId' | 'avatarUrl' | 'patientsCount' | 'ratingAverage' | 'reviewsCount'> | 
+   Omit<ServiceProvider, 'serviceProviderId' | 'userId' | 'avatarUrl' | 'ratingAverage' | 'reviewsCount' | 'patientsCount'> => {
+  
+  switch (roleString) {
+    case Role.OWNER:
+      return {
+        username: data.username,
+        phoneNumber: data.phoneNumber,
+        address: data.address,
+      };
+      
+    case Role.VET: {
+      const { firstName, lastName } = splitFullName(data.username);
+      return {
+        firstName,
+        lastName,
+        phoneNumber: data.phoneNumber,
+        address: data.address,
+      };
+    }
+      
+    case Role.SERVICE: {
+      const { firstName, lastName } = splitFullName(data.username);
+      return {
+        firstName,
+        lastName,
+        phoneNumber: data.phoneNumber,
+        address: data.address,
+      };
+    }
+      
+    default:
+      throw new Error(`Unknown role: ${roleString}`);
+  }
+};
+
+// ✅ Типизированное обновление профиля в сторе
+const updateProfileInStore = (
+  currentProfile: UserProfile | null,
+  authUser: User,
+  roleString: Role,
+  responseData: ApiResponse
+): UserProfile => {
+  const profileData: UserProfile = { user: authUser };
+  
+  switch (roleString) {
+    case Role.OWNER:
+      profileData.petOwner = responseData as PetOwner;
+      break;
+    case Role.VET:
+      profileData.veterinarian = responseData as Veterinarian;
+      break;
+    case Role.SERVICE:
+      profileData.serviceProvider = responseData as ServiceProvider;
+      break;
+  }
+  
+  return profileData;
+};
+
+// ✅ Хелпер для получения текущего username из профиля
+const getCurrentUsername = (profile: UserProfile | null, roleString: Role): string => {
+  if (!profile) return '';
+  
+  switch (roleString) {
+    case Role.OWNER:
+      return profile.petOwner?.username || '';
+    case Role.VET:
+      const vet = profile.veterinarian;
+      return vet ? `${vet.firstName} ${vet.lastName}`.trim() : '';
+    case Role.SERVICE:
+      const service = profile.serviceProvider;
+      return service ? `${service.firstName} ${service.lastName}`.trim() : '';
+    default:
+      return '';
+  }
+};
+
+// ✅ Хелпер для получения текущего phoneNumber
+const getCurrentPhoneNumber = (profile: UserProfile | null): string => {
+  if (!profile) return '';
+  return profile.petOwner?.phoneNumber || 
+         profile.veterinarian?.phoneNumber || 
+         profile.serviceProvider?.phoneNumber || '';
+};
+
+// ✅ Хелпер для получения текущего address
+const getCurrentAddress = (profile: UserProfile | null): string => {
+  if (!profile) return '';
+  return profile.petOwner?.address || 
+         profile.veterinarian?.address || 
+         profile.serviceProvider?.address || '';
+};
 
 export const useProfileStore = create<ProfileStore>((set, get) => ({
   profile: null,
-  loading: false,
+  isLoading: false,
   error: null,
 
-  fetchProfile: async () => {
+  // store/profileStore.ts
+fetchProfile: async (authUser) => {
+  if (!authUser) {
+    console.log("❌ fetchProfile: no authUser");
+    set({ profile: null, error: 'Пользователь не авторизован' });
+    return;
+  }
+  
+  set({ isLoading: true, error: null });
+  
+  try {
+    // ✅ extractRoleString теперь возвращает строку
+    const roleString = extractRoleString(authUser);
+    console.log(`📝 Fetching profile for role: ${roleString}`);
+    
+    const endpoint = getProfileEndpoint(roleString);
+    const response = await api.get(endpoint);
+    
+    console.log('✅ Profile fetch response:', response.status);
+    
+    // ✅ Но для updateProfileInStore нужно передавать Role
+    const profileData = updateProfileInStore(null, authUser, authUser.role, response.data);
+    set({ profile: profileData, isLoading: false, error: null });
+    
+  } catch (error: any) {
+    console.log(`❌ Profile fetch error: ${error?.response?.status}`);
+    
+    if (error?.response?.status === 404) {
+      set({ profile: { user: authUser }, isLoading: false, error: null });
+      throw error;
+    } else {
+      set({ error: 'Не удалось загрузить профиль', isLoading: false });
+      throw error;
+    }
+  }
+},
+
+  createProfile: async (authUser, data) => {
+    if (!authUser) {
+      set({ error: 'Пользователь не авторизован' });
+      return false;
+    }
+    
+    set({ isLoading: true, error: null });
+    
     try {
-      set({ loading: true, error: null });
+      const roleString = authUser.role;
+      const endpoint = getProfileEndpoint(roleString);
+      const transformedData = transformProfileData(roleString, data);
+      
+      const response = await api.post<ApiResponse>(endpoint, transformedData);
+      
+      const profileData = updateProfileInStore(null, authUser, roleString, response.data);
+      
+      set({ profile: profileData, isLoading: false, error: null });
+      console.log("✅ Profile created successfully");
+      return true;
+      
+    } catch (error: any) {
+      console.error("❌ Profile creation error:", error?.response?.status);
+      const errorMessage = error?.response?.data?.message || 'Не удалось создать профиль';
+      set({ error: errorMessage, isLoading: false });
+      return false;
+    }
+  },
 
-      const token = await AsyncStorage.getItem('token');
-
-      if (!token) {
-        throw new Error('No token');
-      }
-
-      // 1️⃣ получаем USER
-      const userRes = await api.get('/user-service/auth/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const user = userRes.data;
-
-      let petOwner = null;
-      let veterinarian = null;
-      let serviceProvider = null;
-
-      // 2️⃣ по роли тянем профиль
-      if (user.role === 'OWNER') {
-        try {
-          const res = await api.get('/pet-management/api/pet-owners/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          petOwner = res.data;
-        } catch (e) {
-          console.log('OWNER profile not found');
-        }
-      }
-
-      if (user.role === 'VET') {
-        try {
-          const res = await api.get('/specialist-service/api/veterinarians/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          veterinarian = res.data;
-        } catch (e) {
-          console.log('VET profile not found');
-        }
-      }
-
-      if (user.role === 'SERVICE') {
-        try {
-          const res = await api.get('/specialist-service/api/service-providers/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          serviceProvider = res.data;
-        } catch (e) {
-          console.log('SERVICE profile not found');
-        }
-      }
-
-      // 3️⃣ собираем профиль
-      const fullProfile: UserProfile = {
-        user,
-        petOwner,
-        veterinarian,
-        serviceProvider,
+  updateProfile: async (authUser, data) => {
+    const currentProfile = get().profile;
+    
+    if (!authUser || !currentProfile) {
+      set({ error: 'Пользователь не авторизован или профиль не загружен' });
+      return false;
+    }
+    
+    set({ isLoading: true, error: null });
+    
+    try {
+      const roleString = authUser.role;
+      const endpoint = getProfileEndpoint(roleString);
+      
+      // Формируем финальные данные
+      const finalData: CompleteProfileData = {
+        username: data.username || getCurrentUsername(currentProfile, roleString),
+        phoneNumber: data.phoneNumber || getCurrentPhoneNumber(currentProfile),
+        address: data.address || getCurrentAddress(currentProfile),
       };
-
-      set({
-        profile: fullProfile,
-        loading: false,
-      });
-
-    } catch (e: any) {
-      console.log('❌ PROFILE ERROR:', e?.response?.data || e.message);
-
-      set({
-        error: 'Не удалось загрузить профиль',
-        loading: false,
-      });
+      
+      const transformedData = transformProfileData(roleString, finalData);
+      const response = await api.put<ApiResponse>(endpoint, transformedData);
+      
+      const updatedProfile = updateProfileInStore(currentProfile, authUser, roleString, response.data);
+      
+      set({ profile: updatedProfile, isLoading: false, error: null });
+      console.log("✅ Profile updated successfully");
+      return true;
+      
+    } catch (error: any) {
+      console.error("❌ Profile update error:", error?.response?.status);
+      const errorMessage = error?.response?.data?.message || 'Не удалось обновить профиль';
+      set({ error: errorMessage, isLoading: false });
+      return false;
     }
   },
 
-  // ✏️ обновление профиля (пока простое)
-  updateProfile: async (data) => {
-    try {
-      set({ loading: true });
-
-      const current = get().profile;
-
-      if (!current) return;
-
-      set({
-        profile: {
-          ...current,
-          ...data,
-        },
-        loading: false,
-      });
-
-    } catch {
-      set({
-        error: 'Ошибка обновления',
-        loading: false,
-      });
-    }
-  },
-
-  // 🚪 logout
-  logout: async () => {
-    await AsyncStorage.removeItem('token');
-
-    set({
-      profile: null,
-      error: null,
-    });
+  clearProfile: () => {
+    set({ profile: null, isLoading: false, error: null });
   },
 }));

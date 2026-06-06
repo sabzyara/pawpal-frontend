@@ -1,10 +1,11 @@
-import api from './api'; 
+// services/appointmentApi.ts
+  import { appointmentApiClient  } from './api';
+import { specialistService, type SpecialistInfo } from './specialistService';
 import type { 
   AppointmentResponseDto, 
   AppointmentCreateDto, 
   AppointmentUpdateDto,
   AppointmentCancelDto,
-  AppointmentRejectDto,
   AppointmentRescheduleDto,
   AppointmentRecommendationsDto,
   AppointmentFilters,
@@ -14,16 +15,14 @@ import type {
   SpecialistScheduleResponse,
   SpecialistType,
   AppointmentStatus,
-  TimeSlotStatus
+  SlotStatus  
 } from '@/types/appointment.types';
 
-// Реэкспортируем типы
 export type {
   AppointmentResponseDto,
   AppointmentCreateDto,
   AppointmentUpdateDto,
   AppointmentCancelDto,
-  AppointmentRejectDto,
   AppointmentRescheduleDto,
   AppointmentRecommendationsDto,
   AppointmentFilters,
@@ -33,8 +32,10 @@ export type {
   SpecialistScheduleResponse,
   SpecialistType,
   AppointmentStatus,
-  TimeSlotStatus
+  SlotStatus  
 };
+
+export type { SpecialistInfo } from './specialistService';
 
 // ============ КАСТОМНЫЕ ОШИБКИ ============
 
@@ -59,11 +60,18 @@ export class ValidationError extends Error {
   }
 }
 
+export class ConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ConflictError';
+  }
+}
+
 // ============ КОНСТАНТЫ ============
 
-const APPOINTMENTS_URL = '/appointment-service/appointments';
-const SCHEDULES_URL = '/appointment-service/schedules';
-const SLOTS_URL = '/appointment-service/slots';
+const APPOINTMENTS_URL = '/appointments';
+const SCHEDULES_URL = '/schedules';
+const SLOTS_URL = '/slots';
 
 // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
 
@@ -80,28 +88,33 @@ const buildQueryString = (params: Record<string, any>): string => {
   return queryString ? `?${queryString}` : '';
 };
 
-// Обработка ошибок axios
 const handleAxiosError = (error: any): never => {
   const status = error?.response?.status;
   const message = error?.response?.data?.message || error?.message || 'Request failed';
   
   if (status === 401) {
     throw new AuthError(message);
+  } else if (status === 403) {
+    throw new AuthError('Access denied');
   } else if (status === 400) {
     throw new ValidationError(message);
-  } else if (status >= 500) {
+  } else if (status === 409) {
+    throw new ConflictError(message);
+  } else if (status && status >= 500) {
     throw new NetworkError(message);
   }
   
   throw new Error(message);
 };
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 // ============ APPOINTMENT API ============
 
 export const appointmentApi = {
   createAppointment: async (data: AppointmentCreateDto): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.post<AppointmentResponseDto>(APPOINTMENTS_URL, data);
+      const response = await appointmentApiClient.post<AppointmentResponseDto>(APPOINTMENTS_URL, data);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -114,10 +127,10 @@ export const appointmentApi = {
         status: filters?.status,
         page: filters?.page,
         size: filters?.size || 10,
-        sort: filters?.sort,
+        sort: filters?.sort || 'date,desc', 
       };
       
-      const response = await api.get<Page<AppointmentResponseDto>>(`${APPOINTMENTS_URL}/me`, { params });
+      const response = await appointmentApiClient.get<Page<AppointmentResponseDto>>(`${APPOINTMENTS_URL}/me`, { params });
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -130,9 +143,10 @@ export const appointmentApi = {
         status: filters?.status,
         page: filters?.page,
         size: filters?.size || 10,
+        sort: filters?.sort || 'date,desc',
       };
       
-      const response = await api.get<Page<AppointmentResponseDto>>(`${APPOINTMENTS_URL}/specialist/me`, { params });
+      const response = await appointmentApiClient.get<Page<AppointmentResponseDto>>(`${APPOINTMENTS_URL}/specialist/me`, { params });
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -146,7 +160,7 @@ export const appointmentApi = {
   ): Promise<Page<AppointmentResponseDto>> => {
     try {
       const params = { userType, page, size: size || 10 };
-      const response = await api.get<Page<AppointmentResponseDto>>(`${APPOINTMENTS_URL}/upcoming`, { params });
+      const response = await appointmentApiClient.get<Page<AppointmentResponseDto>>(`${APPOINTMENTS_URL}/upcoming`, { params });
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -155,7 +169,7 @@ export const appointmentApi = {
 
   getAppointmentById: async (id: number): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.get<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}`);
+      const response = await appointmentApiClient.get<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}`);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -164,7 +178,7 @@ export const appointmentApi = {
 
   updateAppointment: async (id: number, data: AppointmentUpdateDto): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.put<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}`, data);
+      const response = await appointmentApiClient.put<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}`, data);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -177,16 +191,23 @@ export const appointmentApi = {
         ? `${APPOINTMENTS_URL}/${id}?reason=${encodeURIComponent(reason)}`
         : `${APPOINTMENTS_URL}/${id}`;
       
-      await api.delete<void>(url);
+      await appointmentApiClient.delete<void>(url);
     } catch (error) {
       throw handleAxiosError(error);
     }
-    
+  },
+  
+  cancelAppointmentWithBody: async (id: number, cancelDto: AppointmentCancelDto): Promise<void> => {
+    try {
+      await appointmentApiClient.post<void>(`${APPOINTMENTS_URL}/${id}/cancel`, cancelDto);
+    } catch (error) {
+      throw handleAxiosError(error);
+    }
   },
   
   confirmAppointment: async (id: number): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.patch<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}/confirm`);
+      const response = await appointmentApiClient.patch<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}/confirm`);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -195,7 +216,7 @@ export const appointmentApi = {
 
   completeAppointment: async (id: number): Promise<void> => {
     try {
-      await api.patch<void>(`${APPOINTMENTS_URL}/${id}/complete`);
+      await appointmentApiClient.patch<void>(`${APPOINTMENTS_URL}/${id}/complete`);
     } catch (error) {
       throw handleAxiosError(error);
     }
@@ -203,7 +224,7 @@ export const appointmentApi = {
 
   markAsNoShow: async (id: number): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.patch<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}/no-show`);
+      const response = await appointmentApiClient.patch<AppointmentResponseDto>(`${APPOINTMENTS_URL}/${id}/no-show`);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -212,7 +233,7 @@ export const appointmentApi = {
 
   addRecommendations: async (id: number, recommendations: AppointmentRecommendationsDto): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.post<AppointmentResponseDto>(
+      const response = await appointmentApiClient.post<AppointmentResponseDto>(
         `${APPOINTMENTS_URL}/${id}/recommendations`,
         recommendations
       );
@@ -224,7 +245,7 @@ export const appointmentApi = {
 
   getRecommendations: async (id: number): Promise<string | null> => {
     try {
-      const response = await api.get<string>(`${APPOINTMENTS_URL}/${id}/recommendations`);
+      const response = await appointmentApiClient.get<string>(`${APPOINTMENTS_URL}/${id}/recommendations`);
       return response.data;
     } catch (error) {
       console.warn('Failed to get recommendations:', error);
@@ -234,65 +255,189 @@ export const appointmentApi = {
 
   rescheduleAppointment: async (data: AppointmentRescheduleDto): Promise<AppointmentResponseDto> => {
     try {
-      const response = await api.post<AppointmentResponseDto>(`${APPOINTMENTS_URL}/reschedule`, data);
+      const response = await appointmentApiClient.post<AppointmentResponseDto>(`${APPOINTMENTS_URL}/reschedule`, data);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
     }
   },
-
-  
 };
 
 // ============ TIME SLOT API ============
 
 export const timeSlotApi = {
-  getAvailableSlotsForDate: async (
-  specialistId: number,
-  specialistType: SpecialistType,
-  date: string,
-  page: number = 0,
-  size: number = 50
-): Promise<{ content: TimeSlot[]; totalPages: number; totalElements: number }> => {
-  try {
-    const params = { specialistId, specialistType, date, page, size };
-    const response = await api.get<Page<TimeSlot>>(`${SLOTS_URL}/available`, { params });
-    return {
-      content: response.data.content || [],
-      totalPages: response.data.totalPages,
-      totalElements: response.data.totalElements
-    };
-  } catch (error) {
-    throw handleAxiosError(error);
-  }
-},
+  getAvailableSlotsBySpecialistId: async (
+    specialistId: number,
+    specialistType: SpecialistType,
+    date: string,
+    page: number = 0,
+    size: number = 20
+  ): Promise<Page<TimeSlot>> => {  
+    try {
+      console.log('📤 GET AVAILABLE SLOTS - URL:', `${SLOTS_URL}/available`);
+      console.log('📤 GET AVAILABLE SLOTS - Params:', { specialistId, specialistType, date, page, size });
+      
+      const response = await appointmentApiClient.get<Page<TimeSlot>>(`${SLOTS_URL}/available`, {
+        params: { specialistId, specialistType, date, page, size }
+      });
+      
+      console.log(' GET AVAILABLE SLOTS - Count:', response.data?.content?.length);
+      return response.data;
+    } catch (error) {
+      console.error(' GET AVAILABLE SLOTS - Error:', error);
+      throw handleAxiosError(error);
+    }
+  },
+
+  getSlotsByDate: async (
+    specialistId: number,
+    specialistType: SpecialistType,
+    date: string
+  ): Promise<TimeSlot[]> => {
+    try {
+      console.log('📤 GET SLOTS BY DATE - URL:', `${SLOTS_URL}/date`);
+      console.log('📤 GET SLOTS BY DATE - Params:', { specialistId, specialistType, date });
+      
+      const response = await appointmentApiClient.get<TimeSlot[]>(`${SLOTS_URL}/date`, {
+        params: { specialistId, specialistType, date }
+      });
+      
+      console.log(' GET SLOTS BY DATE - Count:', response.data?.length);
+      return response.data || [];
+    } catch (error) {
+      console.error(' GET SLOTS BY DATE - Error:', error);
+      throw handleAxiosError(error);
+    }
+  },
+
+  getMyAvailableSlots: async (
+    date: string,
+    page: number = 0,
+    size: number = 20
+  ): Promise<Page<TimeSlot>> => { 
+    try {
+      console.log('📤 GET MY AVAILABLE SLOTS - URL:', `${SLOTS_URL}/my-available`);
+      console.log('📤 GET MY AVAILABLE SLOTS - Params:', { date, page, size });
+      
+      const response = await appointmentApiClient.get<Page<TimeSlot>>(`${SLOTS_URL}/my-available`, {
+        params: { date, page, size }
+      });
+      
+      console.log(' GET MY AVAILABLE SLOTS - Count:', response.data?.content?.length);
+      return response.data;
+    } catch (error) {
+      console.error(' GET MY AVAILABLE SLOTS - Error:', error);
+      throw handleAxiosError(error);
+    }
+  },
+
+  getAvailableSlotsByUserId: async (
+    userId: number,
+    date: string,
+    page: number = 0,
+    size: number = 20
+  ): Promise<{ slots: Page<TimeSlot>; specialistInfo: SpecialistInfo }> => {  
+    try {
+      const specialist = await specialistService.getSpecialistByUserId(userId);
+      
+      console.log('📤 GET AVAILABLE SLOTS BY USER - Specialist:', {
+        specialistId: specialist.specialistId,
+        specialistType: specialist.specialistType
+      });
+      
+      const slots = await timeSlotApi.getAvailableSlotsBySpecialistId(
+        specialist.specialistId,
+        specialist.specialistType,
+        date,
+        page,
+        size
+      );
+      
+      return {
+        slots,
+        specialistInfo: specialist
+      };
+    } catch (error) {
+      console.error(' GET AVAILABLE SLOTS BY USER - Error:', error);
+      throw handleAxiosError(error);
+    }
+  },
 
   blockSlot: async (slotId: number, reason: string): Promise<TimeSlot> => {
     try {
-      const response = await api.post<TimeSlot>(`${SLOTS_URL}/${slotId}/block`, null, {
-        params: { reason }
-      });
+      console.log('📤 BLOCK SLOT - URL:', `${SLOTS_URL}/${slotId}/block`);
+      
+      const response = await appointmentApiClient.post<TimeSlot>(
+        `${SLOTS_URL}/${slotId}/block`,
+        null,
+        { params: { reason } }
+      );
+      
+      console.log(' BLOCK SLOT - Success');
       return response.data;
     } catch (error) {
+      console.error(' BLOCK SLOT - Error:', error);
       throw handleAxiosError(error);
     }
   },
 
   unblockSlot: async (slotId: number): Promise<TimeSlot> => {
     try {
-      const response = await api.post<TimeSlot>(`${SLOTS_URL}/${slotId}/unblock`);
+      console.log('📤 UNBLOCK SLOT - URL:', `${SLOTS_URL}/${slotId}/unblock`);
+      
+      const response = await appointmentApiClient.post<TimeSlot>(`${SLOTS_URL}/${slotId}/unblock`);
+      
+      console.log(' UNBLOCK SLOT - Success');
       return response.data;
     } catch (error) {
+      console.error(' UNBLOCK SLOT - Error:', error);
       throw handleAxiosError(error);
     }
   },
 
-  regenerateSlotsForDate: async (specialistId: number, date: string): Promise<void> => {
+  regenerateSlots: async (
+    specialistId: number,
+    date: string
+  ): Promise<void> => {
     try {
-      await api.post<void>(`${SLOTS_URL}/regenerate`, null, {
-        params: { specialistId, date }
-      });
+      console.log(' REGENERATE SLOTS - URL:', `${SLOTS_URL}/regenerate`);
+      
+      const response = await appointmentApiClient.post<void>(
+        `${SLOTS_URL}/regenerate`,
+        null,
+        { params: { specialistId, date } }
+      );
+      
+      console.log(' REGENERATE SLOTS - Success');
     } catch (error) {
+      console.error(' REGENERATE SLOTS - Error:', error);
+      throw handleAxiosError(error);
+    }
+  },
+
+  regenerateAllSlots: async (specialistId: number): Promise<void> => {  
+    try {
+      console.log(' REGENERATE ALL SLOTS - URL:', `${SLOTS_URL}/regenerate-all`);
+      
+      await appointmentApiClient.post<void>(
+        `${SLOTS_URL}/regenerate-all`,
+        null,
+        { params: { specialistId } }
+      );
+      
+      console.log(' REGENERATE ALL SLOTS - Success');
+    } catch (error) {
+      console.error(' REGENERATE ALL SLOTS - Error:', error);
+      throw handleAxiosError(error);
+    }
+  },
+
+  regenerateSlotsByUserId: async (userId: number, date: string): Promise<void> => {
+    try {
+      const specialist = await specialistService.getSpecialistByUserId(userId);
+      await timeSlotApi.regenerateSlots(specialist.specialistId, date);
+    } catch (error) {
+      console.error('❌ REGENERATE SLOTS BY USER - Error:', error);
       throw handleAxiosError(error);
     }
   },
@@ -300,31 +445,92 @@ export const timeSlotApi = {
 
 // ============ SCHEDULE API ============
 
-// services/appointmentApi.ts - добавить в scheduleApi
-
 export const scheduleApi = {
-  createSchedule: async (data: SpecialistScheduleCreateDto): Promise<SpecialistScheduleResponse> => {
+  createSchedule: async (data: SpecialistScheduleCreateDto, retryCount: number = 0): Promise<SpecialistScheduleResponse> => {
     try {
-      const response = await api.post<SpecialistScheduleResponse>(SCHEDULES_URL, data);
+      console.log('📤 CREATE SCHEDULE - URL:', SCHEDULES_URL);
+      console.log('📤 CREATE SCHEDULE - Data:', JSON.stringify(data, null, 2));
+      
+      const response = await appointmentApiClient.post<SpecialistScheduleResponse>(SCHEDULES_URL, data);
+      console.log('✅ CREATE SCHEDULE - Response:', response.status);
+      return response.data;
+    } catch (error: any) {
+      if (retryCount < 3 && (
+        error?.message === 'Network Error' ||
+        error?.response?.status === 502 ||
+        error?.response?.status === 503 ||
+        error?.response?.status === 504
+      )) {
+        console.log(`🔄 Server waking up, retry ${retryCount + 1}/3...`);
+        await sleep(2000);
+        return scheduleApi.createSchedule(data, retryCount + 1);
+      }
+      throw handleAxiosError(error);
+    }
+  },
+
+  createWeeklySchedules: async (
+    specialistId: number,
+    specialistType: SpecialistType,
+    schedules: SpecialistScheduleCreateDto[]
+  ): Promise<SpecialistScheduleResponse[]> => {
+    try {
+      console.log('📤 CREATE WEEKLY SCHEDULES - URL:', `${SCHEDULES_URL}/weekly`);
+      
+      const response = await appointmentApiClient.post<SpecialistScheduleResponse[]>(
+        `${SCHEDULES_URL}/weekly`,
+        schedules,
+        { params: { specialistId, specialistType } }
+      );
+      
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
     }
   },
 
-  getMySchedules: async (): Promise<SpecialistScheduleResponse[]> => {
+  getMySchedules: async (retryCount: number = 0): Promise<SpecialistScheduleResponse[]> => {
     try {
-      const response = await api.get<SpecialistScheduleResponse[]>(`${SCHEDULES_URL}/me`);
+      console.log('📤 GET MY SCHEDULES - URL:', `${SCHEDULES_URL}/me`);
+      const response = await appointmentApiClient.get<SpecialistScheduleResponse[]>(`${SCHEDULES_URL}/me`);
+      console.log('✅ GET MY SCHEDULES - Count:', response.data?.length);
+      return response.data;
+    } catch (error: any) {
+      if (retryCount < 3 && (
+        error?.message === 'Network Error' ||
+        error?.response?.status === 502 ||
+        error?.response?.status === 503 ||
+        error?.response?.status === 504
+      )) {
+        console.log(`🔄 Server waking up, retry ${retryCount + 1}/3...`);
+        await sleep(2000);
+        return scheduleApi.getMySchedules(retryCount + 1);
+      }
+      throw handleAxiosError(error);
+    }
+  },
+
+  getSchedulesBySpecialistId: async (specialistId: number): Promise<SpecialistScheduleResponse[]> => {
+    try {
+      console.log('📤 GET SCHEDULES BY SPECIALIST ID:', `${SCHEDULES_URL}/specialist/${specialistId}`);
+      const response = await appointmentApiClient.get<SpecialistScheduleResponse[]>(`${SCHEDULES_URL}/specialist/${specialistId}`);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
     }
   },
 
-  getSchedulesBySpecialist: async (specialistId: number): Promise<SpecialistScheduleResponse[]> => {
+  getSchedulesByUserId: async (userId: number): Promise<{
+    schedules: SpecialistScheduleResponse[];
+    specialistInfo: SpecialistInfo;
+  }> => {
     try {
-      const response = await api.get<SpecialistScheduleResponse[]>(`${SCHEDULES_URL}/specialist/${specialistId}`);
-      return response.data;
+      const specialist = await specialistService.getSpecialistByUserId(userId);
+      const schedules = await scheduleApi.getSchedulesBySpecialistId(specialist.specialistId);
+      return {
+        schedules,
+        specialistInfo: specialist
+      };
     } catch (error) {
       throw handleAxiosError(error);
     }
@@ -332,7 +538,7 @@ export const scheduleApi = {
 
   getScheduleById: async (id: number): Promise<SpecialistScheduleResponse> => {
     try {
-      const response = await api.get<SpecialistScheduleResponse>(`${SCHEDULES_URL}/${id}`);
+      const response = await appointmentApiClient.get<SpecialistScheduleResponse>(`${SCHEDULES_URL}/${id}`);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -341,7 +547,7 @@ export const scheduleApi = {
 
   getScheduleByDay: async (dayOfWeek: string): Promise<SpecialistScheduleResponse> => {
     try {
-      const response = await api.get<SpecialistScheduleResponse>(`${SCHEDULES_URL}/day/${dayOfWeek}`);
+      const response = await appointmentApiClient.get<SpecialistScheduleResponse>(`${SCHEDULES_URL}/day/${dayOfWeek}`);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -350,7 +556,7 @@ export const scheduleApi = {
 
   updateSchedule: async (id: number, data: Partial<SpecialistScheduleCreateDto>): Promise<SpecialistScheduleResponse> => {
     try {
-      const response = await api.put<SpecialistScheduleResponse>(`${SCHEDULES_URL}/${id}`, data);
+      const response = await appointmentApiClient.put<SpecialistScheduleResponse>(`${SCHEDULES_URL}/${id}`, data);
       return response.data;
     } catch (error) {
       throw handleAxiosError(error);
@@ -359,7 +565,7 @@ export const scheduleApi = {
 
   deleteSchedule: async (id: number): Promise<void> => {
     try {
-      await api.delete<void>(`${SCHEDULES_URL}/${id}`);
+      await appointmentApiClient.delete<void>(`${SCHEDULES_URL}/${id}`);
     } catch (error) {
       throw handleAxiosError(error);
     }
@@ -367,12 +573,15 @@ export const scheduleApi = {
 
   deleteScheduleByDay: async (dayOfWeek: string): Promise<void> => {
     try {
-      await api.delete<void>(`${SCHEDULES_URL}/day/${dayOfWeek}`);
+      await appointmentApiClient.delete<void>(`${SCHEDULES_URL}/day/${dayOfWeek}`);
     } catch (error) {
       throw handleAxiosError(error);
     }
   },
 };
+
+export { specialistService } from './specialistService';
+
 // ============ DEFAULT EXPORT ============
 
 export default appointmentApi;
