@@ -1,5 +1,6 @@
 import { useTheme } from '@/hooks/useTheme';
 import { useProfileStore } from '@/store/profileStore';
+import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
 import { profileStyles } from '@/styles/profileScreenStyles';
 import { Role } from '@/types/profile';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,39 +25,59 @@ export default function ProfileScreen() {
   const { colors } = useTheme();
   const styles = profileStyles(colors);
   const router = useRouter();
-  const { profile, loading, error, fetchProfile, logout } = useProfileStore();
-  const [refreshing, setRefreshing] = useState(false);
   
+  // ✅ ИСПРАВЛЕНО: убраны loading, error, logout из profileStore
+  const { profile, fetchProfile } = useProfileStore();
+  const user = useAuthStore((state) => state.user); // ✅ ДОБАВЛЕНО для authUser
+  const logout = useAuthStore((state) => state.logout); // ✅ ДОБАВЛЕНО из authStore
+  
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true); // ✅ ДОБАВЛЕНО локальное состояние
+  const [error, setError] = useState<string | null>(null); // ✅ ДОБАВЛЕНО локальное состояние
 
   useEffect(() => {
-  const load = async () => {
-    await fetchProfile();
-  };
-  load();
-}, []);
+    const load = async () => {
+      try {
+        setLoading(true);
+        // ✅ ИСПРАВЛЕНО: передан user
+        if (user) {
+          await fetchProfile(user);
+        }
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [user]); // ✅ ДОБАВЛЕНА зависимость от user
 
-useEffect(() => {
-  if (!profile) return;
+  useEffect(() => {
+    if (!profile) return;
 
-  const role = profile.user.role;
+    const role = profile.user.role;
 
-  if (role === Role.OWNER && !profile.petOwner) {
-    router.replace('/complete_profile');
-  }
+    if (role === Role.OWNER && !profile.petOwner) {
+      router.replace('/complete_profile');
+    }
 
-  if (role === Role.VET && !profile.veterinarian) {
-    router.replace('/complete_vet');
-  }
+    if (role === Role.VET && !profile.veterinarian) {
+      router.replace('/complete_vet');
+    }
 
-  if (role === Role.SERVICE && !profile.serviceProvider) {
-    router.replace('/complete_service');
-  }
+    if (role === Role.SERVICE && !profile.serviceProvider) {
+      router.replace('/complete_service');
+    }
 
-}, [profile]);
+  }, [profile]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchProfile();
+    // ✅ ИСПРАВЛЕНО: передан user
+    if (user) {
+      await fetchProfile(user);
+    }
     setRefreshing(false);
   };
 
@@ -82,9 +103,9 @@ useEffect(() => {
     router.push("/edit_profile");
   };
 
-const handleMyPets = () => {
-  router.push("/my_pet"); 
-};
+  const handleMyPets = () => {
+    router.push("/my_pet"); 
+  };
 
   const handleMyAppointments = () => {
     router.push("/my_appointments");
@@ -137,24 +158,24 @@ const handleMyPets = () => {
 
     
   const getAvatarUrl = (): string => {
-  const role = profile?.user.role;
+    const role = profile?.user.role;
 
-  if (role === Role.OWNER && profile?.petOwner?.avatarUrl) {
-    return profile.petOwner.avatarUrl;
-  }
+    if (role === Role.OWNER && profile?.petOwner?.avatarUrl) {
+      return profile.petOwner.avatarUrl;
+    }
 
-  if (role === Role.VET && profile?.veterinarian?.avatarUrl) {
-    return profile.veterinarian.avatarUrl;
-  }
+    if (role === Role.VET && profile?.veterinarian?.avatarUrl) {
+      return profile.veterinarian.avatarUrl;
+    }
 
-  if (role === Role.SERVICE && profile?.serviceProvider?.avatarUrl) {
-    return profile.serviceProvider.avatarUrl;
-  }
+    if (role === Role.SERVICE && profile?.serviceProvider?.avatarUrl) {
+      return profile.serviceProvider.avatarUrl;
+    }
 
-  // fallback
-  const seed = getDisplayName() || "user";
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
-};
+    // fallback
+    const seed = getDisplayName() || "user";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
+  };
 
   const getStats = () => {
     switch (profile?.user.role) {
@@ -380,7 +401,15 @@ const handleMyPets = () => {
         <View style={styles.errorContainer}>
           <Feather name="alert-circle" size={64} color="#FF6B6B" />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={fetchProfile}>
+          <TouchableOpacity 
+            style={styles.retryButton} 
+            // ✅ ИСПРАВЛЕНО: обернуто в стрелочную функцию
+            onPress={() => {
+              if (user) {
+                fetchProfile(user);
+              }
+            }}
+          >
             <LinearGradient colors={colors.primary.gradient} style={styles.retryGradient}>
               <Feather name="refresh-cw" size={20} color="#FFF" />
               <Text style={styles.retryButtonText}>Try Again</Text>

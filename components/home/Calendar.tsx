@@ -3,7 +3,8 @@ import { createHomeStyles } from '@/styles/homeStyles';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-
+import '@/app/i18n';
+import { useTranslation } from 'react-i18next';
 interface CalendarSectionProps {
   selectedDate: string;
   onDateSelect: (date: string) => void;
@@ -15,8 +16,13 @@ export const CalendarSection: React.FC<CalendarSectionProps> = ({
 }) => {
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
-
+  const { t } = useTranslation();
   const today = new Date();
+
+  const weekDays = t(
+  'calendar.days',
+  { returnObjects: true }
+) as string[];
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -26,17 +32,17 @@ export const CalendarSection: React.FC<CalendarSectionProps> = ({
       String(d.getMonth() + 1).padStart(2, "0")
     }-${String(d.getDate()).padStart(2, "0")}`;
 
-    return {
-      full,
-      day: d.toLocaleDateString("en-US", { weekday: "short" }),
-      date: d.getDate(),
-    };
+   return {
+  full,
+  day: weekDays[d.getDay()],
+  date: d.getDate(),
+};
   });
 
   return (
     <View style={styles.calendarSection}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Calendar</Text>
+        <Text style={styles.sectionTitle}>{t('calendar.title')}</Text>
       </View>
 
       <ScrollView

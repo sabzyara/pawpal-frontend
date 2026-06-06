@@ -1,6 +1,3 @@
-
-// screens/home/HomeScreen.tsx
-
 import { CalendarSection } from '@/components/home/Calendar';
 import { FloatingChatButton } from '@/components/home/FloatingChatButton';
 import { HomeHeader } from '@/components/home/Header';
@@ -20,12 +17,18 @@ import { SCHEDULE_TYPES_CONFIG, ScheduleItem } from '@/types/home_index';
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from 'expo-router';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import MiniAiCard from '@/components/home/MiniAiCard';
+import MiniTrackerCard from '@/components/home/MiniTrackerCard';
 // 🔥 ВАЖНО
 import { useProfileStore } from '@/store/profileStore';
+import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
+
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   getNotifications,
@@ -56,6 +59,16 @@ export default function HomeScreen() {
   notificationCount,
   setNotificationCount,
 ] = useState(0);
+
+const [showCalendar, setShowCalendar] =
+  useState(true);
+
+  const [showTracker, setShowTracker] =
+  useState(true);
+
+const [showAI, setShowAI] =
+  useState(true); 
+
 
   const fetchPets = async () => {
     try {
@@ -100,20 +113,55 @@ export default function HomeScreen() {
     }
   };
 
-  // 🔥 ПРОФИЛЬ ИЗ STORE (КАК В PROFILE SCREEN)
+  
+
+ const loadHomeSettings = async () => {
+  setShowCalendar(
+    (
+      await AsyncStorage.getItem(
+        'showCalendar'
+      )
+    ) !== 'false'
+  );
+
+  setShowTracker(
+    (
+      await AsyncStorage.getItem(
+        'showTracker'
+      )
+    ) !== 'false'
+  );
+
+  setShowAI(
+    (
+      await AsyncStorage.getItem(
+        'showAI'
+      )
+    ) !== 'false'
+  );
+
+};
+
+
+  // ✅ ИЗМЕНЕНО: убран authUser из profileStore, добавлен user из authStore
   const { profile, fetchProfile } = useProfileStore();
+  const user = useAuthStore((state) => state.user);
 
   // 🔄 ОБНОВЛЕНИЕ
-  useFocusEffect(
+useFocusEffect(
   useCallback(() => {
-
     fetchPets();
 
-    fetchProfile();
+    // ✅ ИЗМЕНЕНО: передаем user вместо authUser
+    if (user) {
+      fetchProfile(user);
+    }
 
     fetchNotifications();
 
-  }, [profile])
+    loadHomeSettings();
+    // ✅ ИЗМЕНЕНО: зависимость от user вместо authUser
+  }, [profile, user])
 );
 
   // 🧠 ИМЯ
@@ -138,7 +186,6 @@ export default function HomeScreen() {
 
   const handleAddPet = () => router.push("/add");
   const handleAddTask = () => router.push("/add");
-  const handleViewAllSchedule = () => router.push("/tracker");
   const handleNotificationPress = () => router.push("/notifications");
 
   const handleTaskPress = (item: ScheduleItem) => {
@@ -146,9 +193,130 @@ export default function HomeScreen() {
     router.push(route as any);
   };
 
+  const [analysisData, setAnalysisData] =
+  useState<any[]>([]);
+
+  const [trackerData, setTrackerData] =
+  useState<any[]>([]);
+
+const loadAnalysis = async () => {
+  try {
+    const results = await Promise.all(
+      pets.map(async (pet) => {
+        const res = await api.get(
+          `/pet-management/api/recommendations/${pet.id}`
+        );
+
+        return {
+          petId: pet.id,
+          petName: pet.name,
+          avatarUrl: pet.avatarUrl,
+          ...res.data,
+        };
+      })
+    );
+
+    setAnalysisData(results);
+
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const loadTracker = async () => {
+  try {
+    const results = await Promise.all(
+      pets.map(async (pet) => {
+        const [nutritionRes, activityRes] =
+          await Promise.all([
+            api.get(
+              `/pet-management/api/nutrition/pet/${pet.id}`
+            ),
+            api.get(
+              `/pet-management/api/activities/pet/${pet.id}`
+            ),
+          ]);
+
+        const nutritionForDay =
+          nutritionRes.data.filter(
+            (n: any) =>
+              n.date?.slice(0, 10) ===
+              selectedDate
+          );
+
+        const activityForDay =
+          activityRes.data.filter(
+            (a: any) =>
+              a.date?.slice(0, 10) ===
+              selectedDate
+          );
+
+        const calories =
+          nutritionForDay.reduce(
+            (
+              sum: number,
+              item: any
+            ) => {
+              const match =
+                item.summary?.match(
+                  /(\d+(\.\d+)?)/
+                );
+
+              return (
+                sum +
+                (match
+                  ? parseFloat(
+                      match[0]
+                    )
+                  : 0)
+              );
+            },
+            0
+          );
+
+        const activity =
+          activityForDay.length * 10;
+
+        return {
+          petId: pet.id,
+          petName: pet.name,
+          avatarUrl:
+            pet.avatarUrl,
+          calories,
+          activity,
+        };
+      })
+    );
+
+    setTrackerData(results);
+  } catch (e) {
+    console.log(
+      'TRACKER ERROR:',
+      e
+    );
+  }
+};
+
+
+useEffect(() => {
+  if (pets.length > 0) {
+    loadTracker();
+  }
+}, [
+  pets,
+  selectedDate,
+]);
+
+useEffect(() => {
+  if (pets.length > 0) {
+    loadAnalysis();
+  }
+}, [pets]);
+
+  
+
   return (
     <SafeAreaView style={styles.safe}>
-      ```tsx id="home_fixed_clean"
 <HomeHeader
   greeting={greeting}
   userName={getDisplayName()}
@@ -163,9 +331,6 @@ export default function HomeScreen() {
 }
   onNotificationPress={handleNotificationPress}
 />
-```
-
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -174,7 +339,10 @@ export default function HomeScreen() {
             onRefresh={() => {
               onRefresh();
               fetchPets();
-              fetchProfile(); // 🔥 синхронно с профилем
+              // ✅ ИЗМЕНЕНО: передаем user вместо authUser
+              if (user) {
+                fetchProfile(user);
+              }
             }}
             tintColor={colors.primary.main}
             colors={[colors.primary.main]}
@@ -189,25 +357,34 @@ export default function HomeScreen() {
             onPetPress={handlePetPress}
           />
 
-          <CalendarSection
-            selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-          />
+        {showCalendar && (
+        <CalendarSection
+          selectedDate={selectedDate}
+          onDateSelect={setSelectedDate}
+        />
+      )}
 
-          <ScheduleSection
-            schedule={filteredSchedule}
-            onTaskPress={handleTaskPress}
-            onToggleDone={toggleDone}
-            onViewAllPress={handleViewAllSchedule}
-            onAddTaskPress={handleAddTask}
-          />
+         {showTracker && (
+         <MiniTrackerCard
+          pets={trackerData}
+          onPress={() =>
+            router.push('/tracker')
+          }
+        />
+        )}
 
-          <LearnCard onPress={() => router.push("/learn")} />
+        {showAI && (
+          <MiniAiCard
+            pets={analysisData}
+            onPress={() =>
+              router.push('/analysis')
+            }
+          />
+        )}
+
         </View>
       </ScrollView>
-
       <FloatingChatButton />
     </SafeAreaView>
   );
 }
-

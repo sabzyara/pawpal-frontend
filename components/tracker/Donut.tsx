@@ -7,11 +7,17 @@ type Props = {
   value: number;
   max: number;
   label?: string;
+  size?: number;
 };
 
-export default function Donut({ value, max, label }: Props) {
-  const radius = 80;
-  const strokeWidth = 40;
+export default function Donut({
+  value,
+  max,
+  label,
+  size = 200,
+}: Props) {
+  const radius = size * 0.4;
+const strokeWidth = size * 0.12;
   const circumference = 2 * Math.PI * radius;
 
   const progress = value / max;
@@ -21,14 +27,14 @@ export default function Donut({ value, max, label }: Props) {
 
   return (
     <View style={styles.container}>
-      <Svg width={200} height={200}>
+      <Svg width={size} height={size}>
         
         {/* Background (remaining) */}
         <Circle
           stroke={colors.tracker.secondary} // 🔥 вместо хардкода
           fill="none"
-          cx="100"
-          cy="100"
+          cx={size / 2}
+          cy={size / 2}
           r={radius}
           strokeWidth={strokeWidth}
         />
@@ -37,24 +43,40 @@ export default function Donut({ value, max, label }: Props) {
         <Circle
           stroke={colors.tracker.primary} // 🔥 вместо хардкода
           fill="none"
-          cx="100"
-          cy="100"
+          cx={size / 2}
+          cy={size / 2}
           r={radius}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
           rotation="-90"
-          origin="100,100"
+          origin={`${size / 2},${size / 2}`}
         />
       </Svg>
 
       <View style={styles.center}>
-        <Text style={[styles.value, { color: colors.text.primary }]}>
+        <Text
+          style={[
+            styles.value,
+            {
+              color: colors.text.primary,
+              fontSize: size * 0.14,
+            },
+          ]}
+        >
           {value}
         </Text>
-        <Text style={[styles.max, { color: colors.text.secondary }]}>
-          {max}
+        <Text
+          style={[
+            styles.max,
+            {
+              color: colors.text.secondary,
+              fontSize: size * 0.08,
+            },
+          ]}
+        >
+          / {max}
         </Text>
         {label && (
           <Text style={[styles.label, { color: colors.text.tertiary }]}>

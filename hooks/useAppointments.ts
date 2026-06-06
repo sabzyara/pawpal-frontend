@@ -1,27 +1,51 @@
-// hooks/useAppointments.ts - ПОЛНАЯ ВЕРСИЯ С ОБОГАЩЕНИЕМ ДАННЫХ
-
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Alert } from 'react-native';
-import { appointmentApi } from '@/services/appointmentApi';
-import { 
-  AppointmentResponseDto, 
-  AppointmentFilters, 
+import api from "@/services/api";
+import { appointmentApi, specialistService } from "@/services/appointmentApi";
+import type { SpecialistInfo } from "@/services/appointmentApi";
+import {
+  AppointmentFilters,
   AppointmentRecommendationsDto,
+  AppointmentResponseDto,
   AppointmentUpdateDto,
-} from '@/types/appointment.types';
-import { useUser } from './useUser';
-import api from '@/services/api';
+  SpecialistType,
+} from "@/types/appointment.types";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert } from "react-native";
 
 // ============ ТИПЫ ============
 
-export type UseAppointmentsMode = 'owner' | 'specialist' | 'details';
+export type UseAppointmentsMode = "owner" | "specialist" | "details";
+
+export interface EnrichedAppointment {
+  id: number;
+  petId: number;
+  petOwnerId: number;
+  specialistId: number;
+  specialistType: SpecialistType;
+  timeSlotId: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  ownerNotes?: string;
+  specialistNotes?: string;
+  cancellationReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  specialistName: string;
+  specialistInfo?: SpecialistInfo;
+  petOwnerName: string;
+  petName: string;
+  petType: string;
+  petBreed?: string;
+}
 
 export interface UseAppointmentsConfig {
   mode: UseAppointmentsMode;
-  appointmentId?: number; 
+  appointmentId?: number;
   filters?: AppointmentFilters;
-  autoLoad?: boolean; 
-  pageSize?: number; 
+  autoLoad?: boolean;
+  pageSize?: number;
+  clearCacheOnUnmount?: boolean;
 }
 
 export interface UseAppointmentsReturn {
@@ -29,32 +53,30 @@ export interface UseAppointmentsReturn {
   refreshing: boolean;
   error: string | null;
   refresh: () => void;
-  
-  // Для режимов 'owner' и 'specialist'
-  appointments?: any[];
+  appointments?: EnrichedAppointment[];
   hasMore?: boolean;
   totalPages?: number;
   currentPage?: number;
   loadMore?: () => void;
-  
-  // Специфичные для 'owner'
   cancelAppointment?: (id: number, reason: string) => Promise<boolean>;
-  
-  // Специфичные для 'specialist'
   createdCount?: number;
+  specialistInfo?: SpecialistInfo | null;
   confirmAppointment?: (id: number) => Promise<AppointmentResponseDto>;
   cancelBySpecialist?: (id: number, reason: string) => Promise<void>;
   completeAppointment?: (id: number) => Promise<void>;
   markAsNoShow?: (id: number) => Promise<AppointmentResponseDto>;
-  addRecommendations?: (id: number, recommendations: AppointmentRecommendationsDto) => Promise<AppointmentResponseDto>;
-  
-  // Для режима 'details'
-  appointment?: any;
+  addRecommendations?: (
+    id: number,
+    recommendations: AppointmentRecommendationsDto,
+  ) => Promise<AppointmentResponseDto>;
+  appointment?: EnrichedAppointment | null;
   recommendations?: string | null;
-  updateAppointment?: (data: AppointmentUpdateDto) => Promise<AppointmentResponseDto>;
+  updateAppointment?: (
+    data: AppointmentUpdateDto,
+  ) => Promise<AppointmentResponseDto>;
 }
 
-// ============ КЭШИ ДЛЯ ДАННЫХ ИЗ ДРУГИХ СЕРВИСОВ ============
+// ============ КЭШИ ============
 
 interface UserData {
   firstName: string;
@@ -70,90 +92,110 @@ interface PetData {
 
 const userCache = new Map<number, UserData>();
 const petCache = new Map<number, PetData>();
+const specialistInfoCache = new Map<string, SpecialistInfo>();
+
+let activeHooksCount = 0;
 
 // ============ ФУНКЦИИ ОБОГАЩЕНИЯ ============
 
-/**
- * Обогащает одну запись (для деталей)
- */
-const enrichSingleAppointment = async (appointment: any): Promise<any> => {
+const getSpecialistInfo = async (
+  specialistId: number,
+  specialistType: string
+): Promise<{ name: string; info?: SpecialistInfo }> => {
+  const cacheKey = `${specialistType}_${specialistId}`;
+  
+  if (specialistInfoCache.has(cacheKey)) {
+    const info = specialistInfoCache.get(cacheKey)!;
+    return { name: `${info.firstName} ${info.lastName}`.trim(), info };
+  }
+
+  try {
+    const info = await specialistService.getSpecialistByUserId(specialistId);
+    if (info) {
+      specialistInfoCache.set(cacheKey, info);
+      return { name: `${info.firstName} ${info.lastName}`.trim(), info };
+    }
+  } catch (error) {
+    console.error("Failed to load specialist info:", error);
+  }
+
+  return { name: `Специалист #${specialistId}` };
+};
+
+const enrichSingleAppointment = async (appointment: any): Promise<EnrichedAppointment | null> => {
   if (!appointment) return null;
-  
-  // Загружаем данные специалиста
-  let specialistName = '';
-  if (userCache.has(appointment.specialistId)) {
-    const user = userCache.get(appointment.specialistId)!;
-    specialistName = `${user.firstName} ${user.lastName}`.trim();
+
+  let specialistName = "";
+  let specialistInfo = null;
+
+  if (appointment.specialistId && appointment.specialistType) {
+    const result = await getSpecialistInfo(
+      appointment.specialistId,
+      appointment.specialistType
+    );
+    specialistName = result.name;
+    specialistInfo = result.info;
   } else {
-    try {
-      const response = await api.get(`/users/${appointment.specialistId}`);
-      const user = response.data;
-      const userData = {
-        firstName: user.firstName || user.first_name || '',
-        lastName: user.lastName || user.last_name || '',
-        phone: user.phone || user.phoneNumber,
-      };
-      userCache.set(appointment.specialistId, userData);
-      specialistName = `${userData.firstName} ${userData.lastName}`.trim();
-    } catch (error) {
-      console.error('Failed to load specialist:', error);
-      specialistName = `Специалист #${appointment.specialistId}`;
+    specialistName = `Специалист #${appointment.specialistId || "?"}`;
+  }
+
+  let petOwnerName = "";
+  const ownerId = appointment.petOwnerId || appointment.userId;
+  if (ownerId) {
+    if (userCache.has(ownerId)) {
+      const user = userCache.get(ownerId)!;
+      petOwnerName = `${user.firstName} ${user.lastName}`.trim();
+    } else {
+      try {
+        const response = await api.get(`/user-service/users/${ownerId}`);
+        const user = response.data;
+        const userData = {
+          firstName: user.firstName || user.first_name || "",
+          lastName: user.lastName || user.last_name || "",
+          phone: user.phone || user.phoneNumber,
+        };
+        userCache.set(ownerId, userData);
+        petOwnerName = `${userData.firstName} ${userData.lastName}`.trim();
+      } catch (error) {
+        console.error("Failed to load owner:", error);
+        petOwnerName = `Владелец #${ownerId}`;
+      }
     }
   }
-  
-  // Загружаем данные владельца
-  let petOwnerName = '';
-  if (userCache.has(appointment.petOwnerId)) {
-    const user = userCache.get(appointment.petOwnerId)!;
-    petOwnerName = `${user.firstName} ${user.lastName}`.trim();
-  } else {
-    try {
-      const response = await api.get(`/users/${appointment.petOwnerId}`);
-      const user = response.data;
-      const userData = {
-        firstName: user.firstName || user.first_name || '',
-        lastName: user.lastName || user.last_name || '',
-        phone: user.phone || user.phoneNumber,
-      };
-      userCache.set(appointment.petOwnerId, userData);
-      petOwnerName = `${userData.firstName} ${userData.lastName}`.trim();
-    } catch (error) {
-      console.error('Failed to load owner:', error);
-      petOwnerName = `Владелец #${appointment.petOwnerId}`;
+
+  let petName = "Не указан";
+  let petType = "Не указан";
+  let petBreed = "";
+
+  if (appointment.petId) {
+    if (petCache.has(appointment.petId)) {
+      const pet = petCache.get(appointment.petId)!;
+      petName = pet.name;
+      petType = pet.species;
+      petBreed = pet.breed || "";
+    } else {
+      try {
+        const response = await api.get(`/pet-management/api/pets/${appointment.petId}`);
+        const pet = response.data;
+        const petData = {
+          name: pet.name || "Unknown",
+          species: pet.species || pet.type || "Unknown",
+          breed: pet.breed,
+        };
+        petCache.set(appointment.petId, petData);
+        petName = petData.name;
+        petType = petData.species;
+        petBreed = petData.breed || "";
+      } catch (error) {
+        console.error("Failed to load pet:", error);
+      }
     }
   }
-  
-  // Загружаем данные питомца
-  let petName = 'Не указан';
-  let petType = 'Не указан';
-  let petBreed = '';
-  
-  if (petCache.has(appointment.petId)) {
-    const pet = petCache.get(appointment.petId)!;
-    petName = pet.name;
-    petType = pet.species;
-    petBreed = pet.breed || '';
-  } else {
-    try {
-      const response = await api.get(`/pets/${appointment.petId}`);
-      const pet = response.data;
-      const petData = {
-        name: pet.name || 'Unknown',
-        species: pet.species || pet.type || 'Unknown',
-        breed: pet.breed,
-      };
-      petCache.set(appointment.petId, petData);
-      petName = petData.name;
-      petType = petData.species;
-      petBreed = petData.breed || '';
-    } catch (error) {
-      console.error('Failed to load pet:', error);
-    }
-  }
-  
+
   return {
     ...appointment,
     specialistName,
+    specialistInfo,
     petOwnerName,
     petName,
     petType,
@@ -161,451 +203,586 @@ const enrichSingleAppointment = async (appointment: any): Promise<any> => {
   };
 };
 
-/**
- * Обогащает список записей (для списка)
- */
-const enrichAppointmentsBatch = async (rawAppointments: any[]): Promise<any[]> => {
+const enrichAppointmentsBatch = async (
+  rawAppointments: any[],
+): Promise<EnrichedAppointment[]> => {
   if (!rawAppointments.length) return [];
-  
+
   try {
-    // Собираем уникальные ID
-    const uniqueSpecialistIds = [...new Set(rawAppointments.map(a => a.specialistId))];
-    const uniqueOwnerIds = [...new Set(rawAppointments.map(a => a.petOwnerId))];
-    const uniquePetIds = [...new Set(rawAppointments.map(a => a.petId))];
+    const uniqueSpecialistIds = [
+      ...new Set(
+        rawAppointments
+          .filter((a) => a.specialistId)
+          .map((a) => ({ 
+            id: a.specialistId, 
+            type: a.specialistType 
+          }))
+      ),
+    ];
     
-    // Загружаем всех специалистов
-    const specialistPromises = uniqueSpecialistIds.map(async (specId) => {
-      if (userCache.has(specId)) {
-        return { id: specId, data: userCache.get(specId)! };
+    const uniqueOwnerIds = [
+      ...new Set(
+        rawAppointments
+          .map((a) => a.petOwnerId || a.userId)
+          .filter(Boolean)
+      ),
+    ];
+    const uniquePetIds = [...new Set(rawAppointments.map((a) => a.petId).filter(Boolean))];
+
+    const specialistPromises = uniqueSpecialistIds.map(
+      async ({ id, type }) => {
+        const cacheKey = `${type}_${id}`;
+        if (specialistInfoCache.has(cacheKey)) {
+          return { id, data: specialistInfoCache.get(cacheKey)! };
+        }
+        try {
+          const info = await specialistService.getSpecialistByUserId(id);
+          if (info) {
+            specialistInfoCache.set(cacheKey, info);
+            return { id, data: info };
+          }
+        } catch (error) {
+          console.error(`Failed to load specialist ${id}:`, error);
+        }
+        return { id, data: null };
       }
-      try {
-        const response = await api.get(`/users/${specId}`);
-        const user = response.data;
-        const userData = {
-          firstName: user.firstName || user.first_name || '',
-          lastName: user.lastName || user.last_name || '',
-          phone: user.phone || user.phoneNumber,
-        };
-        userCache.set(specId, userData);
-        return { id: specId, data: userData };
-      } catch (error) {
-        console.error(`Failed to load specialist ${specId}:`, error);
-        return { id: specId, data: { firstName: 'Unknown', lastName: '' } };
-      }
-    });
-    
-    // Загружаем всех владельцев
+    );
+
     const ownerPromises = uniqueOwnerIds.map(async (ownerId) => {
       if (userCache.has(ownerId)) {
         return { id: ownerId, data: userCache.get(ownerId)! };
       }
       try {
-        const response = await api.get(`/users/${ownerId}`);
+        const response = await api.get(`/user-service/users/${ownerId}`);
         const user = response.data;
         const userData = {
-          firstName: user.firstName || user.first_name || '',
-          lastName: user.lastName || user.last_name || '',
+          firstName: user.firstName || user.first_name || "",
+          lastName: user.lastName || user.last_name || "",
           phone: user.phone || user.phoneNumber,
         };
         userCache.set(ownerId, userData);
         return { id: ownerId, data: userData };
       } catch (error) {
         console.error(`Failed to load owner ${ownerId}:`, error);
-        return { id: ownerId, data: { firstName: 'Unknown', lastName: '' } };
+        return { id: ownerId, data: { firstName: "Unknown", lastName: "" } };
       }
     });
-    
-    // Загружаем всех питомцев
+
     const petPromises = uniquePetIds.map(async (petId) => {
       if (petCache.has(petId)) {
         return { id: petId, data: petCache.get(petId)! };
       }
       try {
-        const response = await api.get(`/pets/${petId}`);
+        const response = await api.get(`/pet-management/api/pets/${petId}`);
         const pet = response.data;
         const petData = {
-          name: pet.name || 'Unknown',
-          species: pet.species || pet.type || 'Unknown',
+          name: pet.name || "Unknown",
+          species: pet.species || pet.type || "Unknown",
           breed: pet.breed,
         };
         petCache.set(petId, petData);
         return { id: petId, data: petData };
       } catch (error) {
         console.error(`Failed to load pet ${petId}:`, error);
-        return { id: petId, data: { name: 'Unknown', species: 'Unknown', breed: undefined } };
+        return {
+          id: petId,
+          data: { name: "Unknown", species: "Unknown", breed: undefined },
+        };
       }
     });
-    
+
     const [specialists, owners, pets] = await Promise.all([
       Promise.all(specialistPromises),
       Promise.all(ownerPromises),
       Promise.all(petPromises),
     ]);
-    
-    const specialistMap = new Map(specialists.map(s => [s.id, s.data]));
-    const ownerMap = new Map(owners.map(o => [o.id, o.data]));
-    const petMap = new Map(pets.map(p => [p.id, p.data]));
-    
-    // Обогащаем записи
+
+    const specialistMap = new Map(specialists.map((s) => [s.id, s.data]));
+    const ownerMap = new Map(owners.map((o) => [o.id, o.data]));
+    const petMap = new Map(pets.map((p) => [p.id, p.data]));
+
     const enriched = rawAppointments.map((apt) => {
       const specialist = specialistMap.get(apt.specialistId);
-      const owner = ownerMap.get(apt.petOwnerId);
+      const owner = ownerMap.get(apt.petOwnerId || apt.userId);
       const pet = petMap.get(apt.petId);
-      
+
       return {
         ...apt,
-        specialistName: specialist ? `${specialist.firstName} ${specialist.lastName}`.trim() : `Специалист #${apt.specialistId}`,
-        petOwnerName: owner ? `${owner.firstName} ${owner.lastName}`.trim() : `Владелец #${apt.petOwnerId}`,
-        petName: pet?.name || 'Не указан',
-        petType: pet?.species || 'Не указан',
-        petBreed: pet?.breed || '',
+        specialistName: specialist
+          ? `${specialist.firstName} ${specialist.lastName}`.trim()
+          : `Специалист #${apt.specialistId}`,
+        specialistInfo: specialist,
+        petOwnerName: owner
+          ? `${owner.firstName} ${owner.lastName}`.trim()
+          : `Владелец #${apt.petOwnerId || apt.userId}`,
+        petName: pet?.name || "Не указан",
+        petType: pet?.species || "Не указан",
+        petBreed: pet?.breed || "",
       };
     });
-    
+
     return enriched;
   } catch (error) {
-    console.error('Error enriching appointments:', error);
+    console.error("Error enriching appointments:", error);
     return rawAppointments;
   }
 };
 
+// ============ ОЧИСТКА КЭША ============
+
+export const clearAppointmentsCache = () => {
+  userCache.clear();
+  petCache.clear();
+  specialistInfoCache.clear();
+  activeHooksCount = 0;
+};
+
 // ============ ОСНОВНОЙ ХУК ============
 
-export const useAppointments = (config: UseAppointmentsConfig): UseAppointmentsReturn => {
-  const { mode, appointmentId, filters, autoLoad = true, pageSize = 10 } = config;
-  
-  const { getCurrentUserId } = useUser();
+export const useAppointments = (
+  config: UseAppointmentsConfig,
+): UseAppointmentsReturn => {
+  const {
+    mode,
+    appointmentId,
+    filters,
+    autoLoad = true,
+    pageSize = 10,
+    clearCacheOnUnmount = false,
+  } = config;
+
   const isMountedRef = useRef(true);
-  
-  // Общие состояния
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const filtersKey = useMemo(() => JSON.stringify(filters || {}), [filters]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // Состояния для owner и specialist режимов
-  const [appointments, setAppointments] = useState<any[]>([]);
+
+  const [appointments, setAppointments] = useState<EnrichedAppointment[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [createdCount, setCreatedCount] = useState(0);
+  const [specialistInfo, setSpecialistInfo] = useState<SpecialistInfo | null>(null);
   const [enriching, setEnriching] = useState(false);
-  
-  // Состояния для details режима
-  const [appointment, setAppointment] = useState<any>(null);
+
+  const [appointment, setAppointment] = useState<EnrichedAppointment | null>(null);
   const [recommendations, setRecommendations] = useState<string | null>(null);
+
+  // ============ УПРАВЛЕНИЕ АКТИВНЫМИ ХУКАМИ ============
   
-  // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
-  
+  useEffect(() => {
+    activeHooksCount++;
+    isMountedRef.current = true;
+    
+    return () => {
+      activeHooksCount--;
+      isMountedRef.current = false;
+      
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      
+      if (clearCacheOnUnmount && activeHooksCount === 0) {
+        clearAppointmentsCache();
+      }
+    };
+  }, [clearCacheOnUnmount]);
+
   const handleError = useCallback((error: any, defaultMessage: string) => {
     console.error(defaultMessage, error);
     const message = error?.message || defaultMessage;
     setError(message);
-    Alert.alert('Ошибка', message);
+    Alert.alert("Ошибка", message);
   }, []);
-  
+
   const updateIfMounted = useCallback((callback: () => void) => {
     if (isMountedRef.current) {
       callback();
     }
   }, []);
-  
+
   // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА OWNER ============
-  
-  const loadOwnerAppointments = useCallback(async (page: number = 0, shouldRefresh: boolean = false) => {
-    try {
-      updateIfMounted(() => {
-        setError(null);
-        if (shouldRefresh) {
-          setRefreshing(true);
-        } else if (page === 0) {
-          setLoading(true);
+
+  const loadOwnerAppointments = useCallback(
+    async (page: number = 0, shouldRefresh: boolean = false) => {
+      try {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
         }
-      });
-      
-      const response = await appointmentApi.getMyAppointments({
-        ...filters,
-        page,
-        size: pageSize,
-      });
-      
-      const newContent = response.content || [];
-      
-      updateIfMounted(() => {
-        if (page === 0 || shouldRefresh) {
-          setAppointments(newContent);
-        } else {
-          setAppointments(prev => [...prev, ...newContent]);
-        }
-        
-        setTotalPages(response.totalPages || 0);
-        setCurrentPage(response.number || page);
-        setHasMore(!response.last && newContent.length > 0);
-      });
-    } catch (error: any) {
-      updateIfMounted(() => handleError(error, 'Не удалось загрузить записи'));
-    } finally {
-      updateIfMounted(() => {
-        setLoading(false);
-        setRefreshing(false);
-      });
-    }
-  }, [filters, pageSize, handleError, updateIfMounted]);
-  
-  // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА SPECIALIST ============
-  
-  const loadSpecialistAppointments = useCallback(async (shouldRefresh: boolean = false) => {
-    try {
-      updateIfMounted(() => {
-        setError(null);
-        if (shouldRefresh) {
-          setRefreshing(true);
-        } else {
-          setLoading(true);
-        }
-      });
-      
-      const allResponse = await appointmentApi.getSpecialistAppointments(filters);
-      const createdResponse = await appointmentApi.getSpecialistAppointments({ 
-        status: 'CREATED', 
-        size: 1 
-      });
-      
-      const rawAppointments = allResponse.content || [];
-      
-      updateIfMounted(() => {
-        setAppointments(rawAppointments);
-        setTotalPages(allResponse.totalPages || 0);
-        setCreatedCount(createdResponse.totalElements || 0);
-      });
-      
-      // Обогащаем данные
-      if (rawAppointments.length > 0) {
-        setEnriching(true);
-        const enriched = await enrichAppointmentsBatch(rawAppointments);
+        abortControllerRef.current = new AbortController();
+
         updateIfMounted(() => {
-          setAppointments(enriched);
+          setError(null);
+          if (shouldRefresh) {
+            setRefreshing(true);
+          } else if (page === 0) {
+            setLoading(true);
+          }
         });
-        setEnriching(false);
+
+        const parsedFilters = filtersKey !== "{}" ? JSON.parse(filtersKey) : undefined;
+        
+        const response = await appointmentApi.getMyAppointments({
+          ...parsedFilters,
+          page,
+          size: pageSize,
+        });
+
+        const newContent = response.content || [];
+
+        if (newContent.length > 0) {
+          setEnriching(true);
+          const enriched = await enrichAppointmentsBatch(newContent);
+          updateIfMounted(() => {
+            if (page === 0 || shouldRefresh) {
+              setAppointments(enriched);
+            } else {
+              setAppointments((prev) => [...prev, ...enriched]);
+            }
+          });
+          setEnriching(false);
+        } else {
+          updateIfMounted(() => {
+            if (page === 0 || shouldRefresh) {
+              setAppointments([]);
+            }
+          });
+        }
+
+        updateIfMounted(() => {
+          setTotalPages(response.totalPages || 0);
+          setCurrentPage(response.number || page);
+          setHasMore(!response.last && newContent.length > 0);
+        });
+      } catch (error: any) {
+        if (error?.name !== 'AbortError') {
+          updateIfMounted(() => handleError(error, "Не удалось загрузить записи"));
+        }
+      } finally {
+        updateIfMounted(() => {
+          setLoading(false);
+          setRefreshing(false);
+        });
       }
-      
-    } catch (error: any) {
-      updateIfMounted(() => handleError(error, 'Не удалось загрузить записи'));
-    } finally {
-      updateIfMounted(() => {
-        setLoading(false);
-        setRefreshing(false);
-      });
-    }
-  }, [filters, handleError, updateIfMounted]);
-  
+    },
+    [filtersKey, pageSize, handleError, updateIfMounted]
+  );
+
+  // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА SPECIALIST ============
+
+  const loadSpecialistAppointments = useCallback(
+    async (shouldRefresh: boolean = false) => {
+      try {
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
+        abortControllerRef.current = new AbortController();
+
+        updateIfMounted(() => {
+          setError(null);
+          if (shouldRefresh) {
+            setRefreshing(true);
+          } else {
+            setLoading(true);
+          }
+        });
+
+        const currentSpecialist = await specialistService.getCurrentSpecialist();
+        if (currentSpecialist) {
+          setSpecialistInfo(currentSpecialist);
+        }
+
+        const parsedFilters = filtersKey !== "{}" ? JSON.parse(filtersKey) : undefined;
+
+        const [allResponse, createdResponse] = await Promise.all([
+          appointmentApi.getSpecialistAppointments(parsedFilters),
+          appointmentApi.getSpecialistAppointments({
+            status: "CREATED",
+            size: 1,
+          }),
+        ]);
+
+        const rawAppointments = allResponse.content || [];
+
+        updateIfMounted(() => {
+          setTotalPages(allResponse.totalPages || 0);
+          setCreatedCount(createdResponse.totalElements || 0);
+        });
+
+        if (rawAppointments.length > 0) {
+          setEnriching(true);
+          const enriched = await enrichAppointmentsBatch(rawAppointments);
+          updateIfMounted(() => {
+            setAppointments(enriched);
+          });
+          setEnriching(false);
+        } else {
+          updateIfMounted(() => {
+            setAppointments([]);
+          });
+        }
+      } catch (error: any) {
+        if (error?.name !== 'AbortError') {
+          updateIfMounted(() => handleError(error, "Не удалось загрузить записи"));
+        }
+      } finally {
+        updateIfMounted(() => {
+          setLoading(false);
+          setRefreshing(false);
+        });
+      }
+    },
+    [filtersKey, handleError, updateIfMounted]
+  );
+
   // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА DETAILS ============
-  
+
   const loadAppointmentDetails = useCallback(async () => {
     if (!appointmentId || appointmentId === 0) return;
-    
+
     try {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
       updateIfMounted(() => {
         setLoading(true);
         setError(null);
       });
-      
+
       const [data, recData] = await Promise.all([
         appointmentApi.getAppointmentById(appointmentId),
-        appointmentApi.getRecommendations(appointmentId)
+        appointmentApi.getRecommendations(appointmentId),
       ]);
-      
-      // Обогащаем данные
+
       const enriched = await enrichSingleAppointment(data);
-      
+
       updateIfMounted(() => {
         setAppointment(enriched);
         setRecommendations(recData);
       });
     } catch (error: any) {
-      updateIfMounted(() => handleError(error, 'Не удалось загрузить детали записи'));
+      if (error?.name !== 'AbortError') {
+        updateIfMounted(() =>
+          handleError(error, "Не удалось загрузить детали записи")
+        );
+      }
     } finally {
       updateIfMounted(() => setLoading(false));
     }
   }, [appointmentId, handleError, updateIfMounted]);
-  
+
   // ============ ОБЩИЕ ДЕЙСТВИЯ ============
-  
+
   const refresh = useCallback(() => {
     switch (mode) {
-      case 'owner':
+      case "owner":
         loadOwnerAppointments(0, true);
         break;
-      case 'specialist':
+      case "specialist":
         loadSpecialistAppointments(true);
         break;
-      case 'details':
+      case "details":
         loadAppointmentDetails();
         break;
     }
   }, [mode, loadOwnerAppointments, loadSpecialistAppointments, loadAppointmentDetails]);
-  
+
   const loadMore = useCallback(() => {
-    if (mode === 'owner' && hasMore && !loading && !refreshing) {
+    if (mode === "owner" && hasMore && !loading && !refreshing) {
       loadOwnerAppointments(currentPage + 1);
     }
   }, [mode, hasMore, loading, refreshing, currentPage, loadOwnerAppointments]);
-  
+
   // ============ ДЕЙСТВИЯ ДЛЯ ВЛАДЕЛЬЦА ============
-  
-  const cancelAppointment = useCallback(async (id: number, reason: string): Promise<boolean> => {
-    try {
-      await appointmentApi.cancelAppointment(id, reason);
-      
-      updateIfMounted(() => {
-        setAppointments(prev => prev.map(apt => 
-          apt.id === id ? { ...apt, status: 'CANCELLED_BY_USER', cancellationReason: reason } : apt
-        ));
-      });
-      
-      Alert.alert('Успех', 'Запись успешно отменена');
-      return true;
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось отменить запись');
-      return false;
-    }
-  }, [updateIfMounted]);
-  
+
+  const cancelAppointment = useCallback(
+    async (id: number, reason: string): Promise<boolean> => {
+      try {
+        await appointmentApi.cancelAppointment(id, reason);
+
+        updateIfMounted(() => {
+          setAppointments((prev) =>
+            prev.map((apt) =>
+              apt.id === id
+                ? {
+                    ...apt,
+                    status: "CANCELLED_BY_USER",
+                    cancellationReason: reason,
+                  }
+                : apt
+            )
+          );
+        });
+
+        Alert.alert("Успех", "Запись успешно отменена");
+        return true;
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось отменить запись");
+        return false;
+      }
+    },
+    [updateIfMounted]
+  );
+
   // ============ ДЕЙСТВИЯ ДЛЯ СПЕЦИАЛИСТА ============
-  
-  const confirmAppointment = useCallback(async (id: number): Promise<AppointmentResponseDto> => {
-    try {
-      const updated = await appointmentApi.confirmAppointment(id);
-      updateIfMounted(() => {
-        setAppointments(prev => prev.map(apt => apt.id === id ? { ...apt, ...updated } : apt));
-        setCreatedCount(prev => Math.max(0, prev - 1));
-      });
-      Alert.alert('Успех', 'Запись подтверждена');
-      return updated;
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось подтвердить запись');
-      throw error;
-    }
-  }, [updateIfMounted]);
-  
-  const cancelBySpecialist = useCallback(async (id: number, reason: string): Promise<void> => {
-    try {
-      await appointmentApi.cancelAppointment(id, `Rejected by specialist: ${reason}`);
-      
-      updateIfMounted(() => {
-        setAppointments(prev => prev.map(apt => 
-          apt.id === id ? { ...apt, status: 'CANCELLED_BY_SPECIALIST' } : apt
-        ));
-        setCreatedCount(prev => Math.max(0, prev - 1));
-      });
-      Alert.alert('Успех', 'Запись отклонена');
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось отклонить запись');
-      throw error;
-    }
-  }, [updateIfMounted]);
-  
-  const completeAppointment = useCallback(async (id: number): Promise<void> => {
-    try {
-      await appointmentApi.completeAppointment(id);
-      updateIfMounted(() => {
-        setAppointments(prev => prev.map(apt => 
-          apt.id === id ? { ...apt, status: 'COMPLETED' } : apt
-        ));
-      });
-      Alert.alert('Успех', 'Прием завершен');
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось завершить прием');
-      throw error;
-    }
-  }, [updateIfMounted]);
-  
-  const markAsNoShow = useCallback(async (id: number): Promise<AppointmentResponseDto> => {
-    try {
-      const updated = await appointmentApi.markAsNoShow(id);
-      updateIfMounted(() => {
-        setAppointments(prev => prev.map(apt => apt.id === id ? { ...apt, ...updated } : apt));
-      });
-      Alert.alert('Успех', 'Клиент отмечен как неявившийся');
-      return updated;
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось отметить неявку');
-      throw error;
-    }
-  }, [updateIfMounted]);
-  
-  const addRecommendations = useCallback(async (
-    id: number, 
-    recommendationsData: AppointmentRecommendationsDto
-  ): Promise<AppointmentResponseDto> => {
-    try {
-      const updated = await appointmentApi.addRecommendations(id, recommendationsData);
-      updateIfMounted(() => {
-        setAppointments(prev => prev.map(apt => apt.id === id ? { ...apt, ...updated } : apt));
-      });
-      Alert.alert('Успех', 'Рекомендации добавлены');
-      return updated;
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось добавить рекомендации');
-      throw error;
-    }
-  }, [updateIfMounted]);
-  
+
+  const confirmAppointment = useCallback(
+    async (id: number): Promise<AppointmentResponseDto> => {
+      try {
+        const updated = await appointmentApi.confirmAppointment(id);
+        updateIfMounted(() => {
+          setAppointments((prev) =>
+            prev.map((apt) => (apt.id === id ? { ...apt, ...updated } : apt))
+          );
+          setCreatedCount((prev) => Math.max(0, prev - 1));
+        });
+        Alert.alert("Успех", "Запись подтверждена");
+        return updated;
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось подтвердить запись");
+        throw error;
+      }
+    },
+    [updateIfMounted]
+  );
+
+  const cancelBySpecialist = useCallback(
+    async (id: number, reason: string): Promise<void> => {
+      try {
+        await appointmentApi.cancelAppointment(id, `CANCELLED_BY_SPECIALIST: ${reason}`);
+
+        updateIfMounted(() => {
+          setAppointments((prev) =>
+            prev.map((apt) =>
+              apt.id === id 
+                ? { 
+                    ...apt, 
+                    status: "CANCELLED_BY_SPECIALIST",
+                    cancellationReason: reason 
+                  } 
+                : apt
+            )
+          );
+          setCreatedCount((prev) => Math.max(0, prev - 1));
+        });
+        Alert.alert("Успех", "Запись отклонена");
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось отклонить запись");
+        throw error;
+      }
+    },
+    [updateIfMounted]
+  );
+
+  const completeAppointment = useCallback(
+    async (id: number): Promise<void> => {
+      try {
+        await appointmentApi.completeAppointment(id);
+        updateIfMounted(() => {
+          setAppointments((prev) =>
+            prev.map((apt) => (apt.id === id ? { ...apt, status: "COMPLETED" } : apt))
+          );
+        });
+        Alert.alert("Успех", "Прием завершен");
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось завершить прием");
+        throw error;
+      }
+    },
+    [updateIfMounted]
+  );
+
+  const markAsNoShow = useCallback(
+    async (id: number): Promise<AppointmentResponseDto> => {
+      try {
+        const updated = await appointmentApi.markAsNoShow(id);
+        updateIfMounted(() => {
+          setAppointments((prev) =>
+            prev.map((apt) => (apt.id === id ? { ...apt, ...updated } : apt))
+          );
+        });
+        Alert.alert("Успех", "Клиент отмечен как неявившийся");
+        return updated;
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось отметить неявку");
+        throw error;
+      }
+    },
+    [updateIfMounted]
+  );
+
+  const addRecommendations = useCallback(
+    async (id: number, recommendationsData: AppointmentRecommendationsDto): Promise<AppointmentResponseDto> => {
+      try {
+        const updated = await appointmentApi.addRecommendations(id, recommendationsData);
+        updateIfMounted(() => {
+          setAppointments((prev) =>
+            prev.map((apt) => (apt.id === id ? { ...apt, ...updated } : apt))
+          );
+        });
+        Alert.alert("Успех", "Рекомендации добавлены");
+        return updated;
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось добавить рекомендации");
+        throw error;
+      }
+    },
+    [updateIfMounted]
+  );
+
   // ============ ДЕЙСТВИЯ ДЛЯ ДЕТАЛЕЙ ============
-  
-  const updateAppointment = useCallback(async (data: AppointmentUpdateDto): Promise<AppointmentResponseDto> => {
-    if (!appointmentId) throw new Error('Appointment ID is required');
-    
-    try {
-      const updated = await appointmentApi.updateAppointment(appointmentId, data);
-      updateIfMounted(() => setAppointment(updated));
-      Alert.alert('Успех', 'Запись обновлена');
-      return updated;
-    } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось обновить запись');
-      throw error;
-    }
-  }, [appointmentId, updateIfMounted]);
-  
-  // ============ ОЧИСТКА ПРИ РАЗМОНТИРОВАНИИ ============
-  
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-  
+
+  const updateAppointment = useCallback(
+    async (data: AppointmentUpdateDto): Promise<AppointmentResponseDto> => {
+      if (!appointmentId) throw new Error("Appointment ID is required");
+
+      try {
+        const updated = await appointmentApi.updateAppointment(appointmentId, data);
+        updateIfMounted(() => setAppointment(updated));
+        Alert.alert("Успех", "Запись обновлена");
+        return updated;
+      } catch (error: any) {
+        Alert.alert("Ошибка", error?.message || "Не удалось обновить запись");
+        throw error;
+      }
+    },
+    [appointmentId, updateIfMounted]
+  );
+
   // ============ АВТОЗАГРУЗКА ============
   
   useEffect(() => {
     if (autoLoad) {
       switch (mode) {
-        case 'owner':
+        case "owner":
           loadOwnerAppointments(0);
           break;
-        case 'specialist':
+        case "specialist":
           loadSpecialistAppointments();
           break;
-        case 'details':
+        case "details":
           loadAppointmentDetails();
           break;
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, appointmentId]);
-  
+  }, [mode, appointmentId, filtersKey, autoLoad]);
+
   // ============ БАЗОВЫЙ РЕТУРН ============
-  
+
   const baseReturn: UseAppointmentsReturn = {
     loading: loading || enriching,
     refreshing,
     error,
     refresh,
   };
-  
+
   // ============ РЕТУРН ДЛЯ OWNER ============
-  
-  if (mode === 'owner') {
+
+  if (mode === "owner") {
     return {
       ...baseReturn,
       appointments,
@@ -616,10 +793,10 @@ export const useAppointments = (config: UseAppointmentsConfig): UseAppointmentsR
       cancelAppointment,
     };
   }
-  
+
   // ============ РЕТУРН ДЛЯ SPECIALIST ============
-  
-  if (mode === 'specialist') {
+
+  if (mode === "specialist") {
     return {
       ...baseReturn,
       appointments,
@@ -627,6 +804,7 @@ export const useAppointments = (config: UseAppointmentsConfig): UseAppointmentsR
       totalPages,
       currentPage: 0,
       createdCount,
+      specialistInfo,
       confirmAppointment,
       cancelBySpecialist,
       completeAppointment,
@@ -634,9 +812,9 @@ export const useAppointments = (config: UseAppointmentsConfig): UseAppointmentsR
       addRecommendations,
     };
   }
-  
+
   // ============ РЕТУРН ДЛЯ DETAILS ============
-  
+
   return {
     ...baseReturn,
     appointment,
@@ -648,24 +826,40 @@ export const useAppointments = (config: UseAppointmentsConfig): UseAppointmentsR
 // ============ УДОБНЫЕ ОБЕРТКИ ============
 
 export const useOwnerAppointments = (filters?: AppointmentFilters) => {
+  const stableFilters = useMemo(() => filters, [
+    filters?.status,
+    filters?.specialistId,
+    filters?.petId,
+    filters?.page,
+    filters?.size,
+  ]);
+  
   return useAppointments({
-    mode: 'owner',
-    filters,
+    mode: "owner",
+    filters: stableFilters,
     autoLoad: true,
   });
 };
 
 export const useSpecialistAppointments = (filters?: AppointmentFilters) => {
+  const stableFilters = useMemo(() => filters, [
+    filters?.status,
+    filters?.specialistId,
+    filters?.petId,
+    filters?.page,
+    filters?.size,
+  ]);
+  
   return useAppointments({
-    mode: 'specialist',
-    filters,
+    mode: "specialist",
+    filters: stableFilters,
     autoLoad: true,
   });
 };
 
 export const useAppointmentDetails = (id: number) => {
   return useAppointments({
-    mode: 'details',
+    mode: "details",
     appointmentId: id,
     autoLoad: true,
   });

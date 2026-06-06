@@ -16,12 +16,15 @@ import {
   View,
 } from "react-native";
 
+import "./i18n";
+import { useTranslation } from 'react-i18next';
+
 export default function NutritionForm() {
   const { petId } = useLocalSearchParams();
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
-
+  const { t } = useTranslation();
   const [mealType, setMealType] = useState("");
   const [caloriesValue, setCaloriesValue] = useState("");
   const [foodValue, setFoodValue] = useState("");
@@ -140,17 +143,17 @@ export default function NutritionForm() {
             />
 
             <View style={styles.header}>
-              <Text style={styles.title}>Add Nutrition</Text>
+              <Text style={styles.title}>{t('tracker.Add Nutrition')}</Text>
 
               <Text style={styles.subtitle}>
-                Track your pet’s daily meals
+                {t('tracker.Track your pet’s daily meals')}
               </Text>
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.form}>
 
-                <Text style={styles.label}>Meal Type</Text>
+                <Text style={styles.label}>{t('tracker.Meal Type')}</Text>
 
                 <TextInput
                   value={mealType}
@@ -160,7 +163,7 @@ export default function NutritionForm() {
                   placeholderTextColor={colors.text.secondary}
                 />
 
-                <Text style={styles.label}>Calories</Text>
+                <Text style={styles.label}>{t('tracker.Calories')}</Text>
 
                 <TextInput
                   value={caloriesValue}
@@ -171,7 +174,7 @@ export default function NutritionForm() {
                   placeholderTextColor={colors.text.secondary}
                 />
 
-                <Text style={styles.label}>Food Items</Text>
+                <Text style={styles.label}>{t('tracker.Food Items')}</Text>
 
                 <TextInput
                   value={foodValue}
@@ -186,7 +189,7 @@ export default function NutritionForm() {
                   onPress={handleSave}
                 >
                   <Text style={styles.saveButtonText}>
-                    Add Nutrition
+                    {t('tracker.Add Nutrition')}
                   </Text>
                 </TouchableOpacity>
 

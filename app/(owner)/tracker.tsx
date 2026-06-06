@@ -4,19 +4,24 @@ import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useCallback,useEffect, useState, } from "react";
+import React, { useCallback, useState , useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import "../i18n";
 
 export default function TrackerScreen() {
   const { colors } = useTheme();
+
+  const { t } = useTranslation();
 
   const [pets, setPets] = useState<any[]>([]);
   const [selectedPet, setSelectedPet] = useState<number | null>(null);
@@ -26,6 +31,9 @@ export default function TrackerScreen() {
 
   const [tab, setTab] = useState<"nutrition" | "activity">("nutrition");
 
+  const [historyVisible, setHistoryVisible] =
+  useState(false);
+
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(
     `${today.getFullYear()}-${
@@ -34,6 +42,28 @@ export default function TrackerScreen() {
   );
 
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  if (!selectedPet) return;
+
+  const loadPetData = async () => {
+    try {
+      const [nutRes, actRes] = await Promise.all([
+        api.get(`/pet-management/api/nutrition/pet/${selectedPet}`),
+        api.get(`/pet-management/api/activities/pet/${selectedPet}`),
+      ]);
+
+      console.log("LOADING PET", selectedPet);
+
+      setNutrition(nutRes.data || []);
+      setActivities(actRes.data || []);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  loadPetData();
+}, [selectedPet]);
 
   const load = async () => {
     try {
@@ -54,16 +84,6 @@ export default function TrackerScreen() {
     return petId;
   });
 }
-
-      if (petId) {
-        const [nutRes, actRes] = await Promise.all([
-          api.get(`/pet-management/api/nutrition/pet/${petId}`),
-          api.get(`/pet-management/api/activities/pet/${petId}`),
-        ]);
-
-        setNutrition(nutRes.data || []);
-        setActivities(actRes.data || []);
-      }
     } catch (e) {
       console.log("ERROR:", e);
     } finally {
@@ -87,7 +107,7 @@ if (pets.length === 0) {
       }}
     >
       <Text>
-        You don't have any pets yet
+        {t('tracker.You don\'t have any pets yet')}
       </Text>
     </View>
   );
@@ -133,11 +153,32 @@ console.log("selectedDate:", selectedDate);
             fontWeight: "500",
           }}
         >
-          Loading tracker...
+          {t('tracker.Loading tracker...')}
         </Text>
       </View>
     );
   }
+
+  console.log("selectedPet =", selectedPet);
+console.log("nutrition[0] =", nutrition[0]);
+console.log("activities[0] =", activities[0]);
+
+const history =
+  tab === 'nutrition'
+    ? nutrition
+        .sort(
+          (a, b) =>
+            new Date(b.date).getTime() -
+            new Date(a.date).getTime()
+        )
+        .slice(0, 30)
+    : activities
+        .sort(
+          (a, b) =>
+            new Date(b.date).getTime() -
+            new Date(a.date).getTime()
+        )
+        .slice(0, 30);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary, }}>
@@ -174,7 +215,7 @@ console.log("selectedDate:", selectedDate);
 
         {/* TITLE */}
         <Text style={{ fontSize: 26, fontWeight: "700", textAlign: "center", marginTop: 20,  marginBottom: 20, color: colors.text.primary }}>
-          {tab === "nutrition" ? "Nutrition Tracker" : "Activity Tracker"}
+          {tab === "nutrition" ? t("tracker.Nutrition Tracker") : t("tracker.Activity Tracker")}
         </Text>
 
         {/* TABS */}
@@ -196,7 +237,7 @@ console.log("selectedDate:", selectedDate);
             onPress={() => setTab("nutrition")}
           >
             <Text style={{ fontWeight: "700", fontSize: 16, color: tab === "nutrition" ? "#fff" : colors.text.secondary }}>
-              Nutrition
+              {t("tracker.Nutrition")}
             </Text>
           </TouchableOpacity>
 
@@ -211,7 +252,7 @@ console.log("selectedDate:", selectedDate);
             onPress={() => setTab("activity")}
           >
             <Text style={{ fontWeight: "700", fontSize: 16, color: tab === "activity" ? "#fff" : colors.text.secondary }}>
-              Activity
+              {t("tracker.Activity")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -229,6 +270,30 @@ console.log("selectedDate:", selectedDate);
             max={tab === "nutrition" ? 2000 : 100}
           />
         </View>
+
+        <TouchableOpacity
+  onPress={() =>
+    setHistoryVisible(true)
+  }
+  style={{
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor:
+      colors.card.elevated,
+  }}
+>
+  <Text
+    style={{
+      color:
+        colors.text.primary,
+      fontWeight: '700',
+    }}
+  >
+    {t('tracker.View Last 30 Days')}
+  </Text>
+</TouchableOpacity>
 
         {/* LIST */}
         {tab === "nutrition" ? (
@@ -261,7 +326,7 @@ console.log("selectedDate:", selectedDate);
               }
             >
               <Text style={{ color: "#fff", fontWeight: "700" }}>
-                + Add Nutrition
+                {t('tracker.Add Nutrition')}
               </Text>
             </TouchableOpacity>
           </>
@@ -292,12 +357,114 @@ console.log("selectedDate:", selectedDate);
               }
             >
               <Text style={{ color: "#fff", fontWeight: "700" }}>
-                + Add Activity
+                {t('tracker.Add Activity')}
               </Text>
             </TouchableOpacity>
           </>
         )}
       </ScrollView>
+
+      <Modal
+  visible={historyVisible}
+  animationType="slide"
+  onRequestClose={() =>
+    setHistoryVisible(false)
+  }
+>
+  <SafeAreaView
+    style={{
+      flex: 1,
+      paddingTop: 30,
+      backgroundColor:
+        colors.background.primary,
+    }}
+  >
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent:
+          'space-between',
+        alignItems: 'center',
+        padding: 20,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: '700',
+          color:
+            colors.text.primary,
+        }}
+      >
+        {t('tracker.Last 30 Days')}
+      </Text>
+
+      <TouchableOpacity
+        onPress={() =>
+          setHistoryVisible(false)
+        }
+      >
+        <Text
+          style={{
+            fontSize: 18,
+            color:
+              colors.primary.main,
+          }}
+        >
+          {t('tracker.Close')}
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    <ScrollView
+      contentContainerStyle={{
+        padding: 16,
+      }}
+    >
+      {history.map(
+        (item: any) => (
+          <View
+            key={
+              item.logId ||
+              item.activityId
+            }
+            style={{
+              backgroundColor:
+                colors.card.elevated,
+              padding: 16,
+              borderRadius: 16,
+              marginBottom: 12,
+            }}
+          >
+            <Text
+              style={{
+                fontWeight: '700',
+                color:
+                  colors.text.primary,
+              }}
+            >
+              {item.date?.slice(
+                0,
+                10
+              )}
+            </Text>
+
+            <Text
+              style={{
+                marginTop: 6,
+                color:
+                  colors.text.secondary,
+              }}
+            >
+              {item.summary}
+            </Text>
+          </View>
+        )
+      )}
+    </ScrollView>
+  </SafeAreaView>
+</Modal>
     </SafeAreaView>
+    
   );
 }

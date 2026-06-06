@@ -1,0 +1,46 @@
+{
+  "settings": {
+    "title": "Баптаулар",
+    "darkMode": "Қараңғы режим",
+    "preferences": "Параметрлер",
+    "notifications": "Хабарландырулар",
+    "account": "Аккаунт",
+    "deleteAccount": "Аккаунтты жою",
+    "about": "Ақпарат",
+    "privacyPolicy": "Құпиялылық саясаты",
+    "appVersion": "Қолданба нұсқасы 1.0.0",
+    "homeScreen": "Басты экран",
+    "showCalendar": "Күнтізбені көрсету",
+    "showTracker": "Трекерді көрсету",
+    "showAI": "AI талдауын көрсету",
+    "language": "Тіл",
+    "english": "Ағылшын",
+    "kazakh": "Қазақша",
+    "russian": "Орысша"
+  },
+  "tracker": {
+    "You don't have any pets yet": "Сізде әлі үй жануарлары жоқ",
+    "Loading tracker...": "Трекер жүктелуде...",
+    "View Last 30 Days": "Соңғы 30 күнін көру",
+    "Nutrition": "Тамақтану",
+    "Activity": "Белсенділік",
+    "Add Nutrition": "Тамақтануды қосу",
+    "Add Activity": "Белсенділікті қосу",
+    "Close": "Жабу",
+    "Last 30 Days": "Соңғы 30 күн",
+    "Meal Type": "Тамақ түрі",
+    "Calories": "Калории",
+    "Food Items": "Тағамдар",
+    "Track your pet’s daily meals": "Үй жануарыңыздың күнделікті тамақтарын қадағалаңыз",
+    "Activity Type": "Белсенділік түрі",
+    "Distance": "Қашықтық",
+    "Duration": "Ұзақтығы",
+    "Track your pet’s daily activity": "Үй жануарыңыздың күнделікті белсенділігін қадағалаңыз",
+    "Nutrition Tracker": "Тамақтану трекері",
+    "Activity Tracker": "Белсенділік трекері"
+  },
+  "calendar":{
+    "title": "Күнтізбе",
+    "days": ["Жс", "Дс", "Сс", "Ср", "Бс", "Жм", "Сб"]
+  }
+}

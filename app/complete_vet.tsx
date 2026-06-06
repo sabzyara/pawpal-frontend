@@ -14,11 +14,32 @@ import {
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useProfileStore } from '@/store/profileStore';
+import { useAuthStore } from '@/store/authStore';
+
+interface VetData {
+  firstName: string;
+  lastName: string;
+  licenseNumber: string;
+  clinicName: string;
+  phoneNumber?: string;
+  city?: string;
+  experienceYears?: number;
+  education?: string;
+  address?: string;
+  about?: string;
+  pricePerVisit?: number;
+  avatarUrl?: string;
+}
 
 export default function CompleteVetScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
+  const { fetchProfile } = useProfileStore();
+  const user = useAuthStore((state) => state.user);
 
+  // Состояния формы
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -34,6 +55,7 @@ export default function CompleteVetScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
+    // Валидация обязательных полей
     if (!firstName || !lastName) {
       Alert.alert('Ошибка', 'Имя и фамилия обязательны');
       return;
@@ -52,42 +74,72 @@ export default function CompleteVetScreen() {
     try {
       setLoading(true);
 
-      const vetData = {
+      // Формируем данные для отправки
+      const vetData: VetData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        phoneNumber: phoneNumber.trim() || null,
         licenseNumber: licenseNumber.trim(),
         clinicName: clinicName.trim(),
-        experienceYears: experienceYears ? parseInt(experienceYears) : null,
-        avatarUrl: avatarUrl.trim() || null,
-        about: about.trim() || null,
-        education: education.trim() || null,
-        pricePerVisit: pricePerVisit ? parseFloat(pricePerVisit) : null,
-        address: address.trim() || null,
-        city: city.trim() || null
       };
 
-      console.log('Sending vet data:', vetData);
+      // Добавляем опциональные поля только если они заполнены
+      if (phoneNumber.trim()) vetData.phoneNumber = phoneNumber.trim();
+      if (city.trim()) vetData.city = city.trim();
+      if (experienceYears) vetData.experienceYears = parseInt(experienceYears, 10);
+      if (education.trim()) vetData.education = education.trim();
+      if (address.trim()) vetData.address = address.trim();
+      if (about.trim()) vetData.about = about.trim();
+      if (pricePerVisit) vetData.pricePerVisit = parseFloat(pricePerVisit);
+      if (avatarUrl.trim()) vetData.avatarUrl = avatarUrl.trim();
 
-      // ✅ Исправлено: убраны лишние headers (интерцептор добавит токен)
-      await api.post('/specialist-service/veterinarians/me', vetData);
+      console.log('📤 Sending vet data:', vetData);
 
-      Alert.alert('Успех', 'Профиль ветеринара успешно создан', [
-        { text: 'OK', onPress: () => router.replace('/specialist-profile') }
-      ]);
+      // Отправляем запрос на создание профиля
+      const response = await api.post('/specialist-service/veterinarians/me', vetData);
+      console.log('✅ API response status:', response.status);
+
+      // Обновляем профиль в store
+      if (user) {
+        console.log('🔄 Fetching updated profile...');
+        await fetchProfile(user);
+        console.log('✅ Profile updated in store');
+      }
+
+      // Успех - показываем Alert и редиректим
+      console.log('✅ Profile created successfully, showing alert');
       
-    } catch (e: any) {
-      console.log('Error response:', e?.response?.data);
+      Alert.alert(
+        'Успех!', 
+        'Профиль ветеринара успешно создан', 
+        [
+          { 
+            text: 'Перейти в профиль', 
+            onPress: () => {
+              console.log('🔄 Redirecting to specialist profile...');
+              router.replace('/specialist-profile');
+            }
+          }
+        ]
+      );
       
-      if (e?.response?.status === 409) {
+    } catch (error: any) {
+      console.log('❌ Error status:', error?.response?.status);
+      console.log('❌ Error data:', error?.response?.data);
+      
+      // Обработка различных ошибок
+      if (error?.response?.status === 409) {
         Alert.alert('Ошибка', 'Профиль ветеринара уже существует');
-      } else if (e?.response?.status === 403) {
+      } else if (error?.response?.status === 403) {
         Alert.alert('Ошибка', 'У вас нет прав для создания профиля ветеринара');
-      } else if (e?.response?.status === 401) {
+      } else if (error?.response?.status === 401) {
         Alert.alert('Ошибка', 'Сессия истекла. Пожалуйста, войдите заново');
-        router.replace('/login');
-      } else if (e?.response?.data?.message) {
-        Alert.alert('Ошибка', e.response.data.message);
+        router.replace('/(auth)/login');
+      } else if (error?.response?.status === 400) {
+        Alert.alert('Ошибка', 'Проверьте правильность заполнения полей');
+      } else if (error?.response?.data?.message) {
+        Alert.alert('Ошибка', error.response.data.message);
+      } else if (error?.message === 'Network Error') {
+        Alert.alert('Ошибка', 'Нет соединения с сервером');
       } else {
         Alert.alert('Ошибка', 'Не удалось сохранить профиль. Пожалуйста, попробуйте позже.');
       }
@@ -98,128 +150,241 @@ export default function CompleteVetScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: colors.background.primary }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView 
-        style={{ flex: 1, backgroundColor: colors.background.primary }}
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
         <View style={styles.container}>
-          <Text style={styles.title}>Профиль ветеринара 🐾</Text>
-          <Text style={styles.subtitle}>
-            Заполните информацию о себе
+          {/* Header Card */}
+          <View
+            style={{
+              backgroundColor: colors.primary.main,
+              borderRadius: 28,
+              padding: 24,
+              marginBottom: 24,
+              marginTop: 20,
+            }}
+          >
+            <Text style={{ fontSize: 34, marginBottom: 8 }}>🐾</Text>
+            <Text
+              style={{
+                fontSize: 24,
+                fontWeight: '700',
+                color: colors.text.inverse,
+              }}
+            >
+              Профиль ветеринара
+            </Text>
+            <Text
+              style={{
+                color: colors.text.inverse,
+                opacity: 0.9,
+                marginTop: 6,
+              }}
+            >
+              Расскажите владельцам животных о себе
+            </Text>
+          </View>
+
+          {/* Основная информация */}
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '700',
+              color: colors.text.primary,
+              marginBottom: 12,
+              marginTop: 8,
+            }}
+          >
+            Основная информация
           </Text>
 
-          <TextInput
-            placeholder="Имя *"
-            placeholderTextColor={colors.text.tertiary}
-            value={firstName}
-            onChangeText={setFirstName}
-            style={styles.input}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="person-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Имя *"
+              placeholderTextColor={colors.text.tertiary}
+              value={firstName}
+              onChangeText={setFirstName}
+              style={styles.inputWithIcon}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Фамилия *"
-            placeholderTextColor={colors.text.tertiary}
-            value={lastName}
-            onChangeText={setLastName}
-            style={styles.input}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="person-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Фамилия *"
+              placeholderTextColor={colors.text.tertiary}
+              value={lastName}
+              onChangeText={setLastName}
+              style={styles.inputWithIcon}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Номер лицензии *"
-            placeholderTextColor={colors.text.tertiary}
-            value={licenseNumber}
-            onChangeText={setLicenseNumber}
-            style={styles.input}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="call-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Телефон"
+              placeholderTextColor={colors.text.tertiary}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              style={styles.inputWithIcon}
+              keyboardType="phone-pad"
+            />
+          </View>
 
-          <TextInput
-            placeholder="Название клиники *"
-            placeholderTextColor={colors.text.tertiary}
-            value={clinicName}
-            onChangeText={setClinicName}
-            style={styles.input}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="location-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Город"
+              placeholderTextColor={colors.text.tertiary}
+              value={city}
+              onChangeText={setCity}
+              style={styles.inputWithIcon}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Телефон"
-            placeholderTextColor={colors.text.tertiary}
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            style={styles.input}
-            keyboardType="phone-pad"
-          />
+          {/* Профессиональная информация */}
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '700',
+              color: colors.text.primary,
+              marginBottom: 12,
+              marginTop: 20,
+            }}
+          >
+            Профессиональная информация
+          </Text>
 
-          <TextInput
-            placeholder="Город"
-            placeholderTextColor={colors.text.tertiary}
-            value={city}
-            onChangeText={setCity}
-            style={styles.input}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="document-text-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Номер лицензии *"
+              placeholderTextColor={colors.text.tertiary}
+              value={licenseNumber}
+              onChangeText={setLicenseNumber}
+              style={styles.inputWithIcon}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Адрес"
-            placeholderTextColor={colors.text.tertiary}
-            value={address}
-            onChangeText={setAddress}
-            style={styles.input}
-            multiline
-            numberOfLines={2}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="business-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Название клиники *"
+              placeholderTextColor={colors.text.tertiary}
+              value={clinicName}
+              onChangeText={setClinicName}
+              style={styles.inputWithIcon}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Опыт работы (лет)"
-            placeholderTextColor={colors.text.tertiary}
-            value={experienceYears}
-            onChangeText={setExperienceYears}
-            style={styles.input}
-            keyboardType="numeric"
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="time-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Опыт работы (лет)"
+              placeholderTextColor={colors.text.tertiary}
+              value={experienceYears}
+              onChangeText={setExperienceYears}
+              style={styles.inputWithIcon}
+              keyboardType="numeric"
+            />
+          </View>
 
-          <TextInput
-            placeholder="Образование"
-            placeholderTextColor={colors.text.tertiary}
-            value={education}
-            onChangeText={setEducation}
-            style={styles.input}
-            multiline
-            numberOfLines={3}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="school-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Образование"
+              placeholderTextColor={colors.text.tertiary}
+              value={education}
+              onChangeText={setEducation}
+              style={[styles.inputWithIcon, styles.textAreaMultiline]}
+              multiline
+              numberOfLines={3}
+            />
+          </View>
 
-          <TextInput
-            placeholder="О себе"
-            placeholderTextColor={colors.text.tertiary}
-            value={about}
-            onChangeText={setAbout}
-            style={[styles.input, styles.textArea]}
-            multiline
-            numberOfLines={4}
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="location-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Адрес клиники"
+              placeholderTextColor={colors.text.tertiary}
+              value={address}
+              onChangeText={setAddress}
+              style={[styles.inputWithIcon, styles.textAreaMultiline]}
+              multiline
+              numberOfLines={2}
+            />
+          </View>
 
-          <TextInput
-            placeholder="Цена за прием (₸)"
-            placeholderTextColor={colors.text.tertiary}
-            value={pricePerVisit}
-            onChangeText={setPricePerVisit}
-            style={styles.input}
-            keyboardType="numeric"
-          />
+          {/* О себе и работе */}
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '700',
+              color: colors.text.primary,
+              marginBottom: 12,
+              marginTop: 20,
+            }}
+          >
+            О себе и работе
+          </Text>
 
-          <TextInput
-            placeholder="URL аватара"
-            placeholderTextColor={colors.text.tertiary}
-            value={avatarUrl}
-            onChangeText={setAvatarUrl}
-            style={styles.input}
-            autoCapitalize="none"
-          />
+          <View style={styles.textAreaCard}>
+            <Ionicons name="chatbubble-outline" size={20} color={colors.primary.main} style={{ marginRight: 12 }} />
+            <TextInput
+              placeholder="Расскажите о себе, своем опыте и подходе к лечению"
+              placeholderTextColor={colors.text.tertiary}
+              value={about}
+              onChangeText={setAbout}
+              style={styles.textAreaInput}
+              multiline
+              numberOfLines={5}
+              textAlignVertical="top"
+            />
+          </View>
 
+          <View style={styles.inputContainer}>
+            <Ionicons name="cash-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="Цена за прием (₸)"
+              placeholderTextColor={colors.text.tertiary}
+              value={pricePerVisit}
+              onChangeText={setPricePerVisit}
+              style={styles.inputWithIcon}
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="image-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
+            <TextInput
+              placeholder="URL фотографии"
+              placeholderTextColor={colors.text.tertiary}
+              value={avatarUrl}
+              onChangeText={setAvatarUrl}
+              style={styles.inputWithIcon}
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* Кнопка сохранения */}
           <TouchableOpacity 
-            style={[styles.button, loading && styles.buttonDisabled]} 
+            style={[
+              styles.button, 
+              loading && { opacity: 0.6 },
+              { 
+                height: 58,
+                borderRadius: 20,
+                marginTop: 28,
+                marginBottom: 40,
+              }
+            ]} 
             onPress={handleSave}
             disabled={loading}
           >

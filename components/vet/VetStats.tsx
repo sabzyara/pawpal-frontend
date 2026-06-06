@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 
 interface VetStatsProps {
@@ -13,12 +14,64 @@ interface VetStatsProps {
 export const VetStats: React.FC<VetStatsProps> = ({ vet }) => {
   const { colors, spacing, typography } = useTheme();
 
-  const StatItem = ({ label, value }: { label: string; value: string | number }) => (
-    <View style={{ alignItems: 'center', flex: 1 }}>
-      <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
+  const StatCard = ({
+    icon,
+    value,
+    label,
+    color,
+  }: {
+    icon: keyof typeof Ionicons.glyphMap;
+    value: string | number;
+    label: string;
+    color: string;
+  }) => (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: colors.card.default,
+        borderRadius: 20,
+        paddingVertical: spacing.md,
+        paddingHorizontal: spacing.sm,
+        alignItems: 'center',
+
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.06,
+        shadowRadius: 4,
+        elevation: 3,
+      }}
+    >
+      <Ionicons
+        name={icon}
+        size={24}
+        color={color}
+      />
+
+      <Text
+        style={[
+          typography.h4,
+          {
+            color: colors.text.primary,
+            marginTop: spacing.xs,
+          },
+        ]}
+      >
         {value}
       </Text>
-      <Text style={[typography.caption, { color: colors.text.secondary }]}>
+
+      <Text
+        style={[
+          typography.caption,
+          {
+            color: colors.text.secondary,
+            textAlign: 'center',
+            marginTop: 2,
+          },
+        ]}
+      >
         {label}
       </Text>
     </View>
@@ -28,23 +81,30 @@ export const VetStats: React.FC<VetStatsProps> = ({ vet }) => {
     <View
       style={{
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        backgroundColor: colors.card.default,
-        padding: spacing.md,
-        borderRadius: 999,
+        gap: spacing.sm,
         marginBottom: spacing.lg,
-        ...(colors.card.default === '#FFFFFF' && {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 3,
-          elevation: 2,
-        }),
       }}
     >
-      <StatItem label="Experience" value={`${vet.experienceYears} yrs`} />
-      <StatItem label="Patients" value={vet.patientsCount} />
-      <StatItem label="Rating" value={vet.rating} />
+      <StatCard
+        icon="star"
+        value={vet.rating.toFixed(1)}
+        label="Рейтинг"
+        color="#FFB800"
+      />
+
+      <StatCard
+        icon="paw"
+        value={vet.patientsCount}
+        label="Клиенты"
+        color={colors.primary.main}
+      />
+
+      <StatCard
+        icon="school"
+        value={vet.experienceYears}
+        label="Лет опыта"
+        color={colors.success.main}
+      />
     </View>
   );
 };

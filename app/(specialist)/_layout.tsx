@@ -9,21 +9,35 @@ export default function SpecialistTabs() {
 
   return (
     <Tabs
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
 
         tabBarStyle: {
-          backgroundColor: colors.background.primary,
-          borderTopColor: colors.border.light,
+          backgroundColor:
+            colors.background.primary,
 
-          paddingBottom: Platform.OS === "ios" ? 20 : 10,
+          borderTopColor:
+            colors.border.light,
+
+          paddingBottom:
+            Platform.OS === "ios"
+              ? 20
+              : 10,
+
           paddingTop: 10,
 
-          height: Platform.OS === "ios" ? 85 : 65,
+          height:
+            Platform.OS === "ios"
+              ? 85
+              : 65,
         },
 
-        tabBarActiveTintColor: colors.icon.active,
-        tabBarInactiveTintColor: colors.icon.inactive,
+        tabBarActiveTintColor:
+          colors.icon.active,
+
+        tabBarInactiveTintColor:
+          colors.icon.inactive,
 
         tabBarLabelStyle: {
           fontSize: 12,
@@ -32,11 +46,32 @@ export default function SpecialistTabs() {
       }}
     >
       <Tabs.Screen
-        name="vets-list"
+        name="index"
         options={{
-          title: "Список",
+          title: "Home",
 
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
+            <Feather
+              name="home"
+              size={size}
+              color={color}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="specialist_appointments"
+        options={{
+          title: "Appointments",
+
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Feather
               name="calendar"
               size={size}
@@ -46,25 +81,33 @@ export default function SpecialistTabs() {
         }}
       />
 
-      {/* <Tabs.Screen
-        name="chat"
+      <Tabs.Screen
+        name="specialist-list"
         options={{
-          title: "Чат",
+          title: "Specialists",
 
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 22 }}>
-              💬
-            </Text>
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
+            <Feather
+              name="users"
+              size={size}
+              color={color}
+            />
           ),
         }}
-      /> */}
+      />
 
       <Tabs.Screen
         name="specialist-profile"
         options={{
           title: "Profile",
 
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({
+            color,
+            size,
+          }) => (
             <Feather
               name="user"
               size={size}

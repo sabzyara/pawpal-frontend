@@ -380,4 +380,3 @@ const createStyles = (colors: any) =>
       borderColor: colors.primary.main,
     },
   });
-

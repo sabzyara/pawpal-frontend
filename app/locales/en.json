@@ -1,0 +1,47 @@
+{
+  "settings": {
+    "title": "Settings",
+    "darkMode": "Dark Mode",
+    "preferences": "Preferences",
+    "notifications": "Notifications",
+    "account": "Account",
+    "deleteAccount": "Delete Account",
+    "about": "About",
+    "privacyPolicy": "Privacy Policy",
+    "appVersion": "App Version 1.0.0",
+    "homeScreen": "Home Screen",
+    "showCalendar": "Show Calendar",
+    "showTracker": "Show Tracker",
+    "showAI": "Show AI Analysis",
+    "language": "Language",
+    "english": "English",
+    "kazakh": "Kazakh",
+    "russian": "Russian"
+
+  },
+  "tracker": {
+    "You don't have any pets yet": "You don't have any pets yet",
+    "Loading tracker...": "Loading tracker...",
+    "View Last 30 Days": "View Last 30 Days",
+    "Nutrition": "Nutrition",
+    "Activity": "Activity",
+    "Add Nutrition": "Add Nutrition",
+    "Add Activity": "Add Activity",
+    "Close": "Close",
+    "Last 30 Days": "Last 30 Days",
+    "Meal Type": "Meal Type",
+    "Calories": "Calories",
+    "Food Items": "Food Items",
+    "Track your pet’s daily meals": "Track your pet’s daily meals",
+    "Activity Type": "Activity Type",
+    "Distance": "Distance",
+    "Duration": "Duration",
+    "Track your pet’s daily activity": "Track your pet’s daily activity",
+    "Nutrition Tracker": "Nutrition Tracker",
+    "Activity Tracker": "Activity Tracker"  
+},
+"calendar":{
+  "title": "Calendar",
+  "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] 
+  }
+}

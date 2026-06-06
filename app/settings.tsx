@@ -12,15 +12,30 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import i18n from './i18n';
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
 
   const styles = createStyles(colors);
+  const { t } = useTranslation();
+
+  const [language, setLanguage] =
+    useState(i18n.language);
 
   const [notifications, setNotifications] = useState(true);
+
+  const [showCalendar, setShowCalendar] = useState(true);
+  const [showTracker, setShowTracker] =
+  useState(true);
+
+  const [showAI, setShowAI] =
+    useState(true);
 
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
@@ -57,15 +72,121 @@ export default function SettingsScreen() {
     );
   };
 
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <Text style={[styles.header, { color: colors.text.primary }]}>
-        Settings
-      </Text>
+  React.useEffect(() => {
+  loadSettings();
+}, []);
 
-      <Section title="Preferences" styles={styles}>
+const loadSettings = async () => {
+  const calendar =
+    await AsyncStorage.getItem(
+      'showCalendar'
+    );
+
+  const tracker =
+    await AsyncStorage.getItem(
+      'showTracker'
+    );
+
+  const ai =
+    await AsyncStorage.getItem(
+      'showAI'
+    );
+    const savedLanguage =
+  await AsyncStorage.getItem(
+    'language'
+  );
+
+if (savedLanguage) {
+  setLanguage(savedLanguage);
+
+  await i18n.changeLanguage(
+    savedLanguage
+  );
+}
+
+  if (calendar !== null)
+    setShowCalendar(
+      calendar === 'true'
+    );
+
+  if (tracker !== null)
+    setShowTracker(
+      tracker === 'true'
+    );
+
+  if (ai !== null)
+    setShowAI(
+      ai === 'true'
+    );
+
+};
+const changeLanguage = async (
+  lang: string
+) => {
+  setLanguage(lang);
+
+  await i18n.changeLanguage(lang);
+
+  await AsyncStorage.setItem(
+    'language',
+    lang
+  );
+};
+
+  return (
+    <SafeAreaView
+  style={{
+    flex: 1,
+    backgroundColor:
+      colors.background.primary,
+  }}
+>
+  <ScrollView
+    contentContainerStyle={{
+      padding: 16,
+      paddingBottom: 40,
+    }}
+    showsVerticalScrollIndicator={false}
+  >
+      <View
+  style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  }}
+>
+  <TouchableOpacity
+    onPress={() => router.back()}
+    style={{
+      position: 'absolute',
+      left: 0,
+      zIndex: 1,
+    }}
+  >
+    <Ionicons
+      name="arrow-back"
+      size={28}
+      color={colors.text.primary}
+    />
+  </TouchableOpacity>
+
+  <Text
+    style={[
+      styles.header,
+      {
+        color: colors.text.primary,
+        flex: 1,
+        marginBottom: 0,
+      },
+    ]}
+  >
+    {t('settings.title')}
+  </Text>
+</View>
+
+      <Section title={t('settings.preferences')} styles={styles}>
         <SwitchItem
-          title="Dark Mode"
+          title={t('settings.darkMode')}
           value={darkMode}
           onValueChange={(value: boolean) =>
             setTheme(value ? 'dark' : 'light')
@@ -74,26 +195,136 @@ export default function SettingsScreen() {
         />
 
         <SwitchItem
-          title="Notifications"
+          title={t('settings.notifications')}
           value={notifications}
           onValueChange={setNotifications}
           colors={colors}
         />
       </Section>
 
-      <Section title="Account" styles={styles}>
+      <Section title={t('settings.account')} styles={styles}>
         <Item
-          title="Delete Account"
+          title={t('settings.deleteAccount')}
           danger
           onPress={handleDeleteAccount}
           styles={styles}
         />
       </Section>
 
-      <Section title="About" styles={styles}>
-        <Item title="Privacy Policy" styles={styles} />
-        <Item title="App Version 1.0.0" styles={styles} />
+      <Section title={t('settings.about')} styles={styles}>
+        <Item title={t('settings.privacyPolicy')} styles={styles} />
+        <Item title={t('settings.appVersion')} styles={styles} />
       </Section>
+
+      <Section
+        title={t('settings.homeScreen')}
+        styles={styles}
+      >
+        <SwitchItem
+          title={t('settings.showCalendar')}
+          value={showCalendar}
+          onValueChange={async (
+            value: boolean
+          ) => {
+            setShowCalendar(value);
+      
+            await AsyncStorage.setItem(
+              'showCalendar',
+              String(value)
+            );
+          }}
+          colors={colors}
+        />
+      
+        <SwitchItem
+          title={t('settings.showTracker')}
+          value={showTracker}
+          onValueChange={async (
+            value: boolean
+          ) => {
+            setShowTracker(value);
+      
+            await AsyncStorage.setItem(
+              'showTracker',
+              String(value)
+            );
+          }}
+          colors={colors}
+        />
+      
+        <SwitchItem
+          title={t('settings.showAI')}
+          value={showAI}
+          onValueChange={async (
+            value: boolean
+          ) => {
+            setShowAI(value);
+      
+            await AsyncStorage.setItem(
+              'showAI',
+              String(value)
+            );
+          }}
+          colors={colors}
+        />
+      
+      </Section>
+      <Section
+  title={t('settings.language')}
+  styles={styles}
+>
+  <Item
+    title={t('settings.english')}
+    onPress={() =>
+      changeLanguage('en')
+    }
+    styles={styles}
+    rightIcon={
+      language === 'en' ? (
+        <Ionicons
+          name="checkmark-circle"
+          size={24}
+          color={colors.primary.main}
+        />
+      ) : null
+    }
+  />
+
+  <Item
+    title={t('settings.russian')}
+    onPress={() =>
+      changeLanguage('ru')
+    }
+    styles={styles}
+    rightIcon={
+      language === 'ru' ? (
+        <Ionicons
+          name="checkmark-circle"
+          size={24}
+          color={colors.primary.main}
+        />
+      ) : null
+    }
+  />
+
+  <Item
+    title={t('settings.kazakh')}
+    onPress={() =>
+      changeLanguage('kz')
+    }
+    styles={styles}
+    rightIcon={
+      language === 'kz' ? (
+        <Ionicons
+          name="checkmark-circle"
+          size={24}
+          color={colors.primary.main}
+        />
+      ) : null
+    }
+  />
+</Section>
+    </ScrollView>
     </SafeAreaView>
   );
 }
@@ -107,9 +338,25 @@ function Section({ title, children, styles }: any) {
   );
 }
 
-function Item({ title, onPress, danger, styles }: any) {
+function Item({
+  title,
+  onPress,
+  danger,
+  styles,
+  rightIcon,
+}: any) {
   return (
-    <TouchableOpacity style={styles.item} onPress={onPress}>
+    <TouchableOpacity
+      style={[
+        styles.item,
+        {
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        },
+      ]}
+      onPress={onPress}
+    >
       <ThemedText
         style={[
           styles.itemText,
@@ -118,6 +365,8 @@ function Item({ title, onPress, danger, styles }: any) {
       >
         {title}
       </ThemedText>
+
+      {rightIcon}
     </TouchableOpacity>
   );
 }
