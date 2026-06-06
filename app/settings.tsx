@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SettingsScreen() {
   const { colors } = useTheme();
@@ -21,6 +22,14 @@ export default function SettingsScreen() {
   const styles = createStyles(colors);
 
   const [notifications, setNotifications] = useState(true);
+
+  const [showCalendar, setShowCalendar] = useState(true);
+  const [showTracker, setShowTracker] =
+  useState(true);
+
+  const [showSchedule, setShowSchedule] = useState(true);
+  const [showAI, setShowAI] =
+    useState(true);
 
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
@@ -57,11 +66,80 @@ export default function SettingsScreen() {
     );
   };
 
+  React.useEffect(() => {
+  loadSettings();
+}, []);
+
+const loadSettings = async () => {
+  const calendar =
+    await AsyncStorage.getItem(
+      'showCalendar'
+    );
+
+  const tracker =
+    await AsyncStorage.getItem(
+      'showTracker'
+    );
+
+  const ai =
+    await AsyncStorage.getItem(
+      'showAI'
+    );
+
+  if (calendar !== null)
+    setShowCalendar(
+      calendar === 'true'
+    );
+
+  if (tracker !== null)
+    setShowTracker(
+      tracker === 'true'
+    );
+
+  if (ai !== null)
+    setShowAI(
+      ai === 'true'
+    );
+
+};
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <Text style={[styles.header, { color: colors.text.primary }]}>
-        Settings
-      </Text>
+      <View
+  style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  }}
+>
+  <TouchableOpacity
+    onPress={() => router.back()}
+    style={{
+      position: 'absolute',
+      left: 0,
+      zIndex: 1,
+    }}
+  >
+    <Ionicons
+      name="arrow-back"
+      size={28}
+      color={colors.text.primary}
+    />
+  </TouchableOpacity>
+
+  <Text
+    style={[
+      styles.header,
+      {
+        color: colors.text.primary,
+        flex: 1,
+        marginBottom: 0,
+      },
+    ]}
+  >
+    Settings
+  </Text>
+</View>
 
       <Section title="Preferences" styles={styles}>
         <SwitchItem
@@ -93,6 +171,60 @@ export default function SettingsScreen() {
       <Section title="About" styles={styles}>
         <Item title="Privacy Policy" styles={styles} />
         <Item title="App Version 1.0.0" styles={styles} />
+      </Section>
+
+      <Section
+        title="Home Screen"
+        styles={styles}
+      >
+        <SwitchItem
+          title="Show Calendar"
+          value={showCalendar}
+          onValueChange={async (
+            value: boolean
+          ) => {
+            setShowCalendar(value);
+      
+            await AsyncStorage.setItem(
+              'showCalendar',
+              String(value)
+            );
+          }}
+          colors={colors}
+        />
+      
+        <SwitchItem
+          title="Show Tracker"
+          value={showTracker}
+          onValueChange={async (
+            value: boolean
+          ) => {
+            setShowTracker(value);
+      
+            await AsyncStorage.setItem(
+              'showTracker',
+              String(value)
+            );
+          }}
+          colors={colors}
+        />
+      
+        <SwitchItem
+          title="Show AI Analysis"
+          value={showAI}
+          onValueChange={async (
+            value: boolean
+          ) => {
+            setShowAI(value);
+      
+            await AsyncStorage.setItem(
+              'showAI',
+              String(value)
+            );
+          }}
+          colors={colors}
+        />
+      
       </Section>
     </SafeAreaView>
   );
