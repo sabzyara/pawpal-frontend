@@ -117,8 +117,8 @@ export const VetManage: React.FC<VetManageProps> = ({
         text: "Выйти",
         onPress: async () => {
           try {
-            await logout();  // ✅ Используем хук
-            router.replace("/(auth)/login");
+            await logout(); 
+            router.replace("/login");
           } catch (error) {
             Alert.alert("Ошибка", "Не удалось выйти");
           }
