@@ -244,14 +244,19 @@ export const appointmentApi = {
   },
 
   getRecommendations: async (id: number): Promise<string | null> => {
-    try {
-      const response = await appointmentApiClient.get<string>(`${APPOINTMENTS_URL}/${id}/recommendations`);
-      return response.data;
-    } catch (error) {
-      console.warn('Failed to get recommendations:', error);
+  try {
+    const response = await appointmentApiClient.get<string>(`${APPOINTMENTS_URL}/${id}/recommendations`);
+    return response.data;
+  } catch (error: any) {
+    // ✅ 400 означает, что рекомендации еще не добавлены (статус не COMPLETED)
+    if (error?.response?.status === 400 || error?.response?.status === 404) {
+      console.log(`ℹ️ No recommendations yet for appointment ${id}`);
       return null;
     }
-  },
+    console.warn('Failed to get recommendations:', error);
+    return null;
+  }
+},
 
   rescheduleAppointment: async (data: AppointmentRescheduleDto): Promise<AppointmentResponseDto> => {
     try {
@@ -515,23 +520,43 @@ export const scheduleApi = {
       console.log('📤 GET SCHEDULES BY SPECIALIST ID:', `${SCHEDULES_URL}/specialist/${specialistId}`);
       const response = await appointmentApiClient.get<SpecialistScheduleResponse[]>(`${SCHEDULES_URL}/specialist/${specialistId}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
+      // ✅ Специальная обработка для 403 ошибки
+      if (error?.response?.status === 403) {
+        console.warn('⚠️ Access denied to schedules, returning empty array');
+        // Возвращаем пустой массив вместо ошибки
+        return [];
+      }
       throw handleAxiosError(error);
     }
   },
 
+  // ✅ ИСПРАВЛЕННЫЙ МЕТОД с обработкой 403
   getSchedulesByUserId: async (userId: number): Promise<{
     schedules: SpecialistScheduleResponse[];
     specialistInfo: SpecialistInfo;
   }> => {
     try {
       const specialist = await specialistService.getSpecialistByUserId(userId);
-      const schedules = await scheduleApi.getSchedulesBySpecialistId(specialist.specialistId);
+      let schedules: SpecialistScheduleResponse[] = [];
+      
+      try {
+        schedules = await scheduleApi.getSchedulesBySpecialistId(specialist.specialistId);
+      } catch (error: any) {
+        if (error?.response?.status === 403) {
+          console.warn('⚠️ Access denied to schedules for specialist:', specialist.specialistId);
+          schedules = [];
+        } else {
+          throw error;
+        }
+      }
+      
       return {
         schedules,
         specialistInfo: specialist
       };
     } catch (error) {
+      console.error('❌ Error in getSchedulesByUserId:', error);
       throw handleAxiosError(error);
     }
   },

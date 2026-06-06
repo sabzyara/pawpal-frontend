@@ -1,9 +1,9 @@
-// components/VetAvailability.tsx - ИСПРАВЛЕННАЯ ВЕРСИЯ
+// components/VetAvailability.tsx - ФИНАЛЬНАЯ ВЕРСИЯ (работает с 403)
 
 import { useAuthStore } from "@/store/authStore";
 import { useTheme } from "@/hooks/useTheme";
-import type { TimeSlot, SpecialistScheduleResponse } from "@/services/appointmentApi";
-import { scheduleApi, timeSlotApi, specialistService } from "@/services/appointmentApi";
+import type { TimeSlot, SpecialistScheduleResponse, SpecialistType } from "@/services/appointmentApi";
+import { timeSlotApi, specialistService } from "@/services/appointmentApi";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
@@ -45,11 +45,11 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [schedule, setSchedule] = useState<SpecialistScheduleResponse[]>([]);  // ✅ Исправлен тип
-  const [loadingSchedule, setLoadingSchedule] = useState(true);
   const [specialistInfo, setSpecialistInfo] = useState<{ specialistId: number; specialistType: string } | null>(null);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+  const [infoError, setInfoError] = useState<string | null>(null);
 
-  // Загружаем информацию о специалисте и его расписание
+  // Загружаем информацию о специалисте
   useEffect(() => {
     if (isAuthenticated && userId) {
       loadSpecialistInfo();
@@ -65,30 +65,20 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
 
   const loadSpecialistInfo = async () => {
     try {
-      setLoadingSchedule(true);
+      setLoadingInfo(true);
+      setInfoError(null);
+      
       const info = await specialistService.getSpecialistByUserId(userId);
+      
       setSpecialistInfo({
         specialistId: info.specialistId,
         specialistType: info.specialistType,
       });
-      
-      await loadSchedule(info.specialistId, info.specialistType);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading specialist info:", error);
+      setInfoError(error?.message || "Не удалось загрузить информацию о специалисте");
     } finally {
-      setLoadingSchedule(false);
-    }
-  };
-
-  const loadSchedule = async (specId: number, specType: string) => {
-    try {
-      const data = await scheduleApi.getSchedulesBySpecialistId(specId);
-      const filteredByType = data.filter(
-        (s) => s.specialistType === specType,
-      );
-      setSchedule(filteredByType);
-    } catch (error) {
-      console.error("Error loading schedule:", error);
+      setLoadingInfo(false);
     }
   };
 
@@ -97,17 +87,16 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
     
     try {
       setLoading(true);
+      
       const formattedDate = selectedDate.toISOString().split("T")[0];
       
-      // ✅ Исправлено: правильный доступ к данным
       const result = await timeSlotApi.getAvailableSlotsByUserId(
         userId,
         formattedDate,
       );
       
-      // ✅ result.slots.content, а не result.content
       setAvailableSlots(result.slots?.content || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error loading slots:", error);
       setAvailableSlots([]);
     } finally {
@@ -178,24 +167,12 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
     return date.toDateString() === today.toDateString();
   };
 
+  // ✅ Все даты от сегодня и дальше доступны для выбора
+  // Бэкенд сам вернет пустой массив слотов, если их нет
   const isDateAvailable = (date: Date): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    if (date < today) return false;
-
-    const dayOfWeekMap: Record<number, string> = {
-      1: "MONDAY",
-      2: "TUESDAY",
-      3: "WEDNESDAY",
-      4: "THURSDAY",
-      5: "FRIDAY",
-      6: "SATURDAY",
-      0: "SUNDAY",
-    };
-    const dayOfWeek = dayOfWeekMap[date.getDay()];
-
-    return schedule.some((s) => s.dayOfWeek === dayOfWeek);
+    return date >= today;
   };
 
   const formatMonthYear = (date: Date): string => {
@@ -264,7 +241,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
     );
   }
 
-  if (loadingSchedule) {
+  if (loadingInfo) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color={colors.primary.main} />
@@ -274,13 +251,13 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             { color: colors.text.secondary, marginTop: spacing.xs },
           ]}
         >
-          Загрузка расписания...
+          Загрузка информации...
         </Text>
       </View>
     );
   }
 
-  if (schedule.length === 0) {
+  if (infoError || !specialistInfo) {
     return (
       <View
         style={{
@@ -293,11 +270,10 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
         }}
       >
         <Ionicons
-          name="calendar-outline"
+          name="alert-circle-outline"
           size={48}
-          color={colors.text.tertiary}
+          color={colors.error?.main || "#f44336"}
         />
-
         <Text
           style={[
             typography.body1SemiBold,
@@ -307,9 +283,8 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             },
           ]}
         >
-          Расписание не добавлено
+          {!specialistInfo ? "Специалист не найден" : "Ошибка загрузки"}
         </Text>
-
         <Text
           style={[
             typography.caption,
@@ -320,7 +295,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             },
           ]}
         >
-          Специалист пока не указал рабочие дни
+          {infoError || "Пользователь не зарегистрирован как специалист"}
         </Text>
       </View>
     );

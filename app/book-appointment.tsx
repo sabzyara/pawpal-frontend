@@ -193,7 +193,6 @@ export default function BookAppointmentScreen() {
       return;
     }
 
-    // Проверка, что дата не прошедшая
     if (bookingData.date) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -220,7 +219,7 @@ export default function BookAppointmentScreen() {
       await appointmentApi.createAppointment(appointmentData);
 
       Alert.alert("Успех", "Запись успешно создана", [
-        { text: "OK", onPress: () => router.push("/my_appointments") },
+        { text: "OK", onPress: () => router.push("/appointments") },
       ]);
     } catch (error: any) {
       console.error("Error creating appointment:", error);

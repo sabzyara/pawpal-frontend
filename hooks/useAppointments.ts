@@ -163,34 +163,44 @@ const enrichSingleAppointment = async (appointment: any): Promise<EnrichedAppoin
     }
   }
 
-  let petName = "Не указан";
-  let petType = "Не указан";
+  let petName = "";
+  let petType = "";
   let petBreed = "";
 
   if (appointment.petId) {
-    if (petCache.has(appointment.petId)) {
-      const pet = petCache.get(appointment.petId)!;
-      petName = pet.name;
-      petType = pet.species;
-      petBreed = pet.breed || "";
-    } else {
-      try {
-        const response = await api.get(`/pet-management/api/pets/${appointment.petId}`);
-        const pet = response.data;
-        const petData = {
-          name: pet.name || "Unknown",
-          species: pet.species || pet.type || "Unknown",
-          breed: pet.breed,
-        };
-        petCache.set(appointment.petId, petData);
-        petName = petData.name;
-        petType = petData.species;
-        petBreed = petData.breed || "";
-      } catch (error) {
-        console.error("Failed to load pet:", error);
-      }
+  if (petCache.has(appointment.petId)) {
+    const pet = petCache.get(appointment.petId)!;
+    petName = pet.name;
+    petType = pet.species;
+    petBreed = pet.breed || "";
+  } else {
+    try {
+      const response = await api.get(`/pet-management/api/pets/pet/${appointment.petId}/full`);
+      const pet = response.data;
+      
+      // ✅ Логируем для отладки
+      console.log(`🐾 Pet ${appointment.petId} data:`, JSON.stringify(pet, null, 2));
+      
+      // ✅ Пробуем разные варианты полей
+      const petData = {
+        name: pet.petName || pet.name || "Unknown",
+        species: pet.petType || pet.species || pet.type || "Unknown",
+        breed: pet.breed || "",
+      };
+      
+      petCache.set(appointment.petId, petData);
+      petName = petData.name;
+      petType = petData.species;
+      petBreed = petData.breed;
+    } catch (error) {
+      console.error(`Failed to load pet ${appointment.petId}:`, error);
+      // ✅ Устанавливаем значения по умолчанию
+      petName = "Питомец";
+      petType = "Не указан";
+      petBreed = "";
     }
   }
+}
 
   return {
     ...appointment,
@@ -269,27 +279,44 @@ const enrichAppointmentsBatch = async (
     });
 
     const petPromises = uniquePetIds.map(async (petId) => {
-      if (petCache.has(petId)) {
-        return { id: petId, data: petCache.get(petId)! };
-      }
-      try {
-        const response = await api.get(`/pet-management/api/pets/${petId}`);
-        const pet = response.data;
-        const petData = {
-          name: pet.name || "Unknown",
-          species: pet.species || pet.type || "Unknown",
-          breed: pet.breed,
-        };
-        petCache.set(petId, petData);
-        return { id: petId, data: petData };
-      } catch (error) {
-        console.error(`Failed to load pet ${petId}:`, error);
-        return {
-          id: petId,
-          data: { name: "Unknown", species: "Unknown", breed: undefined },
-        };
-      }
-    });
+  if (!petId || petId === 0) {
+    return {
+      id: petId,
+      data: { name: "Не указан", species: "Не указан", breed: "" }
+    };
+  }
+  
+  if (petCache.has(petId)) {
+    return { id: petId, data: petCache.get(petId)! };
+  }
+  
+  try {
+    const response = await api.get(`/pet-management/api/pets/pet/${petId}/full`);
+    const data = response.data;
+    
+    const pet = data.pet || data;
+    
+    const petData = {
+      name: pet.name || "Unknown",
+      species: pet.species || pet.type || "Unknown",
+      breed: pet.breed || "",
+    };
+    
+    petCache.set(petId, petData);
+    return { id: petId, data: petData };
+  } catch (error: any) {
+    console.error(`Failed to load pet ${petId}:`, error?.response?.status, error?.message);
+    
+    const fallbackData = { 
+      name: "Питомец", 
+      species: "Не указан", 
+      breed: "" 
+    };
+    petCache.set(petId, fallbackData);
+    
+    return { id: petId, data: fallbackData };
+  }
+});
 
     const [specialists, owners, pets] = await Promise.all([
       Promise.all(specialistPromises),
