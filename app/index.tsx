@@ -37,7 +37,7 @@ export default function Index() {
     error: profileError 
   } = useProfileStore();
 
-  // Если пользователь есть, но профиль не загружен - загружаем
+  // Загружаем профиль если есть пользователь, но нет профиля
   useEffect(() => {
     if (isInitialized && user && !profile && !isProfileLoading && !profileError) {
       console.log('🔄 Loading profile for user:', user.id);
@@ -47,8 +47,9 @@ export default function Index() {
     }
   }, [isInitialized, user, profile, isProfileLoading, profileError, fetchProfile]);
 
-  // Показываем загрузку, пока данные не готовы
-  if (!isInitialized || isAuthLoading || (user && !profile && isProfileLoading)) {
+  // 1. Аутентификация еще загружается
+  if (!isInitialized || isAuthLoading) {
+    console.log('⏳ Auth loading...');
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#E3275B" />
@@ -56,12 +57,23 @@ export default function Index() {
     );
   }
 
-  // Если нет токена или пользователя - на логин
+  // 2. Нет токена или пользователя - отправляем на логин
   if (!token || !user) {
     console.log('🔐 No token or user, redirecting to login');
     return <Redirect href={ROUTES.LOGIN} />;
   }
 
+  // 3. Профиль еще загружается - показываем спиннер
+  if (isProfileLoading) {
+    console.log('⏳ Profile loading...');
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E3275B" />
+      </View>
+    );
+  }
+
+  // 4. Получаем роль пользователя
   const roleString = extractRoleString(user);
   
   if (!roleString) {
@@ -71,12 +83,12 @@ export default function Index() {
 
   console.log('📍 User role:', roleString);
   console.log('📍 Has profile:', !!profile);
-  console.log('📍 Profile data:', profile ? 'exists' : 'null');
+  console.log('📍 Profile data:', profile ? JSON.stringify(profile).substring(0, 100) : 'null');
 
-  // Проверяем, заполнен ли профиль
+  // 5. Проверяем, заполнен ли профиль
   const hasProfile = !!(profile?.petOwner || profile?.veterinarian || profile?.serviceProvider);
 
-  // Если профиль не заполнен - на страницу заполнения
+  // 6. Если профиль не заполнен - отправляем на страницу заполнения
   if (!hasProfile) {
     console.log('🆕 Profile not complete, redirecting to completion');
     switch (roleString) {
@@ -92,7 +104,7 @@ export default function Index() {
     }
   }
 
-  // Профиль есть - редирект на главный экран по роли
+  // 7. Профиль заполнен - отправляем на главный экран согласно роли
   console.log('✅ Profile complete, redirecting to main app');
   switch (roleString) {
     case "OWNER":

@@ -1,5 +1,3 @@
-// app/vets-list.tsx - ИСПРАВЛЕННАЯ ВЕРСИЯ
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -61,44 +59,49 @@ export default function VetsListScreen() {
         api.get('/specialist-service/service-providers'),
       ]);
       
-      const vets: Specialist[] = (vetsResponse.data || []).map((v: any) => ({
-        id: `vet_${v.vetId}`,
-        specialistId: v.vetId,
-        userId: v.userId,
-        firstName: v.firstName || '',
-        lastName: v.lastName || '',
-        avatarUrl: v.avatarUrl || `https://ui-avatars.com/api/?name=${v.firstName}+${v.lastName}&background=random`,
-        specialty: v.specialty || v.specialization || 'Veterinarian',
-        experienceYears: v.experienceYears || 0,
-        rating: v.ratingAverage || v.rating || 0,
-        reviewsCount: v.reviewsCount || 0,
-        pricePerVisit: v.pricePerVisit || 0,
-        distance: v.distance,
-        clinicName: v.clinicName || 'Private Practice',
-        isAvailableToday: v.isAvailableToday ?? true,
-        address: v.address || 'Address not specified',
-        specialistType: 'VET',
-      }));
+      // Маппинг ветеринаров - фильтруем undefined
+      const vets: Specialist[] = (vetsResponse.data || [])
+        .filter((v: any) => v.vetId) // ✅ Пропускаем элементы без vetId
+        .map((v: any) => ({
+          id: `vet_${v.vetId}`, // ✅ vetId точно есть благодаря filter
+          specialistId: v.vetId,
+          userId: v.userId,
+          firstName: v.firstName || '',
+          lastName: v.lastName || '',
+          avatarUrl: v.avatarUrl || `https://ui-avatars.com/api/?name=${v.firstName}+${v.lastName}&background=random`,
+          specialty: v.specialty || v.specialization || 'Veterinarian',
+          experienceYears: v.experienceYears || 0,
+          rating: v.ratingAverage || v.rating || 0,
+          reviewsCount: v.reviewsCount || 0,
+          pricePerVisit: v.pricePerVisit || 0,
+          distance: v.distance,
+          clinicName: v.clinicName || 'Private Practice',
+          isAvailableToday: v.isAvailableToday ?? true,
+          address: v.address || 'Address not specified',
+          specialistType: 'VET',
+        }));
       
-      // Маппинг сервис-провайдеров
-      const services: Specialist[] = (servicesResponse.data || []).map((s: any) => ({
-        id: `service_${s.serviceProviderId}`,
-        specialistId: s.serviceProviderId,
-        userId: s.userId,
-        firstName: s.firstName || '',
-        lastName: s.lastName || '',
-        avatarUrl: s.avatarUrl || `https://ui-avatars.com/api/?name=${s.firstName}+${s.lastName}&background=random`,
-        specialty: s.serviceCategory || 'Service Provider',
-        experienceYears: s.experienceYears || 0,
-        rating: s.ratingAverage || s.rating || 0,
-        reviewsCount: s.reviewsCount || 0,
-        pricePerVisit: s.pricePerVisit || 0,
-        distance: s.distance,
-        clinicName: s.businessName || s.clinicName || s.city || 'Mobile Service',
-        isAvailableToday: s.isAvailableToday ?? true,
-        address: s.address || s.city || 'Location available upon booking',
-        specialistType: 'SERVICE',
-      }));
+      // Маппинг сервис-провайдеров - фильтруем undefined
+      const services: Specialist[] = (servicesResponse.data || [])
+        .filter((s: any) => s.serviceProviderId) // ✅ Пропускаем элементы без serviceProviderId
+        .map((s: any) => ({
+          id: `service_${s.serviceProviderId}`, // ✅ serviceProviderId точно есть благодаря filter
+          specialistId: s.serviceProviderId,
+          userId: s.userId,
+          firstName: s.firstName || '',
+          lastName: s.lastName || '',
+          avatarUrl: s.avatarUrl || `https://ui-avatars.com/api/?name=${s.firstName}+${s.lastName}&background=random`,
+          specialty: s.serviceCategory || 'Service Provider',
+          experienceYears: s.experienceYears || 0,
+          rating: s.ratingAverage || s.rating || 0,
+          reviewsCount: s.reviewsCount || 0,
+          pricePerVisit: s.pricePerVisit || 0,
+          distance: s.distance,
+          clinicName: s.businessName || s.clinicName || s.city || 'Mobile Service',
+          isAvailableToday: s.isAvailableToday ?? true,
+          address: s.address || s.city || 'Location available upon booking',
+          specialistType: 'SERVICE',
+        }));
       
       const allSpecialists = [...vets, ...services];
       setSpecialists(allSpecialists);
@@ -186,6 +189,16 @@ export default function VetsListScreen() {
     });
   };
 
+  // ✅ Безопасный keyExtractor
+  const keyExtractor = useCallback((item: Specialist) => {
+    // Если id есть и он не undefined/null - используем его
+    if (item?.id && item.id !== 'undefined' && item.id !== 'null') {
+      return item.id;
+    }
+    // Fallback - используем комбинацию полей
+    return `${item.specialistType}_${item.userId || item.specialistId}_${Date.now()}_${Math.random()}`;
+  }, []);
+
   if (loading) {
     return <VetsListSkeleton />;
   }
@@ -239,7 +252,7 @@ export default function VetsListScreen() {
 
       <FlatList
         data={filteredSpecialists}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         renderItem={({ item }) => (
           <VetCard
             vet={item}
