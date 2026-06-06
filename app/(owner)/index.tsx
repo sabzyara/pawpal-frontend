@@ -29,6 +29,8 @@ import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
   getNotifications,
 } from "@/services/notificationService";
