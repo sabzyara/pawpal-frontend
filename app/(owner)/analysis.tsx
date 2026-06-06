@@ -115,39 +115,48 @@ useFocusEffect(
   }
 
   if (pets.length === 0) {
-    return (
-      <View
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent:
+          'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text
         style={{
-          flex: 1,
-          justifyContent:
-            'center',
-          alignItems: 'center',
+          color:
+            colors.text.primary,
         }}
       >
-        <Text>
-          Add a pet first to use AI
-          analysis
-        </Text>
-      </View>
-    );
-  }
+        Add a pet first to use AI analysis
+      </Text>
+    </View>
+  );
+}
 
-  if (!analysis) {
-    return (
-      <View
+if (!analysis) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        justifyContent:
+          'center',
+        alignItems: 'center',
+      }}
+    >
+      <Text
         style={{
-          flex: 1,
-          justifyContent:
-            'center',
-          alignItems: 'center',
+          color:
+            colors.text.primary,
         }}
       >
-        <Text>
-          Analysis unavailable
-        </Text>
-      </View>
-    );
-  }
+        Analysis unavailable
+      </Text>
+    </View>
+  );
+}
 
 return (
   <SafeAreaView
@@ -168,8 +177,9 @@ return (
         style={[
           typography.h2,
           {
-            marginBottom:
-              spacing.lg,
+            marginBottom: spacing.lg,
+            color:
+              colors.text.primary,
           },
         ]}
       >
@@ -188,12 +198,10 @@ return (
       >
         {pets.map((pet) => {
           const petId =
-            pet.petId ??
-            pet.id;
+            pet.petId ?? pet.id;
 
           const active =
-            selectedPet ===
-            petId;
+            selectedPet === petId;
 
           return (
             <TouchableOpacity
@@ -206,9 +214,7 @@ return (
               style={{
                 alignItems:
                   'center',
-
-                marginRight:
-                  16,
+                marginRight: 16,
               }}
             >
               <Image
@@ -219,20 +225,12 @@ return (
                 style={{
                   width: 72,
                   height: 72,
-
-                  borderRadius:
-                    36,
-
-                  borderWidth:
-                    3,
-
-                  borderColor:
-                    active
-                      ? colors
-                          .primary
-                          .main
-                      : 'transparent',
-
+                  borderRadius: 36,
+                  borderWidth: 3,
+                  borderColor: active
+                    ? colors
+                        .primary.main
+                    : 'transparent',
                   backgroundColor:
                     colors.card
                       .default,
@@ -242,15 +240,11 @@ return (
               <Text
                 style={{
                   marginTop: 6,
-
                   fontSize: 12,
-
                   fontWeight:
                     '600',
-
                   color:
-                    colors
-                      .text
+                    colors.text
                       .primary,
                 }}
               >
@@ -261,21 +255,15 @@ return (
         })}
       </ScrollView>
 
-      {/* ТУТ ДАЛЬШЕ ТВОЯ КАРТОЧКА SCORE */}
-
       <View
         style={{
           backgroundColor:
             colors.card.default,
-
           borderRadius: 24,
-
           padding:
             spacing.lg,
-
           alignItems:
             'center',
-
           marginBottom:
             spacing.lg,
         }}
@@ -283,6 +271,11 @@ return (
         <Text
           style={[
             typography.caption,
+            {
+              color:
+                colors.text
+                  .secondary,
+            },
           ]}
         >
           Health Score
@@ -291,10 +284,8 @@ return (
         <Text
           style={{
             fontSize: 48,
-
             fontWeight:
               '700',
-
             color:
               colors.primary
                 .main,
@@ -308,10 +299,8 @@ return (
         <Text
           style={{
             marginTop: 8,
-
             fontWeight:
               '600',
-
             color:
               analysis.riskLevel ===
               'LOW'
@@ -328,13 +317,11 @@ return (
         </Text>
       </View>
 
-       <View
+      <View
         style={{
           backgroundColor:
             colors.card.default,
-
           borderRadius: 24,
-
           padding:
             spacing.lg,
         }}
@@ -345,6 +332,9 @@ return (
             {
               marginBottom:
                 spacing.md,
+              color:
+                colors.text
+                  .primary,
             },
           ]}
         >
@@ -361,17 +351,14 @@ return (
               style={{
                 flexDirection:
                   'row',
-
-                marginBottom:
-                  16,
+                marginBottom: 16,
               }}
             >
               <Ionicons
                 name="checkmark-circle"
                 size={22}
                 color={
-                  colors
-                    .primary
+                  colors.primary
                     .main
                 }
               />
@@ -379,9 +366,10 @@ return (
               <Text
                 style={{
                   flex: 1,
-
-                  marginLeft:
-                    10,
+                  marginLeft: 10,
+                  color:
+                    colors.text
+                      .primary,
                 }}
               >
                 {item}
@@ -389,7 +377,7 @@ return (
             </View>
           )
         )}
-        </View>
+      </View>
     </ScrollView>
   </SafeAreaView>
 );

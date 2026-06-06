@@ -57,7 +57,7 @@ export default function MiniTrackerCard({
             color: colors.text.primary,
           }}
         >
-          📊 Tracker
+          Tracker
         </Text>
 
         <Ionicons

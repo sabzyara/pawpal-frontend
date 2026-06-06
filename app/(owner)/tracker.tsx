@@ -4,22 +4,24 @@ import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
 import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useCallback,useEffect, useState, } from "react";
+import React, { useCallback, useState , useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Modal } from 'react-native';
-
-
+import "../i18n";
 
 export default function TrackerScreen() {
   const { colors } = useTheme();
+
+  const { t } = useTranslation();
 
   const [pets, setPets] = useState<any[]>([]);
   const [selectedPet, setSelectedPet] = useState<number | null>(null);
@@ -41,6 +43,28 @@ export default function TrackerScreen() {
 
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+  if (!selectedPet) return;
+
+  const loadPetData = async () => {
+    try {
+      const [nutRes, actRes] = await Promise.all([
+        api.get(`/pet-management/api/nutrition/pet/${selectedPet}`),
+        api.get(`/pet-management/api/activities/pet/${selectedPet}`),
+      ]);
+
+      console.log("LOADING PET", selectedPet);
+
+      setNutrition(nutRes.data || []);
+      setActivities(actRes.data || []);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  loadPetData();
+}, [selectedPet]);
+
   const load = async () => {
     try {
       setLoading(true);
@@ -60,16 +84,6 @@ export default function TrackerScreen() {
     return petId;
   });
 }
-
-      if (petId) {
-        const [nutRes, actRes] = await Promise.all([
-          api.get(`/pet-management/api/nutrition/pet/${petId}`),
-          api.get(`/pet-management/api/activities/pet/${petId}`),
-        ]);
-
-        setNutrition(nutRes.data || []);
-        setActivities(actRes.data || []);
-      }
     } catch (e) {
       console.log("ERROR:", e);
     } finally {
@@ -93,7 +107,7 @@ if (pets.length === 0) {
       }}
     >
       <Text>
-        You don't have any pets yet
+        {t('tracker.You don\'t have any pets yet')}
       </Text>
     </View>
   );
@@ -139,34 +153,30 @@ console.log("selectedDate:", selectedDate);
             fontWeight: "500",
           }}
         >
-          Loading tracker...
+          {t('tracker.Loading tracker...')}
         </Text>
       </View>
     );
   }
 
-  const history =
+  console.log("selectedPet =", selectedPet);
+console.log("nutrition[0] =", nutrition[0]);
+console.log("activities[0] =", activities[0]);
+
+const history =
   tab === 'nutrition'
     ? nutrition
         .sort(
           (a, b) =>
-            new Date(
-              b.date
-            ).getTime() -
-            new Date(
-              a.date
-            ).getTime()
+            new Date(b.date).getTime() -
+            new Date(a.date).getTime()
         )
         .slice(0, 30)
     : activities
         .sort(
           (a, b) =>
-            new Date(
-              b.date
-            ).getTime() -
-            new Date(
-              a.date
-            ).getTime()
+            new Date(b.date).getTime() -
+            new Date(a.date).getTime()
         )
         .slice(0, 30);
 
@@ -205,7 +215,7 @@ console.log("selectedDate:", selectedDate);
 
         {/* TITLE */}
         <Text style={{ fontSize: 26, fontWeight: "700", textAlign: "center", marginTop: 20,  marginBottom: 20, color: colors.text.primary }}>
-          {tab === "nutrition" ? "Nutrition Tracker" : "Activity Tracker"}
+          {tab === "nutrition" ? t("tracker.Nutrition Tracker") : t("tracker.Activity Tracker")}
         </Text>
 
         {/* TABS */}
@@ -227,7 +237,7 @@ console.log("selectedDate:", selectedDate);
             onPress={() => setTab("nutrition")}
           >
             <Text style={{ fontWeight: "700", fontSize: 16, color: tab === "nutrition" ? "#fff" : colors.text.secondary }}>
-              Nutrition
+              {t("tracker.Nutrition")}
             </Text>
           </TouchableOpacity>
 
@@ -242,7 +252,7 @@ console.log("selectedDate:", selectedDate);
             onPress={() => setTab("activity")}
           >
             <Text style={{ fontWeight: "700", fontSize: 16, color: tab === "activity" ? "#fff" : colors.text.secondary }}>
-              Activity
+              {t("tracker.Activity")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -281,7 +291,7 @@ console.log("selectedDate:", selectedDate);
       fontWeight: '700',
     }}
   >
-    View Last 30 Days
+    {t('tracker.View Last 30 Days')}
   </Text>
 </TouchableOpacity>
 
@@ -316,7 +326,7 @@ console.log("selectedDate:", selectedDate);
               }
             >
               <Text style={{ color: "#fff", fontWeight: "700" }}>
-                + Add Nutrition
+                {t('tracker.Add Nutrition')}
               </Text>
             </TouchableOpacity>
           </>
@@ -347,7 +357,7 @@ console.log("selectedDate:", selectedDate);
               }
             >
               <Text style={{ color: "#fff", fontWeight: "700" }}>
-                + Add Activity
+                {t('tracker.Add Activity')}
               </Text>
             </TouchableOpacity>
           </>
@@ -386,7 +396,7 @@ console.log("selectedDate:", selectedDate);
             colors.text.primary,
         }}
       >
-        Last 30 Days
+        {t('tracker.Last 30 Days')}
       </Text>
 
       <TouchableOpacity
@@ -401,7 +411,7 @@ console.log("selectedDate:", selectedDate);
               colors.primary.main,
           }}
         >
-          Close
+          {t('tracker.Close')}
         </Text>
       </TouchableOpacity>
     </View>

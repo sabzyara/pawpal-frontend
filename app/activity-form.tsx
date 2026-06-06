@@ -15,9 +15,12 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import "./i18n";
+import { useTranslation } from 'react-i18next';
 
 export default function ActivityForm() {
   const { petId } = useLocalSearchParams();
+  const { t } = useTranslation();
 
   const { colors } = useTheme();
   const styles = createStyles(colors);
@@ -136,17 +139,17 @@ export default function ActivityForm() {
             />
 
             <View style={styles.header}>
-              <Text style={styles.title}>Add Activity</Text>
+              <Text style={styles.title}>{t('tracker.Add Activity')}</Text>
 
               <Text style={styles.subtitle}>
-                Track your pet’s daily activity
+                {t('tracker.Track your pet’s daily activity')}
               </Text>
             </View>
 
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
               <View style={styles.form}>
 
-                <Text style={styles.label}>Activity Type</Text>
+                <Text style={styles.label}>{t('tracker.Activity Type')}</Text>
 
                 <TextInput
                   value={activityType}
@@ -156,7 +159,7 @@ export default function ActivityForm() {
                   placeholderTextColor={colors.text.secondary}
                 />
 
-                <Text style={styles.label}>Distance</Text>
+                <Text style={styles.label}>{t('tracker.Distance')}</Text>
 
                 <TextInput
                   value={distanceValue}
@@ -167,7 +170,7 @@ export default function ActivityForm() {
                   placeholderTextColor={colors.text.secondary}
                 />
 
-                <Text style={styles.label}>Duration</Text>
+                <Text style={styles.label}>{t('tracker.Duration')}</Text>
 
                 <TextInput
                   value={durationValue}
@@ -183,7 +186,7 @@ export default function ActivityForm() {
                   onPress={handleSave}
                 >
                   <Text style={styles.saveButtonText}>
-                    Add Activity
+                    {t('tracker.Add Activity')}
                   </Text>
                 </TouchableOpacity>
 

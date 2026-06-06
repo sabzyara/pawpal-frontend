@@ -59,7 +59,7 @@ export default function MiniAiCard({
               colors.text.primary,
           }}
         >
-          🤖 AI Analysis
+          AI Analysis
         </Text>
 
         <Ionicons

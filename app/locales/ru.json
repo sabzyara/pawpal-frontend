@@ -1,0 +1,46 @@
+{
+  "settings": {
+    "title": "Настройки",
+    "darkMode": "Темный режим",
+    "preferences": "Параметры",
+    "notifications": "Уведомления",
+    "account": "Аккаунт",
+    "deleteAccount": "Удалить аккаунт",
+    "about": "О приложении",
+    "privacyPolicy": "Политика конфиденциальности",
+    "appVersion": "Версия приложения 1.0.0",
+    "homeScreen": "Главный экран",
+    "showCalendar": "Показать календарь",
+    "showTracker": "Показать трекер",
+    "showAI": "Показать AI анализ",
+    "language": "Язык",
+    "english": "Английский",
+    "kazakh": "Казахский",
+    "russian": "Русский"
+  },
+  "tracker": {
+    "You don't have any pets yet": "У вас еще нет домашних животных",
+    "Loading tracker...": "Трекер загружается...",
+    "View Last 30 Days": "Посмотреть последние 30 дней",
+    "Nutrition": "Питание",
+    "Activity": "Активность",
+    "Add Nutrition": "Добавить питание",
+    "Add Activity": "Добавить активность",
+    "Close": "Закрыть",
+    "Last 30 Days": "Последние 30 дней",
+    "Meal Type": "Тип еды",
+    "Calories": "Калории",
+    "Food Items": "Продукты питания",
+    "Track your pet’s daily meals": "Отслеживайте ежедневные приемы пищи вашего питомца",
+    "Activity Type": "Тип активности",
+    "Distance": "Расстояние",
+    "Duration": "Продолжительность",
+    "Track your pet’s daily activity": "Отслеживайте ежедневную активность вашего питомца",
+    "Nutrition Tracker": "Трекер питания",
+    "Activity Tracker": "Трекер активности"
+  },
+  "calendar":{
+    "title": "Календарь",
+    "days": ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]
+  }
+}
