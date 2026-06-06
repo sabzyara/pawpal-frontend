@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useEffect } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { View, ActivityIndicator } from "react-native";
+import "./i18n";
 
 function LoadingScreen() {
   return (
