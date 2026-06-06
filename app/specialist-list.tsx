@@ -83,10 +83,10 @@ export default function VetsListScreen() {
       
       // Маппинг сервис-провайдеров - фильтруем undefined
       const services: Specialist[] = (servicesResponse.data || [])
-        .filter((s: any) => s.serviceProviderId) // ✅ Пропускаем элементы без serviceProviderId
+        .filter((s: any) => s.serviceId) // ✅ Пропускаем элементы без serviceProviderId
         .map((s: any) => ({
-          id: `service_${s.serviceProviderId}`, // ✅ serviceProviderId точно есть благодаря filter
-          specialistId: s.serviceProviderId,
+          id: `service_${s.serviceId}`, // ✅ serviceProviderId точно есть благодаря filter
+          specialistId: s.serviceId,
           userId: s.userId,
           firstName: s.firstName || '',
           lastName: s.lastName || '',
