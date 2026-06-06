@@ -1,5 +1,13 @@
 // types/appointment.types.ts
 
+export type SlotStatus = 'AVAILABLE' | 'BOOKED' | 'BLOCKED';
+
+export enum SlotStatusEnum {
+    AVAILABLE = 'AVAILABLE',
+    BOOKED = 'BOOKED',
+    BLOCKED = 'BLOCKED'
+}
+
 export type SpecialistType = 'VET' | 'SERVICE';
 export type UserRole = 'OWNER' | 'SPECIALIST' | 'ADMIN';
 export type AppointmentStatus = 

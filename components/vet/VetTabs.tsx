@@ -1,8 +1,18 @@
 import React from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 
-type TabType = 'about' | 'availability' | 'reviews' | 'edit' | 'manage';
+type TabType =
+  | 'about'
+  | 'availability'
+  | 'reviews'
+  | 'edit'
+  | 'manage';
 
 interface VetTabsProps {
   active: TabType;
@@ -12,73 +22,123 @@ interface VetTabsProps {
 }
 
 const tabLabels: Record<TabType, string> = {
-  about: 'О специалисте',
-  availability: 'Расписание',
+  about: 'О себе',
+  availability: 'График',
   reviews: 'Отзывы',
-  edit: 'Редактировать',
-  manage: 'Управление',
+  edit: 'Редакт.',
+  manage: 'Кабинет',
 };
 
-export const VetTabs: React.FC<VetTabsProps> = ({ 
-  active, 
-  onChange, 
+const tabIcons: Record<
+  TabType,
+  keyof typeof Ionicons.glyphMap
+> = {
+  about: 'person-outline',
+  availability: 'calendar-outline',
+  reviews: 'star-outline',
+  edit: 'create-outline',
+  manage: 'settings-outline',
+};
+
+export const VetTabs: React.FC<VetTabsProps> = ({
+  active,
+  onChange,
   tabs = ['about', 'availability', 'reviews'],
-  isOwner = false 
+  isOwner = false,
 }) => {
-  const { colors, typography, spacing } = useTheme();
+  const {
+    colors,
+    typography,
+    spacing,
+  } = useTheme();
 
-  const displayTabs: TabType[] = React.useMemo(() => {
-    if (isOwner) {
-      const baseTabs = [...tabs];
-      if (!baseTabs.includes('edit')) baseTabs.push('edit');
-      if (!baseTabs.includes('manage')) baseTabs.push('manage');
-      return baseTabs;
-    }
-    return tabs;
-  }, [isOwner, tabs]);
+  const displayTabs: TabType[] =
+    React.useMemo(() => {
+      if (isOwner) {
+        const baseTabs = [...tabs];
 
-  const currentActiveTab = displayTabs.includes(active) ? active : displayTabs[0];
+        if (
+          !baseTabs.includes('edit')
+        ) {
+          baseTabs.push('edit');
+        }
 
-  const handleTabPress = (tab: TabType) => {
-    if (tab !== active) {
-      onChange(tab);
-    }
-  };
+        if (
+          !baseTabs.includes('manage')
+        ) {
+          baseTabs.push('manage');
+        }
+
+        return baseTabs;
+      }
+
+      return tabs;
+    }, [isOwner, tabs]);
 
   return (
     <View
       style={{
         flexDirection: 'row',
         flexWrap: 'wrap',
-        backgroundColor: colors.background.tertiary,
-        borderRadius: spacing.xl, 
-        padding: spacing.xs, 
-        marginBottom: spacing.md, 
-        gap: spacing.xs, 
+        gap: spacing.sm,
+        marginBottom: spacing.lg,
       }}
     >
       {displayTabs.map((tab) => {
-        const isActive = tab === currentActiveTab;
+        const isActive =
+          tab === active;
 
         return (
           <TouchableOpacity
             key={tab}
-            onPress={() => handleTabPress(tab)}
+            onPress={() =>
+              onChange(tab)
+            }
             style={{
               flex: 1,
-              paddingVertical: spacing.xs, 
-              paddingHorizontal: spacing.sm, 
-              borderRadius: spacing.xl,
-              backgroundColor: isActive ? colors.primary.main : 'transparent',
-              minWidth: 100,
+              minWidth: 95,
+
+              borderRadius: 18,
+
+              paddingVertical:
+                spacing.sm,
+
+              backgroundColor:
+                isActive
+                  ? colors.primary.main
+                  : colors.card.default,
+
+              alignItems: 'center',
+
+              shadowColor: '#000',
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
             }}
           >
+            <Ionicons
+              name={tabIcons[tab]}
+              size={18}
+              color={
+                isActive
+                  ? colors.text.inverse
+                  : colors.primary.main
+              }
+            />
+
             <Text
               style={[
-                typography.body2SemiBold,
+                typography.caption,
                 {
+                  marginTop: 4,
                   textAlign: 'center',
-                  color: isActive ? colors.text.inverse : colors.text.secondary,
+                  color: isActive
+                    ? colors.text.inverse
+                    : colors.text.primary,
                 },
               ]}
             >

@@ -48,7 +48,7 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
         style={{
           flexDirection: 'row',
           paddingHorizontal: 16,
-          paddingVertical: 12,
+          paddingVertical: 16,
           backgroundColor: colors.background.primary,
           alignItems: 'center',
         }}
@@ -60,29 +60,40 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: colors.background.tertiary,
-            borderRadius: 12,
-            paddingHorizontal: 12,
+            borderRadius: 999, 
+            height: 52, 
+            paddingHorizontal: 16,
             borderWidth: 1,
             borderColor: colors.border.light,
+            
+            // ↑ added shadow
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.05,
+            shadowRadius: 6,
+            elevation: 2,
           }}
         >
           <Ionicons
             name="search-outline"
-            size={18}
+            size={20}
             color={colors.text.secondary}
           />
 
           <TextInput
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="Search..."
+            placeholder="Search specialists..." 
             placeholderTextColor={colors.text.tertiary}
             style={{
               flex: 1,
               paddingVertical: 10,
               paddingHorizontal: 8,
               color: colors.text.primary,
-              fontSize: 15,
+              fontSize: 16,
             }}
           />
 
@@ -102,29 +113,40 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
           onPress={() => setModalVisible(true)}
           activeOpacity={0.7}
           style={{
-            marginLeft: 10,
+            marginLeft: 12,
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: colors.background.tertiary,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            borderRadius: 12,
+            paddingHorizontal: 16,
+            height: 52, 
+            borderRadius: 999, 
             borderWidth: 1,
             borderColor: colors.border.light,
+            
+            // ↑ added shadow
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.05,
+            shadowRadius: 6,
+            elevation: 2,
           }}
         >
           <Ionicons
             name="funnel-outline"
-            size={16}
-            color={colors.text.primary}
+            size={18}
+            color={colors.primary.main} 
           />
 
           <Text
             style={[
               typography.body2,
               {
-                marginLeft: 6,
+                marginLeft: 8,
                 color: colors.text.primary,
+                fontWeight: '500',
               },
             ]}
           >
@@ -133,14 +155,14 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
 
           <Ionicons
             name="chevron-down"
-            size={14}
+            size={16}
             color={colors.text.secondary}
-            style={{ marginLeft: 4 }}
+            style={{ marginLeft: 6 }}
           />
         </TouchableOpacity>
       </View>
 
-      {/* MODAL */}
+      {/* MODAL - Bottom Sheet Style */}
       <Modal
         visible={modalVisible}
         transparent
@@ -158,18 +180,33 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
           <View
             style={{
               backgroundColor: colors.background.primary,
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              padding: 20,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              padding: 24,
             }}
           >
+            {/* Bottom Sheet Handle */}
+            <View
+              style={{
+                alignSelf: 'center',
+                width: 50,
+                height: 5,
+                borderRadius: 999,
+                backgroundColor: colors.border.medium,
+                marginBottom: 20,
+              }}
+            />
+            
             <Text
               style={[
-                typography.h4,
-                { color: colors.text.primary, marginBottom: 16 },
+                typography.h3, 
+                { 
+                  color: colors.text.primary, 
+                  marginBottom: 24,
+                },
               ]}
             >
-              Sort & Filter
+              Sort Specialists
             </Text>
 
             {options.map((option) => {
@@ -183,7 +220,15 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
                     flexDirection: 'row',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    paddingVertical: 14,
+                    paddingVertical: 16,
+                    paddingHorizontal: 12,
+                    marginBottom: 4,
+                    
+                    // ↑ active background
+                    backgroundColor: isActive
+                      ? colors.primary.light + '20'
+                      : 'transparent',
+                    borderRadius: 16,
                   }}
                 >
                   <View
@@ -194,7 +239,7 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
                   >
                     <Ionicons
                       name={option.icon as any}
-                      size={20}
+                      size={22}
                       color={colors.primary.main}
                     />
 
@@ -202,8 +247,9 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
                       style={[
                         typography.body1,
                         {
-                          marginLeft: 10,
+                          marginLeft: 12,
                           color: colors.text.primary,
+                          fontWeight: isActive ? '600' : '400',
                         },
                       ]}
                     >
@@ -214,7 +260,7 @@ export const VetSearchBar: React.FC<VetSearchBarProps> = ({
                   {isActive && (
                     <Ionicons
                       name="checkmark-circle"
-                      size={22}
+                      size={24}
                       color={colors.primary.main}
                     />
                   )}

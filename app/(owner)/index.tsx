@@ -1,6 +1,3 @@
-
-// screens/home/HomeScreen.tsx
-
 import { CalendarSection } from '@/components/home/Calendar';
 import { FloatingChatButton } from '@/components/home/FloatingChatButton';
 import { HomeHeader } from '@/components/home/Header';
@@ -28,6 +25,9 @@ import MiniAiCard from '@/components/home/MiniAiCard';
 import MiniTrackerCard from '@/components/home/MiniTrackerCard';
 // 🔥 ВАЖНО
 import { useProfileStore } from '@/store/profileStore';
+import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -144,20 +144,25 @@ const [showAI, setShowAI] =
 };
 
 
-  // 🔥 ПРОФИЛЬ ИЗ STORE (КАК В PROFILE SCREEN)
+  // ✅ ИЗМЕНЕНО: убран authUser из profileStore, добавлен user из authStore
   const { profile, fetchProfile } = useProfileStore();
+  const user = useAuthStore((state) => state.user);
 
   // 🔄 ОБНОВЛЕНИЕ
 useFocusEffect(
   useCallback(() => {
     fetchPets();
 
-    fetchProfile();
+    // ✅ ИЗМЕНЕНО: передаем user вместо authUser
+    if (user) {
+      fetchProfile(user);
+    }
 
     fetchNotifications();
 
     loadHomeSettings();
-  }, [profile])
+    // ✅ ИЗМЕНЕНО: зависимость от user вместо authUser
+  }, [profile, user])
 );
 
   // 🧠 ИМЯ
@@ -335,7 +340,10 @@ useEffect(() => {
             onRefresh={() => {
               onRefresh();
               fetchPets();
-              fetchProfile(); // 🔥 синхронно с профилем
+              // ✅ ИЗМЕНЕНО: передаем user вместо authUser
+              if (user) {
+                fetchProfile(user);
+              }
             }}
             tintColor={colors.primary.main}
             colors={[colors.primary.main]}
@@ -360,7 +368,6 @@ useEffect(() => {
          {showTracker && (
          <MiniTrackerCard
           pets={trackerData}
-          selectedDate={selectedDate}
           onPress={() =>
             router.push('/tracker')
           }
@@ -382,4 +389,3 @@ useEffect(() => {
     </SafeAreaView>
   );
 }
-

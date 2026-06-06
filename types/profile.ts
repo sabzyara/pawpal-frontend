@@ -6,9 +6,9 @@ export enum Role {
 }
 
 export enum UserStatus {
+  PENDING = "PENDING",
   ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-  BANNED = "BANNED",
+  REJECTED = "REJECTED",
 }
 
 export interface User {
@@ -49,7 +49,6 @@ export interface Veterinarian {
   city?: string;                    
 }
 
-// Сервис-провайдер
 export interface ServiceProvider {
   serviceProviderId: number;
   userId: number;
@@ -69,10 +68,15 @@ export interface ServiceProvider {
   patientsCount?: number;           
 }
 
-// Полный профиль пользователя
 export interface UserProfile {
   user: User;
   petOwner?: PetOwner;
   veterinarian?: Veterinarian;
   serviceProvider?: ServiceProvider;
+}
+
+export interface CompleteProfileData {
+  username: string;
+  phoneNumber: string;
+  address: string;
 }

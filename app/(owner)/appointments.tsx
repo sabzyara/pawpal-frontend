@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+// app/my_appointments.tsx
+
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -27,12 +29,12 @@ const statusColors: Record<AppointmentStatus, string> = {
 };
 
 const statusLabels: Record<AppointmentStatus, string> = {
-  CREATED: 'Ожидает подтверждения',
-  CONFIRMED: 'Подтверждено',
-  COMPLETED: 'Завершено',
-  CANCELLED_BY_USER: 'Отменено вами',
-  CANCELLED_BY_SPECIALIST: 'Отменено специалистом',
-  NO_SHOW: 'Неявка',
+  CREATED: 'Pending',
+  CONFIRMED: 'Confirmed',
+  COMPLETED: 'Completed',
+  CANCELLED_BY_USER: 'Cancelled',
+  CANCELLED_BY_SPECIALIST: 'Cancelled by Specialist',
+  NO_SHOW: 'No Show',
 };
 
 export default function MyAppointmentsScreen() {
@@ -47,27 +49,42 @@ export default function MyAppointmentsScreen() {
     appointments = [], 
     loading,
     refreshing,
-    hasMore,
     loadMore,
     refresh,
     cancelAppointment,
   } = useOwnerAppointments({ status: selectedStatus });
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(async () => {
     if (!cancelAppointment) {
       Alert.alert('Ошибка', 'Функция отмены недоступна');
       return;
     }
 
-    if (selectedAppointmentId && cancelReason.trim()) {
-      cancelAppointment(selectedAppointmentId, cancelReason);
+    if (!selectedAppointmentId) {
+      Alert.alert('Ошибка', 'Выберите запись для отмены');
+      return;
+    }
+
+    if (!cancelReason.trim()) {
+      Alert.alert('Ошибка', 'Пожалуйста, укажите причину отмены');
+      return;
+    }
+
+    try {
+      await cancelAppointment(selectedAppointmentId, cancelReason);
       setShowCancelModal(false);
       setCancelReason('');
       setSelectedAppointmentId(null);
-    } else {
-      Alert.alert('Ошибка', 'Укажите причину отмены');
+    } catch (error) {
+      console.error('Cancel error:', error);
+      Alert.alert('Ошибка', 'Не удалось отменить запись');
     }
-  };
+  }, [cancelAppointment, selectedAppointmentId, cancelReason]);
+
+  const openCancelModal = useCallback((appointmentId: number) => {
+    setSelectedAppointmentId(appointmentId);
+    setShowCancelModal(true);
+  }, []);
 
   const formatTime = (time?: string) => {
     if (!time) return '--:--';
@@ -77,32 +94,43 @@ export default function MyAppointmentsScreen() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Дата не указана';
     try {
-      return new Date(dateString).toLocaleDateString('ru-RU');
+      return new Date(dateString).toLocaleDateString('ru-RU', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
     } catch {
       return 'Дата не указана';
     }
   };
 
-  const navigateToAppointment = (appointmentId: number) => {
+  const navigateToAppointment = useCallback((appointmentId: number) => {
     router.push({
       pathname: '/appointment-details',
       params: { id: appointmentId.toString() }
     });
-  };
+  }, [router]);
 
   const renderStatusFilter = () => (
     <ScrollView 
       horizontal 
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.xs, marginBottom: spacing.md }}
+      contentContainerStyle={{ paddingHorizontal: spacing.md, gap: 12, marginBottom: spacing.md, paddingVertical: 4 }}
     >
       <TouchableOpacity
         onPress={() => setSelectedStatus(undefined)}
         style={{
-          paddingVertical: spacing.xs,
-          paddingHorizontal: spacing.md,
-          borderRadius: 20,
+          paddingVertical: 10,
+          paddingHorizontal: 18,
+          borderRadius: 999,
           backgroundColor: !selectedStatus ? colors.primary.main : colors.background.tertiary,
+          ...(!selectedStatus && {
+            shadowColor: colors.primary.main,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 8,
+            elevation: 3,
+          }),
         }}
       >
         <Text style={{ 
@@ -117,10 +145,17 @@ export default function MyAppointmentsScreen() {
           key={key}
           onPress={() => setSelectedStatus(key as AppointmentStatus)}
           style={{
-            paddingVertical: spacing.xs,
-            paddingHorizontal: spacing.md,
-            borderRadius: 20,
+            paddingVertical: 10,
+            paddingHorizontal: 18,
+            borderRadius: 999,
             backgroundColor: selectedStatus === key ? colors.primary.main : colors.background.tertiary,
+            ...(selectedStatus === key && {
+              shadowColor: colors.primary.main,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+              elevation: 3,
+            }),
           }}
         >
           <Text style={{ 
@@ -137,7 +172,6 @@ export default function MyAppointmentsScreen() {
   const renderAppointmentCard = ({ item }: { item: any }) => {
     const canCancel = (item.status === 'CREATED' || item.status === 'CONFIRMED') && cancelAppointment;
     const statusColor = statusColors[item.status as AppointmentStatus] || colors.text.secondary;
-    const errorColor = colors.error?.main || '#F44336';
     
     return (
       <TouchableOpacity
@@ -145,23 +179,41 @@ export default function MyAppointmentsScreen() {
         activeOpacity={0.7}
         style={{
           backgroundColor: colors.card.default,
-          borderRadius: spacing.md,
-          padding: spacing.md,
-          marginBottom: spacing.sm,
+          borderRadius: 24,
+          padding: 20,
+          marginBottom: 16,
           marginHorizontal: spacing.md,
           borderWidth: 1,
           borderColor: colors.border.light,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 3,
         }}
       >
         <View style={{ 
           flexDirection: 'row', 
           justifyContent: 'space-between', 
-          alignItems: 'center', 
-          marginBottom: spacing.xs 
+          alignItems: 'flex-start',
+          marginBottom: spacing.sm 
         }}>
-          <Text style={[typography.body1SemiBold, { color: colors.text.primary, flex: 1 }]}>
-            {item.specialistName || 'Специалист'}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <Ionicons
+              name="person-circle"
+              size={48}
+              color={colors.primary.main}
+            />
+            <View style={{ marginLeft: 12 }}>
+              <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
+                {item.specialistName || 'Специалист'}
+              </Text>
+              <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                Запись на прием
+              </Text>
+            </View>
+          </View>
+          
           <View
             style={{
               backgroundColor: statusColor + '20',
@@ -179,7 +231,8 @@ export default function MyAppointmentsScreen() {
         <View style={{ 
           flexDirection: 'row', 
           gap: spacing.md, 
-          marginBottom: spacing.sm 
+          marginBottom: spacing.md,
+          marginTop: spacing.sm,
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs }}>
             <Ionicons name="calendar-outline" size={16} color={colors.text.secondary} />
@@ -195,31 +248,46 @@ export default function MyAppointmentsScreen() {
           </View>
         </View>
 
-        <Text style={[typography.body2, { color: colors.text.primary, marginBottom: spacing.xs }]}>
-          Питомец: {item.petName || 'Не указан'} ({item.petType || 'Не указан'})
-        </Text>
+        <View
+          style={{
+            alignSelf: 'flex-start',
+            backgroundColor: colors.background.tertiary,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 999,
+            marginTop: 4,
+            marginBottom: spacing.xs,
+          }}
+        >
+          <Text style={[typography.caption, { color: colors.text.primary }]}>
+            🐾 {item.petName || 'Питомец не указан'} {item.petType ? `(${item.petType})` : ''}
+          </Text>
+        </View>
 
         {item.ownerNotes && (
-          <Text style={[typography.caption, { color: colors.text.secondary }]} numberOfLines={2}>
-            Заметки: {item.ownerNotes}
+          <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]} numberOfLines={2}>
+            Примечание: {item.ownerNotes}
           </Text>
         )}
 
         {canCancel && (
           <TouchableOpacity
-            onPress={() => {
-              setSelectedAppointmentId(item.id);
-              setShowCancelModal(true);
-            }}
+            onPress={() => openCancelModal(item.id)}
             style={{
-              marginTop: spacing.sm,
-              paddingVertical: spacing.xs,
+              marginTop: spacing.md,
+              paddingVertical: spacing.sm,
               alignItems: 'center',
-              backgroundColor: errorColor + '20',
-              borderRadius: spacing.xs,
+              backgroundColor: (colors.error?.light || '#F44336') + '20',
+              borderWidth: 1,
+              borderColor: colors.error?.main || '#F44336',
+              borderRadius: 12,
             }}
           >
-            <Text style={{ color: errorColor, fontSize: 14, fontWeight: '500' }}>
+            <Text style={{ 
+              color: colors.error?.main || '#F44336', 
+              fontSize: 14, 
+              fontWeight: '600' 
+            }}>
               Отменить запись
             </Text>
           </TouchableOpacity>
@@ -238,10 +306,23 @@ export default function MyAppointmentsScreen() {
         paddingHorizontal: spacing.md,
         paddingBottom: spacing.md,
         backgroundColor: colors.background.primary,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.border.light,
+        borderBottomWidth: 0, 
       }}>
-        <Text style={[typography.h2, { color: colors.text.primary }]}>Мои записи</Text>
+        <Text style={[typography.h2, { color: colors.text.primary }]}>
+          Мои записи
+        </Text>
+        
+        <Text
+          style={[
+            typography.body2,
+            {
+              color: colors.text.secondary,
+              marginTop: 4,
+            },
+          ]}
+        >
+          Управление предстоящими визитами
+        </Text>
       </View>
 
       {renderStatusFilter()}
@@ -269,19 +350,27 @@ export default function MyAppointmentsScreen() {
         }
         ListEmptyComponent={
           showEmpty ? (
-            <View style={{ padding: spacing.xl, alignItems: 'center' }}>
-              <Ionicons name="calendar-outline" size={48} color={colors.text.secondary} />
-              <Text style={[typography.body1, { color: colors.text.primary, marginTop: spacing.md }]}>
-                У вас нет записей
+            <View style={{ padding: spacing.xl, alignItems: 'center', paddingTop: 80 }}>
+              <Ionicons name="calendar-clear-outline" size={80} color={colors.primary.light} />
+              <Text style={[typography.h4, { color: colors.text.primary, marginTop: 16 }]}>
+                Нет записей
+              </Text>
+              <Text style={[typography.body2, { color: colors.text.secondary, textAlign: 'center', marginTop: 8 }]}>
+                Запишитесь к ветеринару или специалисту для вашего питомца
               </Text>
               <TouchableOpacity
                 onPress={() => router.push('/')}
                 style={{ 
-                  marginTop: spacing.md, 
+                  marginTop: spacing.lg, 
                   backgroundColor: colors.primary.main, 
                   paddingHorizontal: spacing.lg, 
                   paddingVertical: spacing.sm, 
-                  borderRadius: 20 
+                  borderRadius: 999,
+                  shadowColor: colors.primary.main,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 8,
+                  elevation: 4,
                 }}
               >
                 <Text style={{ color: colors.text.inverse, fontWeight: '600' }}>Записаться</Text>
@@ -291,28 +380,42 @@ export default function MyAppointmentsScreen() {
         }
       />
 
-      {/* Cancel Modal */}
       <Modal 
         visible={showCancelModal} 
         transparent 
         animationType="fade"
         onRequestClose={() => setShowCancelModal(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}>
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            justifyContent: 'flex-end',
+          }}
+          activeOpacity={1}
+          onPress={() => setShowCancelModal(false)}
+        >
           <View style={{
             backgroundColor: colors.background.primary,
-            borderRadius: spacing.lg,
-            padding: spacing.lg,
-            width: '80%',
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            padding: 24,
           }}>
-            <Text style={[typography.h4, { color: colors.text.primary, marginBottom: spacing.md }]}>
-              Причина отмены
+            <View
+              style={{
+                alignSelf: 'center',
+                width: 50,
+                height: 5,
+                borderRadius: 999,
+                backgroundColor: colors.border.medium,
+                marginBottom: 20,
+              }}
+            />
+            
+            <Text style={[typography.h3, { color: colors.text.primary, marginBottom: 16 }]}>
+              Отмена записи
             </Text>
+            
             <TextInput
               value={cancelReason}
               onChangeText={setCancelReason}
@@ -322,26 +425,38 @@ export default function MyAppointmentsScreen() {
               style={{
                 borderWidth: 1,
                 borderColor: colors.border.light,
-                borderRadius: spacing.sm,
-                padding: spacing.sm,
-                minHeight: 80,
+                borderRadius: 16,
+                padding: spacing.md,
+                minHeight: 100,
                 textAlignVertical: 'top',
                 backgroundColor: colors.background.secondary,
                 color: colors.text.primary,
+                fontSize: 16,
               }}
             />
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: spacing.lg, gap: spacing.sm }}>
+            
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: spacing.lg, gap: spacing.md }}>
               <TouchableOpacity onPress={() => setShowCancelModal(false)}>
-                <Text style={[typography.body1, { color: colors.text.secondary }]}>Отмена</Text>
+                <Text style={[typography.body1, { color: colors.text.secondary, paddingVertical: spacing.sm, paddingHorizontal: spacing.sm }]}>
+                  Отмена
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={handleCancel}>
-                <Text style={[typography.body1SemiBold, { color: colors.error?.main || '#F44336' }]}>
+              <TouchableOpacity 
+                onPress={handleCancel}
+                style={{
+                  backgroundColor: colors.error?.main || '#F44336',
+                  paddingVertical: spacing.sm,
+                  paddingHorizontal: spacing.lg,
+                  borderRadius: 12,
+                }}
+              >
+                <Text style={[typography.body1SemiBold, { color: colors.text.inverse }]}>
                   Отменить запись
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
