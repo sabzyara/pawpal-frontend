@@ -1,10 +1,9 @@
-// screens/home/components/StatsCards.tsx
+// components/home/StatsCards.tsx
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
-import { createHomeStyles } from '../../styles/homeStyles';
 
 interface StatsCardsProps {
   totalPets: number;
@@ -18,7 +17,6 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
   pendingTasks,
 }) => {
   const { colors } = useTheme();
-  const styles = createHomeStyles(colors);
 
   const stats = [
     {
@@ -59,3 +57,36 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginBottom: 24,
+    paddingHorizontal: 16,
+  },
+  statCard: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#FFF',
+    marginTop: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#FFF',
+    marginTop: 4,
+    opacity: 0.9,
+  },
+});

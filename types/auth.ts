@@ -29,5 +29,6 @@ export interface AuthResponse {
     email: string;
     role: Role;
     status: string;
+    createdAt?: string;
   };
 }

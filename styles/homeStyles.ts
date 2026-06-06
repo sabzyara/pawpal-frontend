@@ -135,6 +135,13 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
   },
 
   // ========== PETS SECTION ==========
+
+  scheduleDate: {
+    fontSize: 11,
+    color: '#FFF',
+    opacity: 0.7,
+    marginBottom: 2,
+  },
   petsSection: {
     marginBottom: 24,
     marginTop: 50,

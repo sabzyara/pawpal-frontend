@@ -1,6 +1,55 @@
-import React from 'react';
-import { View, FlatList } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, FlatList, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@/hooks/useTheme';
+
+const ShimmerItem = ({ style }: { style: any }) => {
+  const { colors } = useTheme();
+  const shimmerValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const shimmerAnimation = Animated.loop(
+      Animated.timing(shimmerValue, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      })
+    );
+    shimmerAnimation.start();
+    return () => shimmerAnimation.stop();
+  }, []);
+
+  const translateX = shimmerValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-200, 200],
+  });
+
+  return (
+    <View style={[style, { overflow: 'hidden', backgroundColor: colors.background.tertiary }]}>
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          transform: [{ translateX }],
+        }}
+      >
+        <LinearGradient
+          colors={[
+            'transparent',
+            'rgba(255,255,255,0.3)',
+            'transparent',
+          ]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{ flex: 1 }}
+        />
+      </Animated.View>
+    </View>
+  );
+};
 
 const SkeletonItem = () => {
   const { colors, spacing } = useTheme();
@@ -9,67 +58,71 @@ const SkeletonItem = () => {
     <View
       style={{
         backgroundColor: colors.card.default,
-        borderRadius: 20,
-        padding: 16,
+        borderRadius: 28,
+        padding: 20, 
         marginBottom: 16,
+        
+       
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 3,
       }}
     >
       <View style={{ flexDirection: 'row', gap: 16 }}>
-        {/* Avatar skeleton */}
-        <View
+        {/* Avatar skeleton - bigger */}
+        <ShimmerItem
           style={{
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: colors.background.tertiary,
+            width: 90, 
+            height: 90, 
+            borderRadius: 45, 
           }}
         />
         
         {/* Info skeleton */}
         <View style={{ flex: 1, gap: 8 }}>
           {/* Name skeleton */}
-          <View
+          <ShimmerItem
             style={{
               width: '60%',
               height: 20,
-              borderRadius: 4,
-              backgroundColor: colors.background.tertiary,
+              borderRadius: 8, 
             }}
           />
           {/* Specialty skeleton */}
-          <View
+          <ShimmerItem
             style={{
               width: '70%',
               height: 14,
-              borderRadius: 4,
-              backgroundColor: colors.background.tertiary,
+              borderRadius: 8, 
             }}
           />
           {/* Clinic skeleton */}
-          <View
+          <ShimmerItem
             style={{
               width: '50%',
               height: 14,
-              borderRadius: 4,
-              backgroundColor: colors.background.tertiary,
+              borderRadius: 8, 
             }}
           />
           {/* Address skeleton */}
-          <View
+          <ShimmerItem
             style={{
               width: '80%',
               height: 14,
-              borderRadius: 4,
-              backgroundColor: colors.background.tertiary,
+              borderRadius: 8, 
             }}
           />
           {/* Price skeleton */}
-          <View
+          <ShimmerItem
             style={{
               width: '40%',
               height: 24,
-              borderRadius: 4,
-              backgroundColor: colors.background.tertiary,
+              borderRadius: 8, 
               marginTop: 4,
             }}
           />
@@ -95,21 +148,19 @@ export const VetsListSkeleton = () => {
           borderBottomColor: colors.border.light,
         }}
       >
-        <View
+        <ShimmerItem
           style={{
             width: '40%',
             height: 32,
             borderRadius: 8,
-            backgroundColor: colors.background.tertiary,
             marginBottom: 8,
           }}
         />
-        <View
+        <ShimmerItem
           style={{
             width: '30%',
             height: 16,
             borderRadius: 8,
-            backgroundColor: colors.background.tertiary,
           }}
         />
       </View>
@@ -124,20 +175,18 @@ export const VetsListSkeleton = () => {
           backgroundColor: colors.background.primary,
         }}
       >
-        <View
+        <ShimmerItem
           style={{
             flex: 1,
-            height: 48,
-            borderRadius: 14,
-            backgroundColor: colors.background.tertiary,
+            height: 52, 
+            borderRadius: 999, 
           }}
         />
-        <View
+        <ShimmerItem
           style={{
-            width: 100,
-            height: 48,
-            borderRadius: 14,
-            backgroundColor: colors.background.tertiary,
+            width: 120,
+            height: 52, 
+            borderRadius: 999, 
           }}
         />
       </View>
@@ -153,17 +202,16 @@ export const VetsListSkeleton = () => {
         <View
           style={{
             flexDirection: 'row',
-            gap: 10,
+            gap: 12, 
           }}
         >
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <View
+            <ShimmerItem
               key={i}
               style={{
-                width: 80,
-                height: 40,
-                borderRadius: 30,
-                backgroundColor: colors.background.tertiary,
+                width: 90, 
+                height: 42, 
+                borderRadius: 999, 
               }}
             />
           ))}
@@ -178,12 +226,11 @@ export const VetsListSkeleton = () => {
           backgroundColor: colors.background.tertiary,
         }}
       >
-        <View
+        <ShimmerItem
           style={{
             width: '40%',
             height: 14,
-            borderRadius: 4,
-            backgroundColor: colors.background.secondary,
+            borderRadius: 8,
           }}
         />
       </View>

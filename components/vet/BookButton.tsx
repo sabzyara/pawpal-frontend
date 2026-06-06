@@ -1,59 +1,72 @@
+// components/vet/BookButton.tsx
+
 import React from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '@/hooks/useTheme';
+import { Ionicons } from '@expo/vector-icons';
 
 interface BookButtonProps {
-  specialistId: number;
+  userId: number;        // ← Изменено: теперь принимаем userId
   specialistType: 'VET' | 'SERVICE';
-  specialistName?: string;
+  specialistName: string;
 }
 
-export const BookButton: React.FC<BookButtonProps> = ({ 
-  specialistId, 
-  specialistType, 
-  specialistName 
+export const BookButton: React.FC<BookButtonProps> = ({
+  userId,
+  specialistType,
+  specialistName,
 }) => {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, typography, spacing } = useTheme();
   const router = useRouter();
 
-  const handleBookPress = () => {
+  const handlePress = () => {
     router.push({
       pathname: '/book-appointment',
       params: {
-        specialistId: specialistId.toString(),
+        specialistUserId: userId,        // ← Передаем userId
         specialistType: specialistType,
-        specialistName: specialistName || (specialistType === 'VET' ? 'Ветеринар' : 'Специалист'),
+        specialistName: specialistName,
       },
     });
   };
 
   return (
-    <View
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: spacing.md,
-        backgroundColor: colors.background.primary,
-        borderTopWidth: 1,
-        borderTopColor: colors.border.light,
-      }}
-    >
-      <TouchableOpacity
-        onPress={handleBookPress}
-        style={{
+    <TouchableOpacity
+      style={[
+        styles.button,
+        {
           backgroundColor: colors.primary.main,
-          padding: spacing.md,
-          borderRadius: 16,
-          alignItems: 'center',
-        }}
+          borderRadius: spacing.md,
+          paddingVertical: spacing.md,
+          marginHorizontal: spacing.md,
+          marginBottom: spacing.md,
+        },
+      ]}
+      onPress={handlePress}
+      activeOpacity={0.8}
+    >
+      <Ionicons name="calendar" size={24} color={colors.text.inverse} />
+      <Text
+        style={[
+          typography.button,
+          { color: colors.text.inverse, marginLeft: spacing.sm },
+        ]}
       >
-        <Text style={[typography.button, { color: colors.text.inverse }]}>
-          Записаться на прием
-        </Text>
-      </TouchableOpacity>
-    </View>
+        Записаться
+      </Text>
+    </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

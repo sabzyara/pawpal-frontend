@@ -1,24 +1,121 @@
+import { Redirect } from "expo-router";
+import { useAuthStore } from "@/store/authStore";
+import { useProfileStore } from "@/store/profileStore";
+import { View, ActivityIndicator } from "react-native";
 import { useEffect } from "react";
-import { router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { User } from "@/types/profile";
+
+// Константы маршрутов
+const ROUTES = {
+  OWNER_COMPLETE: '/complete_profile',
+  VET_COMPLETE: '/complete_vet',
+  SERVICE_COMPLETE: '/complete_service',
+  OWNER_MAIN: '/(owner)',
+  SPECIALIST_MAIN: '/(specialist)',
+  ADMIN_MAIN: '/(admin)/admin-main',
+  LOGIN: '/(auth)/login',
+} as const;
+
+// Функция для извлечения строки роли
+const extractRoleString = (user: User | null): string => {
+  if (!user?.role) return '';
+  return user.role as string;
+};
 
 export default function Index() {
+  const { 
+    token, 
+    user, 
+    isLoading: isAuthLoading, 
+    isInitialized 
+  } = useAuthStore();
+  
+  const { 
+    profile, 
+    isLoading: isProfileLoading, 
+    fetchProfile,
+    error: profileError 
+  } = useProfileStore();
+
+  // Загружаем профиль если есть пользователь, но нет профиля
   useEffect(() => {
-    const checkAuth = async () => {
-      const token =
-        await AsyncStorage.getItem("token");
+    if (isInitialized && user && !profile && !isProfileLoading && !profileError) {
+      console.log('🔄 Loading profile for user:', user.id);
+      fetchProfile(user).catch(err => {
+        console.log('Profile fetch error in index:', err?.response?.status);
+      });
+    }
+  }, [isInitialized, user, profile, isProfileLoading, profileError, fetchProfile]);
 
-      console.log("TOKEN:", token);
+  // 1. Аутентификация еще загружается
+  if (!isInitialized || isAuthLoading) {
+    console.log('⏳ Auth loading...');
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E3275B" />
+      </View>
+    );
+  }
 
-      if (token) {
-        router.replace("/(owner)");
-      } else {
-        router.replace("/(auth)/login");
-      }
-    };
+  // 2. Нет токена или пользователя - отправляем на логин
+  if (!token || !user) {
+    console.log('🔐 No token or user, redirecting to login');
+    return <Redirect href={ROUTES.LOGIN} />;
+  }
 
-    checkAuth();
-  }, []);
+  // 3. Профиль еще загружается - показываем спиннер
+  if (isProfileLoading) {
+    console.log('⏳ Profile loading...');
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E3275B" />
+      </View>
+    );
+  }
 
-  return null;
+  // 4. Получаем роль пользователя
+  const roleString = extractRoleString(user);
+  
+  if (!roleString) {
+    console.warn('⚠️ Role not defined for user:', user);
+    return <Redirect href={ROUTES.LOGIN} />;
+  }
+
+  console.log('📍 User role:', roleString);
+  console.log('📍 Has profile:', !!profile);
+  console.log('📍 Profile data:', profile ? JSON.stringify(profile).substring(0, 100) : 'null');
+
+  // 5. Проверяем, заполнен ли профиль
+  const hasProfile = !!(profile?.petOwner || profile?.veterinarian || profile?.serviceProvider);
+
+  // 6. Если профиль не заполнен - отправляем на страницу заполнения
+  if (!hasProfile) {
+    console.log('🆕 Profile not complete, redirecting to completion');
+    switch (roleString) {
+      case "OWNER":
+        return <Redirect href={ROUTES.OWNER_COMPLETE} />;
+      case "VET":
+        return <Redirect href={ROUTES.VET_COMPLETE} />;
+      case "SERVICE":
+        return <Redirect href={ROUTES.SERVICE_COMPLETE} />;
+      default:
+        console.error('❌ Unknown role for profile completion:', roleString);
+        return <Redirect href={ROUTES.LOGIN} />;
+    }
+  }
+
+  // 7. Профиль заполнен - отправляем на главный экран согласно роли
+  console.log('✅ Profile complete, redirecting to main app');
+  switch (roleString) {
+    case "OWNER":
+      return <Redirect href={ROUTES.OWNER_MAIN} />;
+    case "VET":
+    case "SERVICE":
+      return <Redirect href={ROUTES.SPECIALIST_MAIN} />;
+    case "ADMIN":
+      return <Redirect href={ROUTES.ADMIN_MAIN} />;
+    default:
+      console.error('❌ Unknown role for main redirect:', roleString);
+      return <Redirect href={ROUTES.LOGIN} />;
+  }
 }

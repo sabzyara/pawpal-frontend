@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Alert,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -14,137 +20,357 @@ interface VetAboutProps {
   };
 }
 
-export const VetAbout: React.FC<VetAboutProps> = ({ vet }) => {
-  const { colors, spacing, typography } = useTheme();
+export const VetAbout: React.FC<VetAboutProps> = ({
+  vet,
+}) => {
+  const {
+    colors,
+    spacing,
+    typography,
+  } = useTheme();
 
   const handlePhonePress = () => {
+    if (!vet.phoneNumber) return;
+
     const phoneUrl = `tel:${vet.phoneNumber}`;
+
     Linking.canOpenURL(phoneUrl)
       .then((supported) => {
         if (supported) {
           Linking.openURL(phoneUrl);
         } else {
-          Alert.alert('Error', 'Phone calls are not supported on this device');
+          Alert.alert(
+            'Ошибка',
+            'Звонки не поддерживаются'
+          );
         }
       })
-      .catch((err) => console.error('Error opening phone dialer:', err));
+      .catch((err) =>
+        console.error(err)
+      );
   };
 
   const handleLocationPress = () => {
-  const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(vet.address || '')}`;
-  Linking.openURL(mapsUrl).catch((err) => 
-    console.error('Error opening maps:', err)
+    if (!vet.address) return;
+
+    const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(
+      vet.address
+    )}`;
+
+    Linking.openURL(mapsUrl).catch(
+      (err) =>
+        console.error(
+          'Error opening maps:',
+          err
+        )
+    );
+  };
+
+  const InfoCard = ({
+    icon,
+    title,
+    value,
+    onPress,
+  }: {
+    icon: keyof typeof Ionicons.glyphMap;
+    title: string;
+    value: string;
+    onPress?: () => void;
+  }) => (
+    <TouchableOpacity
+      activeOpacity={onPress ? 0.8 : 1}
+      onPress={onPress}
+      disabled={!onPress}
+      style={{
+        backgroundColor:
+          colors.background.primary,
+
+        borderRadius: 18,
+
+        padding: spacing.md,
+
+        flexDirection: 'row',
+
+        alignItems: 'center',
+
+        borderWidth: 1,
+
+        borderColor:
+          colors.border.light,
+      }}
+    >
+      <View
+        style={{
+          width: 46,
+          height: 46,
+
+          borderRadius: 23,
+
+          backgroundColor:
+            colors.primary.light,
+
+          justifyContent:
+            'center',
+
+          alignItems:
+            'center',
+
+          marginRight:
+            spacing.md,
+        }}
+      >
+        <Ionicons
+          name={icon}
+          size={22}
+          color={
+            colors.primary.main
+          }
+        />
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <Text
+          style={[
+            typography.caption,
+            {
+              color:
+                colors.text
+                  .secondary,
+            },
+          ]}
+        >
+          {title}
+        </Text>
+
+        <Text
+          style={[
+            typography.body2SemiBold,
+            {
+              color:
+                colors.text
+                  .primary,
+
+              marginTop: 2,
+            },
+          ]}
+        >
+          {value}
+        </Text>
+      </View>
+
+      {onPress && (
+        <Ionicons
+          name="chevron-forward"
+          size={18}
+          color={
+            colors.text
+              .tertiary
+          }
+        />
+      )}
+    </TouchableOpacity>
   );
-};
 
   return (
     <View
       style={{
-        backgroundColor: colors.card.default,
-        borderRadius: 20,
-        padding: spacing.md,
         gap: spacing.md,
-        ...(colors.card.default === '#FFFFFF' && {
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.05,
-          shadowRadius: 3,
-          elevation: 2,
-        }),
       }}
     >
-      {/* About Text */}
-      <Text style={[typography.body1, { color: colors.text.primary, lineHeight: 24 }]}>
-        {vet.about || 'No description'}
-      </Text>
+      {/* ABOUT */}
+      <View
+        style={{
+          backgroundColor:
+            colors.card.default,
 
-      {/* Clinic Name */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Ionicons name="business-outline" size={18} color={colors.primary.main} />
-        <View style={{ flex: 1 }}>
-          <Text style={[typography.caption, { color: colors.text.secondary }]}>
-            Clinic
-          </Text>
-          <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.clinicName || 'Not specified'}
-          </Text>
-        </View>
+          borderRadius: 24,
+
+          padding: spacing.md,
+
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.05,
+          shadowRadius: 4,
+          elevation: 2,
+        }}
+      >
+        <Text
+          style={[
+            typography.body1SemiBold,
+            {
+              color:
+                colors.text
+                  .primary,
+
+              marginBottom:
+                spacing.sm,
+            },
+          ]}
+        >
+          О специалисте
+        </Text>
+
+        <Text
+          style={[
+            typography.body2,
+            {
+              color:
+                colors.text
+                  .secondary,
+
+              lineHeight: 24,
+            },
+          ]}
+        >
+          {vet.about ||
+            'Информация отсутствует'}
+        </Text>
       </View>
 
-      {/* Address (Touchable for maps) */}
-      <TouchableOpacity 
-        onPress={handleLocationPress}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
-      >
-        <Ionicons name="location-outline" size={18} color={colors.primary.main} />
-        <View style={{ flex: 1 }}>
-          <Text style={[typography.caption, { color: colors.text.secondary }]}>
-            Location
-          </Text>
-          <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.address || 'Not specified'}
-          </Text>
-        </View>
-        <Ionicons name="open-outline" size={14} color={colors.text.secondary} />
-      </TouchableOpacity>
+      {/* CLINIC */}
+      <InfoCard
+        icon="business-outline"
+        title="Клиника"
+        value={
+          vet.clinicName ||
+          'Не указано'
+        }
+      />
 
-      {/* Phone Number (Touchable for calling) */}
-      <TouchableOpacity 
-        onPress={handlePhonePress}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
-      >
-        <Ionicons name="call-outline" size={18} color={colors.primary.main} />
-        <View style={{ flex: 1 }}>
-          <Text style={[typography.caption, { color: colors.text.secondary }]}>
-            Phone Number
-          </Text>
-          <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.phoneNumber || 'Not specified'}
-          </Text>
-        </View>
-        <Ionicons name="chevron-forward" size={14} color={colors.text.secondary} />
-      </TouchableOpacity>
+      {/* ADDRESS */}
+      <InfoCard
+        icon="location-outline"
+        title="Адрес"
+        value={
+          vet.address ||
+          'Не указан'
+        }
+        onPress={
+          vet.address
+            ? handleLocationPress
+            : undefined
+        }
+      />
 
-      {/* Education */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Ionicons name="school-outline" size={18} color={colors.primary.main} />
-        <View style={{ flex: 1 }}>
-          <Text style={[typography.caption, { color: colors.text.secondary }]}>
-            Education
-          </Text>
-          <Text style={[typography.body2, { color: colors.text.primary }]}>
-            {vet.education || 'Not specified'}
-          </Text>
-        </View>
-      </View>
+      {/* PHONE */}
+      <InfoCard
+        icon="call-outline"
+        title="Телефон"
+        value={
+          vet.phoneNumber ||
+          'Не указан'
+        }
+        onPress={
+          vet.phoneNumber
+            ? handlePhonePress
+            : undefined
+        }
+      />
 
-      {/* Languages */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Ionicons name="language-outline" size={18} color={colors.primary.main} />
-        <View style={{ flex: 1 }}>
-          <Text style={[typography.caption, { color: colors.text.secondary }]}>
-            Languages Spoken
+      {/* EDUCATION */}
+      <InfoCard
+        icon="school-outline"
+        title="Образование"
+        value={
+          vet.education ||
+          'Не указано'
+        }
+      />
+
+      {/* LANGUAGES */}
+      {!!vet.languages?.length && (
+        <View
+          style={{
+            backgroundColor:
+              colors.card.default,
+
+            borderRadius: 24,
+
+            padding:
+              spacing.md,
+
+            shadowColor: '#000',
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+        >
+          <Text
+            style={[
+              typography.body1SemiBold,
+              {
+                color:
+                  colors.text
+                    .primary,
+
+                marginBottom:
+                  spacing.sm,
+              },
+            ]}
+          >
+            Языки общения
           </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-            {(vet.languages || []).map(
-                (language, index) => (
-              <View
-                key={index}
-                style={{
-                  backgroundColor: colors.background.tertiary,
-                  paddingHorizontal: spacing.sm,
-                  paddingVertical: 4,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={[typography.caption, { color: colors.text.primary }]}>
-                  {language}
-                </Text>
-              </View>
-            ))}
+
+          <View
+            style={{
+              flexDirection:
+                'row',
+
+              flexWrap:
+                'wrap',
+
+              gap: 8,
+            }}
+          >
+            {vet.languages.map(
+              (
+                language,
+                index
+              ) => (
+                <View
+                  key={index}
+                  style={{
+                    backgroundColor:
+                      colors
+                        .primary
+                        .light,
+
+                    paddingHorizontal:
+                      12,
+
+                    paddingVertical:
+                      8,
+
+                    borderRadius:
+                      20,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color:
+                        colors
+                          .primary
+                          .dark,
+
+                      fontWeight:
+                        '600',
+                    }}
+                  >
+                    {language}
+                  </Text>
+                </View>
+              )
+            )}
           </View>
         </View>
-      </View>
+      )}
     </View>
   );
 };
