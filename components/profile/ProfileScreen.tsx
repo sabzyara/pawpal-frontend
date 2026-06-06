@@ -7,14 +7,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    Image,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -416,7 +416,7 @@ const handleMyPets = () => {
             padding: 16,
             margin: 16,
             borderRadius: 16,
-            backgroundColor: colors.card.elevated,
+            backgroundColor: colors.card.default,
             borderWidth: 1,
             borderColor: colors.border.medium,
           }}
