@@ -34,7 +34,7 @@ export default function AdminTabs() {
       <Tabs.Screen
         name="admin-main"
         options={{
-          title: "Dashboard",
+          title: "List",
 
           tabBarIcon: ({ color, size }) => (
             <Feather

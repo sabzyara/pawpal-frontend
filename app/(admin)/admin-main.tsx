@@ -6,13 +6,14 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 type User = {
   id: number;
@@ -126,17 +127,42 @@ export default function AdminUsersScreen() {
         style={styles.input}
       />
 
-      <View style={styles.filters}>
+      <View
+        style={{
+          flexDirection: "row",
+          borderRadius: 30,
+          padding: 4,
+          marginBottom: 20,
+          backgroundColor: colors.card.elevated,
+        }}
+      >
         {["ALL", "OWNER", "VET", "SERVICE"].map((role) => (
           <TouchableOpacity
             key={role}
-            style={[
-              styles.filterBtn,
-              roleFilter === role && styles.filterBtnActive,
-            ]}
+            style={{
+              flex: 1,
+              paddingVertical: 12,
+              borderRadius: 25,
+              alignItems: "center",
+              backgroundColor:
+                roleFilter === role
+                  ? colors.primary.main
+                  : "transparent",
+            }}
             onPress={() => setRoleFilter(role)}
           >
-            <Text style={styles.filterText}>{role}</Text>
+            <Text
+              style={{
+                fontWeight: "700",
+                fontSize: 14,
+                color:
+                  roleFilter === role
+                    ? "#fff"
+                    : colors.text.secondary,
+              }}
+            >
+              {role}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -177,7 +203,7 @@ export default function AdminUsersScreen() {
 const createStyles = (colors: any) =>
   StyleSheet.create({
     container: {
-      flex: 1,
+      //flex: 1,
       padding: 16,
       backgroundColor: colors.background.primary,
     },
@@ -198,32 +224,9 @@ const createStyles = (colors: any) =>
     input: {
       borderWidth: 1,
       borderColor: colors.border.medium,
-      borderRadius: 12,
+      borderRadius: 20,
       padding: 12,
       marginBottom: 16,
-      color: colors.text.primary,
-    },
-
-    filters: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: 8,
-      marginBottom: 16,
-    },
-
-    filterBtn: {
-      borderWidth: 1,
-      borderColor: colors.border.medium,
-      borderRadius: 10,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-    },
-
-    filterBtnActive: {
-      backgroundColor: colors.primary.main,
-    },
-
-    filterText: {
       color: colors.text.primary,
     },
 

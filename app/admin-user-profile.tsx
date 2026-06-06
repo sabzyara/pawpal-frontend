@@ -1,15 +1,18 @@
 import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { ArrowLeft, PawPrint, Trash2, User } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 
 export default function AdminUserProfile() {
   const { id } = useLocalSearchParams();
@@ -23,17 +26,58 @@ export default function AdminUserProfile() {
     fetchProfile();
   }, []);
 
-  const fetchProfile = async () => {
+  // const fetchProfile = async () => {
+  //   try {
+  //     const res = await api.get(
+  //       `/user-service/admin/users/${id}/profile`
+  //     );
+
+  //     setData(res.data);
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // };
+    //
+  const [loading, setLoading] = useState(true);
+
+const fetchProfile = async () => {
     try {
       const res = await api.get(
         `/user-service/admin/users/${id}/profile`
       );
 
+      console.log(
+        "PROFILE DATA:",
+        JSON.stringify(res.data, null, 2)
+      );
+
       setData(res.data);
-    } catch (e) {
-      console.log(e);
+
+    } catch (e: any) {
+      console.log("STATUS:", e?.response?.status);
+      console.log("DATA:", e?.response?.data);
+      console.log("ERROR:", e);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+      </View>
+    );
+  }
+
+  if (!data) {
+    return (
+      <View style={styles.center}>
+        <Text>No data found</Text>
+      </View>
+    );
+  }
+//
 
   if (!data) {
     return (
@@ -81,115 +125,264 @@ export default function AdminUserProfile() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>User Profile</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
 
-      {/* OWNER */}
-      {data.owner && (
-        <View style={styles.card}>
-          <Text style={styles.section}>Owner Info</Text>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
+            <ArrowLeft size={22} color={colors.text.primary} />
+          </TouchableOpacity>
 
-          <Text style={styles.label}>
-            Username: {data.owner.username}
-          </Text>
+          <Text style={styles.title}>User Profile</Text>
 
-          <Text style={styles.label}>
-            Phone: {data.owner.phoneNumber}
-          </Text>
-
-          <Text style={styles.label}>
-            Address: {data.owner.address}
-          </Text>
+          <View style={{ width: 40 }} />
         </View>
-      )}
 
-      {/* PETS */}
-      {data.pets && (
-        <View style={styles.card}>
-          <Text style={styles.section}>Pets</Text>
-
-          {data.pets.map((pet: any) => (
-            <View key={pet.id} style={styles.petCard}>
-              <Text style={styles.petName}>{pet.name}</Text>
-
-              <Text style={styles.label}>
-                Species: {pet.species}
-              </Text>
-
-              <Text style={styles.label}>
-                Breed: {pet.breed}
-              </Text>
-
-              <Text style={styles.label}>
-                Age: {pet.age}
-              </Text>
-
-              <Text style={styles.label}>
-                Weight: {pet.weight}
-              </Text>
-
-              <Text style={styles.label}>
-                Health: {pet.healthStatus}
-              </Text>
+        {/* OWNER */}
+        {data.owner && (
+          <View style={styles.ownerCard}>
+            <View style={styles.ownerHeader}>
+              <User size={24} color={colors.primary.main} />
+              <Text style={styles.section}>Owner Information</Text>
             </View>
-          ))}
-        </View>
-      )}
 
-      {/* VET */}
-      {data.specialization && (
-        <View style={styles.card}>
-          <Text style={styles.section}>Veterinarian</Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Username</Text>
+              <Text style={styles.infoValue}>{data.owner.username}</Text>
+            </View>
 
-          <Text style={styles.label}>
-            Name: {data.fullName}
-          </Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Phone</Text>
+              <Text style={styles.infoValue}>{data.owner.phoneNumber}</Text>
+            </View>
 
-          <Text style={styles.label}>
-            Specialization: {data.specialization}
-          </Text>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Address</Text>
+              <Text style={styles.infoValue}>{data.owner.address}</Text>
+            </View>
+          </View>
+        )}
 
-          <Text style={styles.label}>
-            Experience: {data.experience}
-          </Text>
-        </View>
-      )}
+        {/* PETS */}
+        {data.pets && (
+          <View style={styles.card}>
+            <View style={styles.ownerHeader}>
+              <PawPrint size={22} color={colors.primary.main} />
+              <Text style={styles.section}>Pets</Text>
+            </View>
 
-      {/* SERVICE */}
-      {data.businessName && (
-        <View style={styles.card}>
-          <Text style={styles.section}>Service Provider</Text>
+            {data.pets.map((pet: any) => (
+              <View key={pet.id} style={styles.petTable}>
+                <Text style={styles.petTitle}>{pet.name}</Text>
 
-          <Text style={styles.label}>
-            Business: {data.businessName}
-          </Text>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableKey}>Species</Text>
+                  <Text style={styles.tableValue}>{pet.species}</Text>
+                </View>
 
-          <Text style={styles.label}>
-            Address: {data.address}
-          </Text>
-        </View>
-      )}
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableKey}>Breed</Text>
+                  <Text style={styles.tableValue}>{pet.breed}</Text>
+                </View>
 
-      {/* ACTIONS */}
-      <TouchableOpacity
-        style={styles.approveBtn}
-        onPress={approveUser}
-      >
-        <Text style={styles.btnText}>Approve</Text>
-      </TouchableOpacity>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableKey}>Age</Text>
+                  <Text style={styles.tableValue}>{pet.age}</Text>
+                </View>
 
-      <TouchableOpacity
-        style={styles.rejectBtn}
-        onPress={rejectUser}
-      >
-        <Text style={styles.btnText}>Reject</Text>
-      </TouchableOpacity>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableKey}>Weight</Text>
+                  <Text style={styles.tableValue}>{pet.weight} kg</Text>
+                </View>
 
-      <TouchableOpacity
-        style={styles.deleteBtn}
-        onPress={deleteUser}
-      >
-        <Text style={styles.btnText}>Delete User</Text>
-      </TouchableOpacity>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableKey}>Health</Text>
+                  <Text style={styles.tableValue}>{pet.healthStatus}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* VET */}
+        {data.licenseNumber && (
+          <View style={styles.ownerCard}>
+            <View style={styles.ownerHeader}>
+              <User size={24} color={colors.primary.main} />
+              <Text style={styles.section}>Veterinarian Information</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>First Name</Text>
+              <Text style={styles.infoValue}>{data.firstName}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Last Name</Text>
+              <Text style={styles.infoValue}>{data.lastName}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Phone Number</Text>
+              <Text style={styles.infoValue}>{data.phoneNumber}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>License Number</Text>
+              <Text style={styles.infoValue}>{data.licenseNumber}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Clinic Name</Text>
+              <Text style={styles.infoValue}>{data.clinicName}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Experience Years</Text>
+              <Text style={styles.infoValue}>{data.experienceYears}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Education</Text>
+              <Text style={styles.infoValue}>{data.education}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Rating Average</Text>
+              <Text style={styles.infoValue}>{data.ratingAverage}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Reviews Count</Text>
+              <Text style={styles.infoValue}>{data.reviewsCount}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Address</Text>
+              <Text style={styles.infoValue}>{data.address}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>City</Text>
+              <Text style={styles.infoValue}>{data.city}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Price per visit</Text>
+              <Text style={styles.infoValue}>{data.pricePerVisit}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>About</Text>
+              <Text style={styles.infoValue}>{data.about}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Patient Count</Text>
+              <Text style={styles.infoValue}>{data.patientsCount}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* SERVICE */}
+        {data.serviceCategory && (
+          <View style={styles.ownerCard}>
+            <View style={styles.ownerHeader}>
+              <User size={24} color={colors.primary.main} />
+              <Text style={styles.section}>Service Provider Information</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>First Name</Text>
+              <Text style={styles.infoValue}>{data.firstName}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Last Name</Text>
+              <Text style={styles.infoValue}>{data.lastName}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Phone Number</Text>
+              <Text style={styles.infoValue}>{data.phoneNumber}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Service Category</Text>
+              <Text style={styles.infoValue}>{data.serviceCategory}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Experience Years</Text>
+              <Text style={styles.infoValue}>{data.experienceYears}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Education</Text>
+              <Text style={styles.infoValue}>{data.education}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Rating Average</Text>
+              <Text style={styles.infoValue}>{data.ratingAverage}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Reviews Count</Text>
+              <Text style={styles.infoValue}>{data.reviewsCount}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Address</Text>
+              <Text style={styles.infoValue}>{data.address}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>City</Text>
+              <Text style={styles.infoValue}>{data.city}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Price per visit</Text>
+              <Text style={styles.infoValue}>{data.pricePerVisit}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>About</Text>
+              <Text style={styles.infoValue}>{data.about}</Text>
+            </View>
+
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Patient Count</Text>
+              <Text style={styles.infoValue}>{data.patientsCount}</Text>
+            </View>
+          </View>
+        )} 
+
+        {/* ACTIONS */}
+        {/* <TouchableOpacity
+          style={styles.editBtn}
+          onPress={() => {
+            router.push(`/edit_user?id=${id}`);
+          }}
+        >
+          <Edit3 size={18} color="#fff" />
+          <Text style={styles.btnText}>Edit User</Text>
+        </TouchableOpacity> */}
+
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={deleteUser}
+        >
+          <Trash2 size={18} color="#fff" />
+          <Text style={styles.btnText}>Delete User</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -263,16 +456,124 @@ const createStyles = (colors: any) =>
       marginBottom: 12,
     },
 
-    deleteBtn: {
-      backgroundColor: "red",
-      padding: 14,
-      borderRadius: 12,
-      marginBottom: 40,
-    },
+    // deleteBtn: {
+    //   backgroundColor: "red",
+    //   padding: 14,
+    //   borderRadius: 12,
+    //   marginBottom: 40,
+    // },
 
     btnText: {
       color: "white",
       textAlign: "center",
       fontWeight: "700",
+    },
+    
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 24,
+    },
+
+    backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: colors.card.elevated,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    ownerCard: {
+      backgroundColor: colors.card.default,
+      borderRadius: 20,
+      padding: 18,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.border.light,
+    },
+
+    ownerHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      marginBottom: 16,
+    },
+
+    infoRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border.light,
+    },
+
+    infoLabel: {
+      color: colors.text.secondary,
+      fontSize: 14,
+    },
+
+    infoValue: {
+      color: colors.text.primary,
+      fontWeight: "600",
+    },
+
+    petTable: {
+      marginTop: 12,
+      backgroundColor: colors.background.secondary,
+      borderRadius: 16,
+      padding: 14,
+    },
+
+    petTitle: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: colors.primary.main,
+      marginBottom: 10,
+    },
+
+    tableRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border.light,
+    },
+
+    tableKey: {
+      color: colors.text.secondary,
+      fontWeight: "500",
+    },
+
+    tableValue: {
+      color: colors.text.primary,
+      fontWeight: "600",
+    },
+
+    editBtn: {
+      backgroundColor: colors.primary.main,
+      borderRadius: 16,
+      padding: 16,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 8,
+    },
+
+    deleteBtn: {
+      backgroundColor: colors.error.main,
+      borderRadius: 16,
+      padding: 16,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 12,
+      marginBottom: 30,
+    },
+    scrollContent: {
+      paddingBottom: 40,
     },
   });

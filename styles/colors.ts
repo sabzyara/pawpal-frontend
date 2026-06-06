@@ -34,9 +34,9 @@ export const Colors = {
       focus: '#E3275B',
     },
     card: {
-      default: '#FFFFFF',
-      elevated: '#FFF5F7',
-      pressed: '#FADBE3',
+      default: '#FFF5F7',
+      elevated: '#FADBE3',
+      pressed: '#FFFFFF',
     },
     input: {
       background: '#FFF5F7',
