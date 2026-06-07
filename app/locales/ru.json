@@ -37,10 +37,386 @@
     "Duration": "Продолжительность",
     "Track your pet’s daily activity": "Отслеживайте ежедневную активность вашего питомца",
     "Nutrition Tracker": "Трекер питания",
-    "Activity Tracker": "Трекер активности"
+    "Activity Tracker": "Трекер активности",
+    "Walk": "Прогулка",
+    "45 minutes": "45 минут",
+    "title": "Трекер"
   },
   "calendar":{
     "title": "Календарь",
-    "days": ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]
-  }
+    "days": ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+     "mon": "Пн",
+    "tue": "Вт",
+    "wed": "Ср",
+    "thu": "Чт",
+    "fri": "Пт",
+    "sat": "Сб",
+    "sun": "Вс"
+  },
+  "analysis": {
+    "title": "AI анализ",
+    "addPet": "Сначала добавьте питомца, чтобы использовать AI анализ",
+    "Analysis unavailable": "Анализ недоступен",
+    "Health Score": "Показатель здоровья",
+    "Recommendations": "Рекомендации"
+  },
+  "login":{
+    "error": "Ошибка",
+    "Please fill in all fields": "Пожалуйста, заполните все поля"
+  },
+  "profile": {
+  "logout": "Выйти",
+  "confirmLogout": "Вы уверены, что хотите выйти?",
+  "cancel": "Отмена",
+
+  "petOwner": "Владелец питомца",
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Поставщик услуг",
+  "administrator": "Администратор",
+  "user": "Пользователь",
+
+  "pets": "Питомцы",
+  "appointments": "Записи",
+  "rating": "Рейтинг",
+  "patients": "Пациенты",
+  "years": "Лет опыта",
+  "services": "Услуги",
+  "satisfaction": "Удовлетворенность",
+  "role": "Роль",
+  "access": "Доступ",
+
+  "personalInfo": "Личная информация",
+  "professionalInfo": "Профессиональная информация",
+  "serviceInfo": "Информация об услугах",
+  "adminInfo": "Информация администратора",
+
+  "username": "Имя пользователя",
+  "phone": "Телефон",
+  "address": "Адрес",
+  "fullName": "Полное имя",
+  "licenseNumber": "Номер лицензии",
+  "clinic": "Клиника",
+  "experience": "Опыт",
+  "serviceCategory": "Категория услуг",
+  "email": "Email",
+
+  "notSpecified": "Не указано",
+
+  "myPets": "Мои питомцы",
+  "managePets": "Управление вашими питомцами",
+
+  "appointmentsTitle": "Записи",
+  "appointmentsHistory": "История ваших записей",
+
+  "work": "Работа",
+  "mySchedule": "Мое расписание",
+  "manageAppointments": "Управление записями клиентов",
+
+  "settings": "Настройки",
+  "editProfile": "Редактировать профиль",
+  "updateProfile": "Обновить личную информацию",
+
+  "settingsDescription": "Уведомления, язык и другое",
+
+  "logoutDescription": "Выйти из аккаунта",
+
+  "loadingProfile": "Загрузка профиля...",
+  "tryAgain": "Повторить",
+
+  "failedToLoad": "Не удалось загрузить профиль",
+  "userNotAuthorized": "Пользователь не авторизован",
+  "failedToLoadProfile": "Не удалось загрузить профиль",
+  "failedToCreateProfile": "Не удалось создать профиль",
+  "failedToUpdateProfile": "Не удалось обновить профиль",
+  "userOrRoleMissing": "Пользователь или роль отсутствует"
+},
+  "appointment" : {
+    "Error": "Ошибка",
+    "CancelFunctionNotAvailable": "Функция отмены недоступна",
+    "SelectAppointmentToCancel": "Выберите запись для отмены",
+    "EnterCancelReason": "Пожалуйста, укажите причину отмены",
+     "noDate": "Дата не указана",
+      "all": "Все",
+      "appointment": "Запись на прием",
+      "CREATED": "СОЗДАНО",
+      "CONFIRMED": "ПОДТВЕРЖДЕНО",
+      "specialist": "Специалист",
+      "noPetName": "Питомец не указан",
+      "ownerNotes": "Примечание",
+      "cancelappointment": "Отменить запись",
+      "title": "Мои записи",
+      "subtitle": "Управление предстоящими визитами",
+      "noAppointmentsDescription": "Запишитесь к ветеринару или специалисту для вашего питомца",
+      "bookAppointment": "Записаться"
+
+  },
+  "addReminder": {
+    "Error": "Ошибка",
+    "Fill all fields": "Пожалуйста, заполните все поля",
+    "Success": "Успех",
+    "Reminder created": "Напоминание создано",
+    "← Back": "← Назад",
+    "title": "Добавить напоминание",
+    "subtitle": "Планируйте напоминания для ваших питомцев",
+    "Reminder Type": "Тип напоминания",
+    "Title": "Название",
+    "Message": "Сообщение",
+    "Date": "Дата",
+    "Time": "Время",
+    "createReminder": "Создать напоминание"
+  },
+  "addPet": {
+    "dog": "Собака 🐶",
+    "cat": "Кошка 🐱",
+    "fish": "Рыба 🐟",
+    "hamster": "Хомяк 🐹",
+    "parrot": "Попугай 🦜",
+    "rabbit": "Кролик 🐰",
+    "turtle": "Черепаха 🐢",
+    "other": "Другое 🐾",
+    "Please fill in all fields": "Пожалуйста, заполните все поля",
+    "Error creating pet": "Ошибка при создании питомца",
+    "Pet added successfully": "Питомец успешно добавлен",
+    "Error": "Ошибка",
+    "Success": "Успех",
+    "title": "Добавить питомца",
+    "addPhoto": "Добавить фото",
+    "age": "Возраст",
+    "weight": "Вес",
+    "healthStatus": "Состояние здоровья",
+    "male": "Мужской",
+    "female": "Женский",
+    "addPet": "Добавить питомца",
+    "breed": "Порода",
+    "selectBreed": "Выбрать породу",
+    "searchBreed": "Поиск породы...",
+    "name": "Имя",
+    "species": "Вид"
+  },
+  "chat": {
+    "hiImYourAIAssistant": "Привет! Я ваш AI помощник 🐾",
+    "selectPet": "Выберите питомца",
+    "askAboutYourPet": "Спросите о вашем питомце...",
+    "aiAnalysis": "AI анализ"
+  },
+  "pets": {
+    "title": "Мои питомцы",
+    "addFirstPet": "Добавьте вашего первого питомца 🐾"
+  },
+  "book": {
+    "title": "Записаться на прием"
+  },
+"vet": {
+  "about": "О специалисте",
+  "clinic": "Клиника",
+  "address": "Адрес",
+  "phone": "Телефон",
+  "education": "Образование",
+  "languages": "Языки общения",
+  "noInfo": "Информация отсутствует",
+  "notSpecified": "Не указано"
+},
+"availability": {
+  "loginRequired": "Авторизуйтесь для записи",
+  "loginDescription": "Войдите в аккаунт, чтобы записаться на прием",
+  "loadingInfo": "Загрузка информации...",
+  "specialistNotFound": "Специалист не найден",
+  "loadingError": "Ошибка загрузки",
+  "specialistNotRegistered": "Пользователь не зарегистрирован как специалист",
+  "selectDateTime": "Выберите дату и время",
+  "selectDateTimeDescription": "Выберите удобную дату и время для приема",
+  "selectTime": "Выберите время",
+  "noSlots": "Нет доступных слотов на эту дату",
+  "selected": "Выбрано"
+},
+"editProfile": {
+  "success": "Успех",
+  "profileUpdated": "Профиль успешно обновлен",
+  "avatarUpdated": "Аватар обновлен",
+  "error": "Ошибка",
+  "updateFailed": "Не удалось обновить профиль",
+  "avatarFailed": "Не удалось загрузить аватар",
+
+  "changePhoto": "Изменить фото",
+
+  "basicInfo": "Основная информация",
+  "firstName": "Имя",
+  "lastName": "Фамилия",
+  "phone": "Телефон",
+  "city": "Город",
+  "address": "Адрес",
+
+  "professionalInfo": "Профессиональная информация",
+  "experience": "Опыт (лет)",
+  "education": "Образование",
+  "clinic": "Клиника",
+  "license": "Лицензия",
+  "serviceCategory": "Категория услуг",
+
+  "about": "О себе",
+  "aboutPlaceholder": "Расскажите о своем опыте, специализации и подходе к работе...",
+
+  "serviceCost": "Стоимость услуг",
+  "visitPrice": "Цена за визит (₸)",
+
+  "saveChanges": "Сохранить изменения"
+},
+"vetHeader": {
+  "veterinarian": "🐾 Ветеринар",
+  "serviceProvider": "✂️ Поставщик услуг",
+  "verifiedSpecialist": "Проверенный специалист"
+},
+"manage": {
+  "error": "Ошибка",
+  "success": "Успех",
+
+  "loadingSpecialist": "Загрузка информации о специалисте...",
+  "specialistNotFound": "Профиль специалиста не найден",
+  "specialistNotFoundMessage": "Пользователь с ID {{id}} не зарегистрирован как специалист",
+
+  "noAccess": "У вас нет прав для управления этим профилем",
+  "noAccessMessage": "Только владелец профиля может управлять расписанием и слотами",
+
+  "specialistId": "ID специалиста в системе",
+  "specialistType": "Тип специалиста",
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Сервис-провайдер",
+
+  "specialistCabinet": "Кабинет специалиста",
+  "specialistCabinetDescription": "Управление расписанием и слотами",
+
+  "schedule": "Расписание",
+  "scheduleDescription": "Настройка рабочих дней",
+
+  "slots": "Слоты",
+  "slotsDescription": "Управление временем записи",
+
+  "scheduleSaved": "Расписание сохранено",
+
+  "account": "Аккаунт",
+  "accountDescription": "Управление настройками и доступом",
+
+  "settings": "Настройки",
+  "logout": "Выйти из аккаунта",
+  "logoutTitle": "Выход из аккаунта",
+  "logoutConfirm": "Вы уверены, что хотите выйти?",
+  "logoutFailed": "Не удалось выйти",
+
+  "deleteProfile": "Удалить профиль",
+  "deleteTitle": "Удаление профиля",
+  "deleteConfirm": "Вы уверены, что хотите удалить профиль специалиста? Это действие нельзя отменить.",
+  "deleteUnavailable": "Функция удаления не доступна",
+  "deleteSuccess": "Профиль специалиста удален",
+
+  "cancel": "Отмена",
+  "delete": "Удалить",
+  "exit": "Выйти",
+
+  "specialistProfileNotFound": "Не удалось найти профиль специалиста. Убедитесь, что пользователь является специалистом."
+},
+"reviews": {
+  "title": "Отзывы",
+  "yourRating": "Ваша оценка",
+  "writeReview": "Напишите ваш отзыв...",
+  "leaveReview": "Оставить отзыв",
+
+  "noReviews": "Пока нет отзывов",
+  "beFirst": "Станьте первым, кто оставит отзыв",
+
+  "anonymous": "Аноним",
+
+  "loadError": "Не удалось загрузить отзывы",
+  "postError": "Не удалось оставить отзыв",
+  "error": "Ошибка"
+},
+"vstats": {
+  "rating": "Рейтинг",
+  "clients": "Клиенты",
+  "experience": "Лет опыта"
+},
+"tabs": {
+  "about": "О себе",
+  "availability": "График",
+  "reviews": "Отзывы",
+  "edit": "Редакт.",
+  "manage": "Кабинет"
+},
+"slots": {
+  "error": "Ошибка",
+  "success": "Успех",
+  "confirmation": "Подтверждение",
+
+  "loadingSpecialist": "Загрузка информации о специалисте...",
+  "specialistNotFound": "Специалист не найден",
+  "specialistNotFoundDescription": "Убедитесь, что пользователь является ветеринаром или сервис-провайдером",
+
+  "specialistType": "Тип специалиста",
+  "specialistId": "ID специалиста",
+
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Сервис-провайдер",
+
+  "blockReasonRequired": "Укажите причину блокировки",
+
+  "slotBlocked": "Слот заблокирован",
+  "slotUnblocked": "Слот разблокирован",
+
+  "blockFailed": "Не удалось заблокировать слот",
+  "unblockFailed": "Не удалось разблокировать слот",
+
+  "unblockQuestion": "Разблокировать этот слот?",
+
+  "cannotGeneratePast": "Нельзя генерировать слоты на прошедшие даты",
+
+  "regenerateTitle": "Подтверждение",
+  "regenerateQuestion": "Это действие удалит все существующие слоты на выбранную дату и создаст новые. Продолжить?",
+
+  "slotsGenerated": "Слоты успешно сгенерированы",
+  "generateFailed": "Не удалось сгенерировать слоты",
+
+  "regenerateSlots": "Сгенерировать слоты заново",
+  "generateSlots": "Сгенерировать слоты",
+
+  "noSlots": "Нет слотов на эту дату",
+
+  "pastSlot": "⏰ Прошедший слот",
+  "cannotEdit": "Недоступен для изменений",
+
+  "available": "Доступен",
+  "booked": "Забронирован",
+  "blocked": "Заблокирован",
+
+  "block": "Заблокировать",
+  "unblock": "Разблокировать",
+
+  "blockReason": "Причина блокировки",
+  "blockPlaceholder": "Например: перерыв, больничный, отпуск и т.д.",
+
+  "cancel": "Отмена",
+  "continue": "Продолжить"
+},
+"gr": {
+  "goodMorning": "Доброе утро",
+  "goodAfternoon": "Добрый день",
+  "goodEvening": "Добрый вечер"
+},
+"specialists": {
+  "title": "Найти специалиста",
+  "availableCount": "{{count}} специалистов доступно",
+
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Поставщик услуг",
+
+  "privatePractice": "Частная практика",
+  "addressNotSpecified": "Адрес не указан",
+  "mobileService": "Выездная услуга",
+  "locationOnBooking": "Адрес будет доступен после записи",
+
+  "error": "Ошибка",
+  "loadFailed": "Не удалось загрузить специалистов",
+  "incompleteData": "Данные специалиста неполные",
+
+  "emptyTitle": "Специалисты не найдены",
+  "emptyDescription": "Попробуйте изменить фильтры или поисковый запрос"
+}
 }

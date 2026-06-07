@@ -20,6 +20,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import "../i18n";
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -33,17 +35,17 @@ export default function LoginScreen() {
   
   const { colors } = useTheme();
   const styles = createStyles(colors);
-
+  const { t } = useTranslation();
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Ошибка', 'Пожалуйста, заполните все поля');
+      Alert.alert(t('login.Error'), t('login.Please fill in all fields'));
       return;
     }
 
     const success = await login(email, password);
 
     if (!success && error) {
-      Alert.alert('Ошибка', error);
+      Alert.alert(t('login.Error'), error);
     }
   };
 

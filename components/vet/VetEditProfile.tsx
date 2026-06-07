@@ -13,6 +13,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import api from '@/services/api';
+import '@/app/i18n';
+import { useTranslation } from 'react-i18next';
 
 interface VetEditProfileProps {
   profile: any;
@@ -26,6 +28,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
   onUpdate,
 }) => {
   const { colors, typography, spacing } = useTheme();
+  const {t} = useTranslation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: profile.firstName || '',
@@ -70,10 +73,16 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
       }
       
       await api.put(endpoint, updateData);
-      Alert.alert('Успех', 'Профиль успешно обновлен');
+      Alert.alert(
+        t("editProfile.success"),
+        t("editProfile.profileUpdated")
+      );
       onUpdate();
     } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось обновить профиль');
+      Alert.alert(
+        t("editProfile.error"),
+        t("editProfile.updateFailed")
+      );
     } finally {
       setLoading(false);
     }
@@ -104,10 +113,16 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         
-        Alert.alert('Успех', 'Аватар обновлен');
+        Alert.alert(
+          t("editProfile.success"),
+          t("editProfile.avatarUpdated")
+        );
         onUpdate();
       } catch (error) {
-        Alert.alert('Ошибка', 'Не удалось загрузить аватар');
+        Alert.alert(
+          t("editProfile.error"),
+          t("editProfile.avatarFailed")
+        );
       }
     }
   };
@@ -118,7 +133,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
       style={{ marginTop: spacing.md }}
       contentContainerStyle={{ paddingBottom: spacing.xl }}
     >
-      {/* Аватар */}
+
       <TouchableOpacity 
         onPress={uploadAvatar} 
         activeOpacity={0.8}
@@ -157,14 +172,14 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
           </View>
         </View>
         <Text style={{ color: colors.primary.main, fontWeight: '500' }}>
-          Изменить фото
+          {t("editProfile.changePhoto")}
         </Text>
       </TouchableOpacity>
 
-      {/* Форма с карточками */}
+
       <View style={{ gap: spacing.md }}>
         
-        {/* 👤 ОСНОВНАЯ ИНФОРМАЦИЯ */}
+
         <View
           style={{
             backgroundColor: colors.card.default,
@@ -194,7 +209,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
                 { color: colors.text.primary },
               ]}
             >
-              Основная информация
+             {t("editProfile.basicInfo")}
             </Text>
           </View>
 
@@ -202,7 +217,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
             <View style={{ flexDirection: 'row', gap: spacing.sm }}>
               <View style={{ flex: 1 }}>
                 <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                  Имя *
+                  {t("editProfile.firstName")}
                 </Text>
                 <TextInput
                   value={formData.firstName}
@@ -219,7 +234,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                  Фамилия *
+                  {t("editProfile.lastName")}
                 </Text>
                 <TextInput
                   value={formData.lastName}
@@ -238,7 +253,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
 
             <View>
               <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                Телефон
+                {t("editProfile.phone")}
               </Text>
               <TextInput
                 value={formData.phoneNumber}
@@ -257,7 +272,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
 
             <View>
               <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                Город
+               {t("editProfile.city")}
               </Text>
               <TextInput
                 value={formData.city}
@@ -275,7 +290,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
 
             <View>
               <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                Адрес
+                {t("editProfile.address")}
               </Text>
               <TextInput
                 value={formData.address}
@@ -293,7 +308,6 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
           </View>
         </View>
 
-        {/* 🎓 ПРОФЕССИОНАЛЬНАЯ ИНФОРМАЦИЯ */}
         <View
           style={{
             backgroundColor: colors.card.default,
@@ -323,14 +337,14 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
                 { color: colors.text.primary },
               ]}
             >
-              Профессиональная информация
+              {t("editProfile.professionalInfo")}
             </Text>
           </View>
 
           <View style={{ gap: spacing.md }}>
             <View>
               <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                Опыт (лет)
+                {t("editProfile.experience")}
               </Text>
               <TextInput
                 value={formData.experienceYears}
@@ -349,7 +363,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
 
             <View>
               <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                Образование
+                {t("editProfile.education")}
               </Text>
               <TextInput
                 value={formData.education}
@@ -369,7 +383,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
               <>
                 <View>
                   <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                    Клиника
+                    {t("editProfile.clinic")}
                   </Text>
                   <TextInput
                     value={formData.clinicName}
@@ -386,7 +400,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
                 </View>
                 <View>
                   <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                    Лицензия
+                    {t("editProfile.license")}
                   </Text>
                   <TextInput
                     value={formData.licenseNumber}
@@ -407,7 +421,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
             {type === 'service' && (
               <View>
                 <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-                  Категория услуг
+                  {t("editProfile.serviceCategory")}
                 </Text>
                 <TextInput
                   value={formData.serviceCategory}
@@ -426,7 +440,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
           </View>
         </View>
 
-        {/* 📝 О СЕБЕ */}
+
         <View
           style={{
             backgroundColor: colors.card.default,
@@ -456,7 +470,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
                 { color: colors.text.primary },
               ]}
             >
-              О себе
+              {t("editProfile.about")}
             </Text>
           </View>
 
@@ -465,7 +479,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
             onChangeText={(text) => setFormData({ ...formData, about: text })}
             multiline
             numberOfLines={4}
-            placeholder="Расскажите о своем опыте, специализации и подходе к работе..."
+            placeholder={t("editProfile.aboutPlaceholder")}
             placeholderTextColor={colors.text.tertiary}
             style={{
               borderWidth: 1,
@@ -480,7 +494,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
           />
         </View>
 
-        {/* 💰 СТОИМОСТЬ УСЛУГ */}
+
         <View
           style={{
             backgroundColor: colors.card.default,
@@ -510,13 +524,13 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
                 { color: colors.text.primary },
               ]}
             >
-              Стоимость услуг
+              {t("editProfile.serviceCost")}
             </Text>
           </View>
 
           <View>
             <Text style={[typography.caption, { color: colors.text.secondary, marginBottom: 4 }]}>
-              Цена за визит (₸)
+              {t("editProfile.visitPrice")}
             </Text>
             <TextInput
               value={formData.pricePerVisit}
@@ -536,7 +550,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
           </View>
         </View>
 
-        {/* Кнопка сохранения */}
+
         <TouchableOpacity
           onPress={handleSave}
           disabled={loading}
@@ -560,7 +574,7 @@ export const VetEditProfile: React.FC<VetEditProfileProps> = ({
             <>
               <Ionicons name="save-outline" size={20} color={colors.text.inverse} />
               <Text style={[typography.button, { color: colors.text.inverse, fontWeight: '600' }]}>
-                Сохранить изменения
+                {t("editProfile.saveChanges")}
               </Text>
             </>
           )}

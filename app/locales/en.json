@@ -38,10 +38,383 @@
     "Duration": "Duration",
     "Track your pet’s daily activity": "Track your pet’s daily activity",
     "Nutrition Tracker": "Nutrition Tracker",
-    "Activity Tracker": "Activity Tracker"  
+    "Activity Tracker": "Activity Tracker",
+    "Walk": "Walk",
+    "45 minutes": "45 minutes",
+    "title": "Tracker"
 },
 "calendar":{
   "title": "Calendar",
-  "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] 
-  }
+  "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+   "mon": "Mon",
+  "tue": "Tue",
+  "wed": "Wed",
+  "thu": "Thu",
+  "fri": "Fri",
+  "sat": "Sat",
+  "sun": "Sun" 
+  },
+  "analysis": {
+    "title": "AI Analysis",
+    "addPet": "Add a pet first to use AI analysis",
+    "Analysis unavailable": "Analysis unavailable",
+    "Health Score": "Health Score",
+    "Recommendations": "Recommendations"
+  },
+  "login":{
+    "error": "Error",
+    "Please fill in all fields": "Please fill in all fields"
+  },
+  "profile": {
+  "petOwner": "Pet Owner",
+  "veterinarian": "Veterinarian",
+  "serviceProvider": "Service Provider",
+  "administrator": "Administrator",
+  "user": "User",
+
+  "pets": "Pets",
+  "appointments": "Appointments",
+  "rating": "Rating",
+  "patients": "Patients",
+  "years": "Years",
+  "services": "Services",
+  "satisfaction": "Satisfaction",
+  "role": "Role",
+  "access": "Access",
+
+  "personalInfo": "Personal Information",
+  "professionalInfo": "Professional Information",
+  "serviceInfo": "Service Information",
+  "adminInfo": "Admin Information",
+
+  "username": "Username",
+  "phone": "Phone",
+  "address": "Address",
+  "fullName": "Full Name",
+  "licenseNumber": "License Number",
+  "clinic": "Clinic",
+  "experience": "Experience",
+  "serviceCategory": "Service Category",
+  "email": "Email",
+
+  "notSpecified": "Not specified",
+
+  "myPets": "My Pets",
+  "managePets": "Manage your furry friends",
+
+  "appointmentsTitle": "Appointments",
+  "appointmentsHistory": "View your booking history",
+
+  "work": "Work",
+  "mySchedule": "My Schedule",
+  "manageAppointments": "Manage client appointments",
+
+  "settings": "Settings",
+  "editProfile": "Edit Profile",
+  "updateProfile": "Update your personal information",
+
+  "settingsDescription": "Notifications, language & more",
+
+  "logout": "Logout",
+  "logoutDescription": "Sign out from your account",
+
+  "loadingProfile": "Loading profile...",
+  "tryAgain": "Try Again",
+
+  "failedToLoad": "Failed to load profile",
+  "userNotAuthorized": "User is not authorized",
+  "failedToLoadProfile": "Failed to load profile",
+  "failedToCreateProfile": "Failed to create profile",
+  "failedToUpdateProfile": "Failed to update profile",
+  "userOrRoleMissing": "User or role is missing"
+},
+  "appointment": {
+    "Error": "Error",
+    "CancelFunctionNotAvailable": "Cancellation function is not available",
+    "SelectAppointmentToCancel": "Please select an appointment to cancel",
+    "EnterCancelReason": "Please enter a reason for cancellation",
+    "noDate": "No date provided",
+    "all": "All",
+    "appointment": "Appointment",
+    "CREATED": "CREATED",
+    "CONFIRMED": "CONFIRMED",
+    "specialist": "Specialist",
+    "noPetName": "No pet name provided",
+    "ownerNotes": "Owner Notes",
+    "cancelappointment": "Cancel Appointment",
+    "title": "My Appointments",
+    "subtitle": "Manage your upcoming visits",
+    "noAppointmentsDescription": "Book an appointment with a vet or specialist for your pet",
+    "bookAppointment": "Book Appointment"
+
+  },
+  "addReminder": {
+    "Error": "Error",
+    "Fill all fields": "Please fill in all fields",
+    "Success": "Success",
+    "Reminder created": "Reminder created",
+    "← Back": "← Back",
+    "title": "Add Reminder",
+    "subtitle": "Schedule pet reminders",
+    "Reminder Type": "Reminder Type",
+    "Title": "Title",
+    "Message": "Message",
+    "Date": "Date",
+    "Time": "Time",
+    "createReminder": "Create Reminder"
+  },
+  "addPet": {
+    "dog": "Dog 🐶",
+    "cat": "Cat 🐱",
+    "fish": "Fish 🐟",
+    "hamster": "Hamster 🐹",
+    "parrot": "Parrot 🦜",
+    "rabbit": "Rabbit 🐰",
+    "turtle": "Turtle 🐢",
+    "other": "Other 🐾",
+    "Please fill in all fields": "Please fill in all fields",
+    "Error creating pet": "Error creating pet",
+    "Pet added successfully": "Pet added successfully",
+    "Error": "Error",
+    "Success": "Success",
+    "title": "Add Pet",
+    "addPhoto": "Add photo",
+    "age": "Age",
+    "weight": "Weight",
+    "healthStatus": "Health status",
+    "name": "Name",
+    "species": "Species",
+    "male": "Male",
+    "female": "Female",
+    "addPet": "Add Pet",
+    "selectBreed": "Select breed",
+    "searchBreed": "Search breed...",
+    "breed": "Breed"
+  },
+  "chat": {
+    "hiImYourAIAssistant": "Hi! I'm your AI assistant 🐾",
+    "selectPet": "Select a pet",
+    "askAboutYourPet": "Ask about your pet...",
+    "aiAnalysis": "AI Analysis"
+  },
+  "pets": {
+    "title": "My Pets",
+    "addFirstPet": "Add your first pet 🐾"
+  },
+  "book":{
+    "title": "Book Appointment"
+  },
+ "vet": {
+  "about": "About specialist",
+  "clinic": "Clinic",
+  "address": "Address",
+  "phone": "Phone",
+  "education": "Education",
+  "languages": "Languages",
+  "noInfo": "No information available",
+  "notSpecified": "Not specified"
+},
+"availability": {
+  "loginRequired": "Login required",
+  "loginDescription": "Sign in to book an appointment",
+  "loadingInfo": "Loading information...",
+  "specialistNotFound": "Specialist not found",
+  "loadingError": "Loading error",
+  "specialistNotRegistered": "User is not registered as a specialist",
+  "selectDateTime": "Select date and time",
+  "selectDateTimeDescription": "Choose a convenient date and time",
+  "selectTime": "Select time",
+  "noSlots": "No available slots for this date",
+  "selected": "Selected"
+},
+"editProfile": {
+  "success": "Success",
+  "profileUpdated": "Profile updated successfully",
+  "avatarUpdated": "Avatar updated successfully",
+  "error": "Error",
+  "updateFailed": "Failed to update profile",
+  "avatarFailed": "Failed to upload avatar",
+
+  "changePhoto": "Change Photo",
+
+  "basicInfo": "Basic Information",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "phone": "Phone",
+  "city": "City",
+  "address": "Address",
+
+  "professionalInfo": "Professional Information",
+  "experience": "Experience (years)",
+  "education": "Education",
+  "clinic": "Clinic",
+  "license": "License",
+  "serviceCategory": "Service Category",
+
+  "about": "About Me",
+  "aboutPlaceholder": "Tell us about your experience, specialization, and approach to work...",
+
+  "serviceCost": "Service Cost",
+  "visitPrice": "Price per Visit (₸)",
+
+  "saveChanges": "Save Changes"
+},
+"vetHeader": {
+  "veterinarian": "🐾 Veterinarian",
+  "serviceProvider": "✂️ Service Provider",
+  "verifiedSpecialist": "Verified Specialist"
+},
+"manage": {
+  "error": "Error",
+  "success": "Success",
+
+  "loadingSpecialist": "Loading specialist information...",
+  "specialistNotFound": "Specialist profile not found",
+  "specialistNotFoundMessage": "User with ID {{id}} is not registered as a specialist",
+
+  "noAccess": "You do not have permission to manage this profile",
+  "noAccessMessage": "Only the profile owner can manage schedules and slots",
+
+  "specialistId": "Specialist ID",
+  "specialistType": "Specialist Type",
+  "veterinarian": "Veterinarian",
+  "serviceProvider": "Service Provider",
+
+  "specialistCabinet": "Specialist Dashboard",
+  "specialistCabinetDescription": "Manage schedules and slots",
+
+  "schedule": "Schedule",
+  "scheduleDescription": "Configure working days",
+
+  "slots": "Slots",
+  "slotsDescription": "Manage appointment times",
+
+  "scheduleSaved": "Schedule saved",
+
+  "account": "Account",
+  "accountDescription": "Manage settings and access",
+
+  "settings": "Settings",
+  "logout": "Log Out",
+  "logoutTitle": "Log Out",
+  "logoutConfirm": "Are you sure you want to log out?",
+  "logoutFailed": "Failed to log out",
+
+  "deleteProfile": "Delete Profile",
+  "deleteTitle": "Delete Profile",
+  "deleteConfirm": "Are you sure you want to delete the specialist profile? This action cannot be undone.",
+  "deleteUnavailable": "Delete function is unavailable",
+  "deleteSuccess": "Specialist profile deleted",
+
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "exit": "Exit",
+
+  "specialistProfileNotFound": "Failed to find specialist profile. Make sure the user is registered as a specialist."
+},
+"reviews": {
+  "title": "Reviews",
+  "yourRating": "Your Rating",
+  "writeReview": "Write your review...",
+  "leaveReview": "Leave Review",
+
+  "noReviews": "No reviews yet",
+  "beFirst": "Be the first to leave a review",
+
+  "anonymous": "Anonymous",
+
+  "loadError": "Failed to load reviews",
+  "postError": "Failed to post review",
+  "error": "Error"
+},
+"vstats": {
+  "rating": "Rating",
+  "clients": "Clients",
+  "experience": "Years Experience"
+},
+"tabs": {
+  "about": "About",
+  "availability": "Schedule",
+  "reviews": "Reviews",
+  "edit": "Edit",
+  "manage": "Dashboard"
+},
+"slots": {
+  "error": "Error",
+  "success": "Success",
+  "confirmation": "Confirmation",
+
+  "loadingSpecialist": "Loading specialist information...",
+  "specialistNotFound": "Specialist not found",
+  "specialistNotFoundDescription": "Make sure the user is a veterinarian or service provider",
+
+  "specialistType": "Specialist Type",
+  "specialistId": "Specialist ID",
+
+  "veterinarian": "Veterinarian",
+  "serviceProvider": "Service Provider",
+
+  "blockReasonRequired": "Please provide a blocking reason",
+
+  "slotBlocked": "Slot blocked",
+  "slotUnblocked": "Slot unblocked",
+
+  "blockFailed": "Failed to block slot",
+  "unblockFailed": "Failed to unblock slot",
+
+  "unblockQuestion": "Unblock this slot?",
+
+  "cannotGeneratePast": "Cannot generate slots for past dates",
+
+  "regenerateTitle": "Confirmation",
+  "regenerateQuestion": "This action will delete all existing slots for the selected date and create new ones. Continue?",
+
+  "slotsGenerated": "Slots generated successfully",
+  "generateFailed": "Failed to generate slots",
+
+  "regenerateSlots": "Regenerate Slots",
+  "generateSlots": "Generate Slots",
+
+  "noSlots": "No slots for this date",
+
+  "pastSlot": "⏰ Past slot",
+  "cannotEdit": "Cannot be modified",
+
+  "available": "Available",
+  "booked": "Booked",
+  "blocked": "Blocked",
+
+  "block": "Block",
+  "unblock": "Unblock",
+
+  "blockReason": "Block Reason",
+  "blockPlaceholder": "For example: break, sick leave, vacation, etc.",
+
+  "cancel": "Cancel",
+  "continue": "Continue"
+},
+"gr": {
+  "goodMorning": "Good Morning",
+  "goodAfternoon": "Good Afternoon",
+  "goodEvening": "Good Evening"
+},
+"specialists": {
+  "title": "Find a Specialist",
+  "availableCount": "{{count}} specialists available",
+
+  "veterinarian": "Veterinarian",
+  "serviceProvider": "Service Provider",
+
+  "privatePractice": "Private Practice",
+  "addressNotSpecified": "Address not specified",
+  "mobileService": "Mobile Service",
+  "locationOnBooking": "Location available upon booking",
+
+  "error": "Error",
+  "loadFailed": "Failed to load specialists",
+  "incompleteData": "Specialist data is incomplete",
+
+  "emptyTitle": "No specialists found",
+  "emptyDescription": "Try changing filters or search query"
+}
 }

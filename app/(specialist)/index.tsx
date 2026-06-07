@@ -22,7 +22,7 @@ import { ru } from 'date-fns/locale';
 import { appointmentApi, specialistService } from '@/services/appointmentApi';
 import type { AppointmentResponseDto, SpecialistInfo } from '@/services/appointmentApi';
 
-// ✅ Создаем отдельный тип для отображения (не расширяем оригинальный)
+
 interface DisplayAppointment {
   id: number;
   status: string;
@@ -31,10 +31,8 @@ interface DisplayAppointment {
   endTime?: string;
   petOwnerId?: number;
   petId?: number;
-  // Добавляем поля для отображения
   displayPetOwnerName: string;
   displayPetName: string;
-  // Оригинальные данные
   original: AppointmentResponseDto;
 }
 
@@ -51,7 +49,7 @@ export default function SpecialistHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [createdCount, setCreatedCount] = useState(0);
 
-  // Загрузка информации о специалисте
+
   const loadSpecialistInfo = useCallback(async () => {
     if (!user?.id || !token) return;
     
@@ -65,7 +63,7 @@ export default function SpecialistHomeScreen() {
     }
   }, [user?.id, token]);
 
-  // Загрузка записей специалиста
+
   const loadAppointments = useCallback(async () => {
     if (!token) return;
 
@@ -77,7 +75,7 @@ export default function SpecialistHomeScreen() {
       
       const content = response.content || [];
       
-      // Преобразуем в DisplayAppointment
+
       const displayAppointments: DisplayAppointment[] = content.map((apt: AppointmentResponseDto) => ({
         id: apt.id,
         status: apt.status,
@@ -92,8 +90,7 @@ export default function SpecialistHomeScreen() {
       }));
       
       setAppointments(displayAppointments);
-      
-      // Подсчитываем количество ожидающих подтверждения
+ 
       const created = content.filter((apt: AppointmentResponseDto) => apt.status === 'CREATED').length;
       setCreatedCount(created);
     } catch (error: any) {
@@ -106,7 +103,7 @@ export default function SpecialistHomeScreen() {
     }
   }, [token]);
 
-  // Загрузка всех данных
+
   const loadData = useCallback(async () => {
     if (!token) return;
     
@@ -123,7 +120,7 @@ export default function SpecialistHomeScreen() {
     }
   }, [token, loadSpecialistInfo, loadAppointments]);
 
-  // Обновление данных (pull-to-refresh)
+
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadData();
@@ -133,7 +130,7 @@ export default function SpecialistHomeScreen() {
     setRefreshing(false);
   }, [loadData, user, fetchProfile]);
 
-  // Загрузка при фокусе на экране
+
   useFocusEffect(
     useCallback(() => {
       loadData();
@@ -194,7 +191,6 @@ export default function SpecialistHomeScreen() {
     });
   };
 
-  // Подтверждение записи
   const handleConfirmAppointment = async (id: number) => {
     try {
       await appointmentApi.confirmAppointment(id);
@@ -205,7 +201,7 @@ export default function SpecialistHomeScreen() {
     }
   };
 
-  // Отмена записи специалистом
+
   const handleCancelBySpecialist = async (id: number) => {
     Alert.alert(
       'Отмена записи',
@@ -354,7 +350,7 @@ export default function SpecialistHomeScreen() {
     );
   };
 
-  // Проверка авторизации
+
   if (!token) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.secondary }}>
@@ -406,7 +402,7 @@ export default function SpecialistHomeScreen() {
       >
         <View style={{ padding: spacing.md }}>
 
-          {/* Welcome Card */}
+
           <View
             style={{
               backgroundColor: colors.primary.main,
@@ -447,7 +443,7 @@ export default function SpecialistHomeScreen() {
             </View>
           </View>
 
-          {/* Stats Cards */}
+
           <View style={{ flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg }}>
             <TouchableOpacity
               onPress={() => router.push('/specialist_appointments?status=CREATED')}
@@ -488,7 +484,7 @@ export default function SpecialistHomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Recent Appointments */}
+
           <View style={{ marginBottom: spacing.md }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
               <Text style={[typography.h4, { color: colors.text.primary }]}>

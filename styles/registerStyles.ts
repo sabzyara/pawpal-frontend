@@ -14,7 +14,7 @@ export const createStyles = (colors: ThemeColors) =>
       paddingVertical: 30,
     },
 
-    // HEADER
+
     header: {
       flexDirection: "column",
       alignItems: "flex-start",
@@ -56,7 +56,7 @@ export const createStyles = (colors: ThemeColors) =>
       marginTop: 4,
     },
 
-    // ROLE CARD
+
     roleCard: {
       flexDirection: "row",
       alignItems: "center",
@@ -106,7 +106,7 @@ export const createStyles = (colors: ThemeColors) =>
       color: colors.primary.light,
     },
 
-    // FORM
+ 
     form: {
       marginTop: 10,
     },
@@ -174,7 +174,7 @@ export const createStyles = (colors: ThemeColors) =>
       top: 14,
     },
 
-    // ROW
+
     row: {
       flexDirection: "row",
       gap: 12,
@@ -184,7 +184,7 @@ export const createStyles = (colors: ThemeColors) =>
       flex: 1,
     },
 
-    // CATEGORY
+
     categoryContainer: {
       flexDirection: "row",
       flexWrap: "wrap",
@@ -266,7 +266,7 @@ export const createStyles = (colors: ThemeColors) =>
       color: colors.text.secondary,
     },
 
-    // Дополнительные стили для выбранной роли
+
     selectedRoleBadge: {
       flexDirection: "row",
       alignItems: "center",
@@ -292,7 +292,7 @@ export const createStyles = (colors: ThemeColors) =>
       fontWeight: "600",
     },
 
-    // Стиль для кнопки "Назад" с иконкой
+
     backButtonIcon: {
       width: 40,
       height: 40,

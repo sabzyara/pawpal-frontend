@@ -11,6 +11,9 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/hooks/useTheme';
 
+import "@/app/i18n";
+import { useTranslation } from "react-i18next";
+
 interface PetAnalysis {
   petId: number;
   petName: string;
@@ -29,7 +32,7 @@ export default function MiniAiCard({
   onPress,
 }: Props) {
   const { colors } = useTheme();
-
+  const { t } = useTranslation();
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -59,7 +62,7 @@ export default function MiniAiCard({
               colors.text.primary,
           }}
         >
-          AI Analysis
+          {t('chat.aiAnalysis')}
         </Text>
 
         <Ionicons

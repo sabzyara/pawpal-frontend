@@ -1,5 +1,4 @@
 // app/my_appointments.tsx
-
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -18,6 +17,8 @@ import { useOwnerAppointments } from '@/hooks/useAppointments';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { AppointmentStatus } from '@/types/appointment.types';
+import '@/app/i18n';
+import { useTranslation } from 'react-i18next';
 
 const statusColors: Record<AppointmentStatus, string> = {
   CREATED: '#FF9800',
@@ -39,6 +40,7 @@ const statusLabels: Record<AppointmentStatus, string> = {
 
 export default function MyAppointmentsScreen() {
   const { colors, typography, spacing } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus | undefined>();
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -56,17 +58,17 @@ export default function MyAppointmentsScreen() {
 
   const handleCancel = useCallback(async () => {
     if (!cancelAppointment) {
-      Alert.alert('Ошибка', 'Функция отмены недоступна');
+      Alert.alert(t('appointment.Error'), t('appointment.CancelFunctionNotAvailable'));
       return;
     }
 
     if (!selectedAppointmentId) {
-      Alert.alert('Ошибка', 'Выберите запись для отмены');
+      Alert.alert(t('appointment.Error'), t('appointment.SelectAppointmentToCancel'));
       return;
     }
 
     if (!cancelReason.trim()) {
-      Alert.alert('Ошибка', 'Пожалуйста, укажите причину отмены');
+      Alert.alert(t('appointment.Error'), t('appointment.EnterCancelReason'));
       return;
     }
 
@@ -77,7 +79,7 @@ export default function MyAppointmentsScreen() {
       setSelectedAppointmentId(null);
     } catch (error) {
       console.error('Cancel error:', error);
-      Alert.alert('Ошибка', 'Не удалось отменить запись');
+      Alert.alert(t('appointment.Error'), t('appointment.CancelFunctionNotAvailable'));
     }
   }, [cancelAppointment, selectedAppointmentId, cancelReason]);
 
@@ -92,7 +94,7 @@ export default function MyAppointmentsScreen() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Дата не указана';
+    if (!dateString) return t('appointment.noDate');
     try {
       return new Date(dateString).toLocaleDateString('ru-RU', {
         month: 'short',
@@ -100,7 +102,7 @@ export default function MyAppointmentsScreen() {
         year: 'numeric',
       });
     } catch {
-      return 'Дата не указана';
+      return t('appointment.noDate');
     }
   };
 
@@ -137,7 +139,7 @@ export default function MyAppointmentsScreen() {
           color: !selectedStatus ? colors.text.inverse : colors.text.primary,
           fontWeight: !selectedStatus ? '600' : '400',
         }}>
-          Все
+          {t('appointment.all')}
         </Text>
       </TouchableOpacity>
       {Object.entries(statusLabels).map(([key, label]) => (
@@ -170,7 +172,7 @@ export default function MyAppointmentsScreen() {
   );
 
   const renderAppointmentCard = ({ item }: { item: any }) => {
-    const canCancel = (item.status === 'CREATED' || item.status === 'CONFIRMED') && cancelAppointment;
+    const canCancel = (item.status === t('appointment.CREATED') || item.status === t('appointment.CONFIRMED')) && cancelAppointment;
     const statusColor = statusColors[item.status as AppointmentStatus] || colors.text.secondary;
     
     return (
@@ -206,10 +208,10 @@ export default function MyAppointmentsScreen() {
             />
             <View style={{ marginLeft: 12 }}>
               <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
-                {item.specialistName || 'Специалист'}
+                {item.specialistName || t('appointment.specialist')}
               </Text>
               <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                Запись на прием
+                {t('appointment.appointment')}
               </Text>
             </View>
           </View>
@@ -260,13 +262,13 @@ export default function MyAppointmentsScreen() {
           }}
         >
           <Text style={[typography.caption, { color: colors.text.primary }]}>
-            🐾 {item.petName || 'Питомец не указан'} {item.petType ? `(${item.petType})` : ''}
+            🐾 {item.petName || t('appointment.noPetName')} {item.petType ? `(${item.petType})` : ''}
           </Text>
         </View>
 
         {item.ownerNotes && (
           <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs }]} numberOfLines={2}>
-            Примечание: {item.ownerNotes}
+            {t('appointment.ownerNotes')}: {item.ownerNotes}
           </Text>
         )}
 
@@ -288,7 +290,7 @@ export default function MyAppointmentsScreen() {
               fontSize: 14, 
               fontWeight: '600' 
             }}>
-              Отменить запись
+              {t('appointment.cancelappointment')}
             </Text>
           </TouchableOpacity>
         )}
@@ -309,7 +311,7 @@ export default function MyAppointmentsScreen() {
         borderBottomWidth: 0, 
       }}>
         <Text style={[typography.h2, { color: colors.text.primary }]}>
-          Мои записи
+          {t('appointment.title')}
         </Text>
         
         <Text
@@ -321,7 +323,7 @@ export default function MyAppointmentsScreen() {
             },
           ]}
         >
-          Управление предстоящими визитами
+          {t('appointment.subtitle')}
         </Text>
       </View>
 
@@ -353,10 +355,10 @@ export default function MyAppointmentsScreen() {
             <View style={{ padding: spacing.xl, alignItems: 'center', paddingTop: 80 }}>
               <Ionicons name="calendar-clear-outline" size={80} color={colors.primary.light} />
               <Text style={[typography.h4, { color: colors.text.primary, marginTop: 16 }]}>
-                Нет записей
+                {t('appointment.noAppointments')}
               </Text>
               <Text style={[typography.body2, { color: colors.text.secondary, textAlign: 'center', marginTop: 8 }]}>
-                Запишитесь к ветеринару или специалисту для вашего питомца
+                {t('appointment.noAppointmentsDescription')}
               </Text>
               <TouchableOpacity
                 onPress={() => router.push('/')}
@@ -373,7 +375,7 @@ export default function MyAppointmentsScreen() {
                   elevation: 4,
                 }}
               >
-                <Text style={{ color: colors.text.inverse, fontWeight: '600' }}>Записаться</Text>
+                <Text style={{ color: colors.text.inverse, fontWeight: '600' }}>{t('appointment.bookAppointment')}</Text>
               </TouchableOpacity>
             </View>
           ) : null
@@ -413,13 +415,13 @@ export default function MyAppointmentsScreen() {
             />
             
             <Text style={[typography.h3, { color: colors.text.primary, marginBottom: 16 }]}>
-              Отмена записи
+              {t('appointment.cancelappointment')}
             </Text>
             
             <TextInput
               value={cancelReason}
               onChangeText={setCancelReason}
-              placeholder="Укажите причину отмены"
+              placeholder={t('appointment.cancelReasonPlaceholder')}
               placeholderTextColor={colors.text.tertiary}
               multiline
               style={{
@@ -438,7 +440,7 @@ export default function MyAppointmentsScreen() {
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: spacing.lg, gap: spacing.md }}>
               <TouchableOpacity onPress={() => setShowCancelModal(false)}>
                 <Text style={[typography.body1, { color: colors.text.secondary, paddingVertical: spacing.sm, paddingHorizontal: spacing.sm }]}>
-                  Отмена
+                  {t('appointment.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity 
@@ -451,7 +453,7 @@ export default function MyAppointmentsScreen() {
                 }}
               >
                 <Text style={[typography.body1SemiBold, { color: colors.text.inverse }]}>
-                  Отменить запись
+                  {t('appointment.confirmCancel')}
                 </Text>
               </TouchableOpacity>
             </View>

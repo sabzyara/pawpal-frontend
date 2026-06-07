@@ -184,7 +184,7 @@ const history =
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary, }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
 
-        {/* 🐾 PET SELECT */}
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {pets.map((pet) => (
             <TouchableOpacity
@@ -213,12 +213,11 @@ const history =
           ))}
         </ScrollView>
 
-        {/* TITLE */}
         <Text style={{ fontSize: 26, fontWeight: "700", textAlign: "center", marginTop: 20,  marginBottom: 20, color: colors.text.primary }}>
           {tab === "nutrition" ? t("tracker.Nutrition Tracker") : t("tracker.Activity Tracker")}
         </Text>
 
-        {/* TABS */}
+
         <View style={{
           flexDirection: "row",
           borderRadius: 30,
@@ -257,13 +256,12 @@ const history =
           </TouchableOpacity>
         </View>
 
-        {/* CALENDAR */}
+
         <CalendarSection
           selectedDate={selectedDate}
           onDateSelect={setSelectedDate}
         />
 
-        {/* DONUT */}
         <View style={{ marginBottom: 20 }}>
           <Donut
             value={tab === "nutrition" ? totalCalories : totalActivity}
@@ -295,7 +293,6 @@ const history =
   </Text>
 </TouchableOpacity>
 
-        {/* LIST */}
         {tab === "nutrition" ? (
           <>
             {filteredNutrition.map((n) => (

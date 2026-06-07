@@ -8,7 +8,6 @@ export const petProfileStyles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
 
-  // Header
   headerContainer: {
     alignItems: "center",
     marginBottom: 24,
@@ -87,7 +86,6 @@ export const petProfileStyles = StyleSheet.create({
     color: "#666",
   },
 
-  // Stats
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -123,7 +121,6 @@ export const petProfileStyles = StyleSheet.create({
     backgroundColor: "#F0F0F0",
   },
 
-  // Tabs
   tabsContainer: {
     flexDirection: "row",
     backgroundColor: "#FFF",
@@ -158,7 +155,6 @@ export const petProfileStyles = StyleSheet.create({
     color: "#FF6B6B",
   },
 
-  // Info Tab
   infoSection: {
     paddingHorizontal: 20,
   },
@@ -219,7 +215,6 @@ export const petProfileStyles = StyleSheet.create({
     marginVertical: 16,
   },
 
-  // Actions Grid
   actionsSection: {
     marginBottom: 20,
   },
@@ -251,7 +246,7 @@ export const petProfileStyles = StyleSheet.create({
     color: "#FFF",
   },
 
-  // Health Tab
+
   healthSection: {
     paddingHorizontal: 20,
   },
@@ -344,7 +339,7 @@ export const petProfileStyles = StyleSheet.create({
     opacity: 0.9,
   },
 
-  // Appointments Tab
+
   appointmentsSection: {
     paddingHorizontal: 20,
   },
@@ -411,7 +406,7 @@ export const petProfileStyles = StyleSheet.create({
     color: "#FFF",
   },
 
-  // Delete Button
+
   deleteButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -429,7 +424,7 @@ export const petProfileStyles = StyleSheet.create({
     color: "#FF6B6B",
   },
 
-  // Modal
+
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",

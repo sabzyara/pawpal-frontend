@@ -6,6 +6,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import { useTranslation } from "react-i18next";
+import "@/app/i18n";
+
 
 type TabType =
   | 'about'
@@ -22,11 +25,11 @@ interface VetTabsProps {
 }
 
 const tabLabels: Record<TabType, string> = {
-  about: 'О себе',
-  availability: 'График',
-  reviews: 'Отзывы',
-  edit: 'Редакт.',
-  manage: 'Кабинет',
+  about: t("tabs.about"),
+  availability: t("tabs.availability"),
+  reviews: t("tabs.reviews"),
+  edit: t("tabs.edit"),
+  manage: t("tabs.manage"),
 };
 
 const tabIcons: Record<
@@ -51,7 +54,7 @@ export const VetTabs: React.FC<VetTabsProps> = ({
     typography,
     spacing,
   } = useTheme();
-
+  const { t } = useTranslation();
   const displayTabs: TabType[] =
     React.useMemo(() => {
       if (isOwner) {

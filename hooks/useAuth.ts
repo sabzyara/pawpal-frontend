@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Role, User } from '@/types/profile';
 import { RegisterData } from '@/types/auth';
 
-// ✅ Типизированная функция
+
 const extractRoleString = (role: Role | string | { name: string } | undefined): string => {
   if (!role) return '';
   
@@ -20,7 +20,7 @@ const extractRoleString = (role: Role | string | { name: string } | undefined): 
   return '';
 };
 
-// ✅ Хелперы для маршрутов с правильной типизацией
+
 const getMainRouteByRole = (role: string): '/admin-main' | '/specialist-profile' | '/' => {
   switch (role) {
     case Role.ADMIN: return '/admin-main';
@@ -40,7 +40,7 @@ const getCompleteRouteByRole = (role: string): '/complete_profile' | '/complete_
   }
 };
 
-// ✅ Базовые селекторы
+
 export const useCurrentUser = (): User | null => {
   return useAuthStore((state) => state.user);
 };
@@ -57,7 +57,7 @@ export const useAuthError = (): string | null => {
   return useAuthStore((state) => state.error);
 };
 
-// ✅ Роли пользователя
+
 export const useUserRole = () => {
   const user = useAuthStore((state) => state.user);
   const roleString = extractRoleString(user?.role);
@@ -74,7 +74,7 @@ export const useUserRole = () => {
   }), [user, roleString]);
 };
 
-// ✅ Действия
+
 export const useAuthActions = () => {
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
@@ -91,7 +91,7 @@ export const useAuthActions = () => {
   }), [login, register, logout, fetchCurrentUser, clearError]);
 };
 
-// ✅ Логин с редиректом
+
 export const useLoginWithRedirect = () => {
   const login = useAuthStore((state) => state.login);
   const fetchProfile = useProfileStore((state) => state.fetchProfile);
@@ -111,20 +111,20 @@ export const useLoginWithRedirect = () => {
       const roleString = extractRoleString(user.role);
       console.log('User role after login:', roleString);
       
-      // Админ сразу на админку
+
       if (roleString === Role.ADMIN) {
         router.replace('/admin-main');
         return true;
       }
       
-      // ✅ Проверяем наличие профиля
+
       try {
         await fetchProfile(user);
-        // Профиль есть - на главный маршрут
+
         console.log('✅ Profile exists, redirecting to main');
         router.replace(getMainRouteByRole(roleString));
       } catch (error: any) {
-        // ✅ Профиля нет - на заполнение
+
         if (error?.response?.status === 404) {
           console.log('🆕 Profile not found, redirecting to completion');
           const completeRoute = getCompleteRouteByRole(roleString);
@@ -143,7 +143,7 @@ export const useLoginWithRedirect = () => {
   }, [login, fetchProfile, router]);
 };
 
-// ✅ Логаут с редиректом
+
 export const useLogoutWithRedirect = () => {
   const logout = useAuthStore((state) => state.logout);
   const clearProfile = useProfileStore((state) => state.clearProfile);
@@ -156,7 +156,7 @@ export const useLogoutWithRedirect = () => {
   }, [logout, clearProfile, router]);
 };
 
-// ✅ Защита маршрутов
+
 export const useProtectedRoute = (allowedRoles?: Role[], requireProfileComplete?: boolean) => {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
@@ -172,28 +172,28 @@ export const useProtectedRoute = (allowedRoles?: Role[], requireProfileComplete?
   useEffect(() => {
     if (isLoading) return;
     
-    // Не авторизован
+
     if (!token || !user) {
       router.replace('/(auth)/login');
       return;
     }
     
-    // Проверка ролей
+
     if (allowedRoles && allowedRoles.length > 0) {
       const userRole = user.role;
       const hasAllowedRole = allowedRoles.some(allowedRole => allowedRole === userRole);
       
       if (!hasAllowedRole) {
         const roleString = extractRoleString(userRole);
-        router.replace(getMainRouteByRole(roleString)); // ✅ Теперь тип правильный
+        router.replace(getMainRouteByRole(roleString)); 
         return;
       }
     }
     
-    // Проверка заполненности профиля
+
     if (requireProfileComplete && !hasProfile && user) {
       const roleString = extractRoleString(user.role);
-      router.replace(getCompleteRouteByRole(roleString)); // ✅ Теперь тип правильный
+      router.replace(getCompleteRouteByRole(roleString)); 
       return;
     }
   }, [isLoading, token, user, allowedRoles, router, requireProfileComplete, hasProfile]);
@@ -215,7 +215,7 @@ export const useProtectedRoute = (allowedRoles?: Role[], requireProfileComplete?
   };
 };
 
-// hooks/useAuth.ts - добавить после useLoginWithRedirect
+
 
 export const useRegisterWithRedirect = () => {
   const register = useAuthStore((state) => state.register);
@@ -238,13 +238,13 @@ export const useRegisterWithRedirect = () => {
       
       const roleString = extractRoleString(user.role);
       
-      // Проверяем, есть ли уже профиль
+
       try {
         await fetchProfile(user);
-        // Профиль уже есть - на главную
+
         router.replace(getMainRouteByRole(roleString));
       } catch (error: any) {
-        // Профиля нет - на заполнение
+
         if (error?.response?.status === 404) {
           router.replace(getCompleteRouteByRole(roleString));
         } else {
@@ -267,7 +267,7 @@ export const useRegisterWithRedirect = () => {
   };
 };
 
-// ✅ Дополнительный хук для прав доступа
+
 export const usePermissions = () => {
   const user = useAuthStore((state) => state.user);
   const roleString = extractRoleString(user?.role);

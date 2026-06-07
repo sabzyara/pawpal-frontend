@@ -29,9 +29,8 @@ const strokeWidth = size * 0.12;
     <View style={styles.container}>
       <Svg width={size} height={size}>
         
-        {/* Background (remaining) */}
         <Circle
-          stroke={colors.tracker.secondary} // 🔥 вместо хардкода
+          stroke={colors.tracker.secondary} 
           fill="none"
           cx={size / 2}
           cy={size / 2}
@@ -39,9 +38,9 @@ const strokeWidth = size * 0.12;
           strokeWidth={strokeWidth}
         />
 
-        {/* Progress */}
+
         <Circle
-          stroke={colors.tracker.primary} // 🔥 вместо хардкода
+          stroke={colors.tracker.primary} 
           fill="none"
           cx={size / 2}
           cy={size / 2}

@@ -3,6 +3,8 @@ import { createHomeStyles } from '@/styles/homeStyles';
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface Pet {
   id: number;
@@ -23,12 +25,12 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
 }) => {
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
-
+  const { t } = useTranslation();
   return (
     <View style={styles.petsSection}>
       
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" ,marginBottom: 12 , paddingHorizontal: 20}}>
-        <Text style={styles.sectionTitle}>My Pets</Text>
+        <Text style={styles.sectionTitle}>{t('pets.title')}</Text>
 
         <TouchableOpacity onPress={onAddPress}>
           <Feather name="plus" size={20} color={colors.primary.main} />
@@ -47,7 +49,7 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
           }}
         >
           <Text style={{ color: colors.text.secondary }}>
-            Add your first pet 🐾
+            {t('pets.addFirstPet')}
           </Text>
         </TouchableOpacity>
       )}
@@ -68,7 +70,6 @@ export const PetsSection: React.FC<PetsSectionProps> = ({
               
             }}
           >
-            {/* AVATAR */}
             <Image
               source={{
                 uri:

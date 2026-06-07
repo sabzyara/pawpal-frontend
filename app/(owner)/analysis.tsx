@@ -20,11 +20,13 @@ import api from '@/services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import "../i18n";
+import { useTranslation } from 'react-i18next';
 
 export default function AnalysisScreen() {
   const { colors, spacing, typography } =
     useTheme();
-
+  const { t } = useTranslation();
   const [pets, setPets] =
     useState<any[]>([]);
 
@@ -130,7 +132,7 @@ useFocusEffect(
             colors.text.primary,
         }}
       >
-        Add a pet first to use AI analysis
+        {t('analysis.addPet')}
       </Text>
     </View>
   );
@@ -152,7 +154,7 @@ if (!analysis) {
             colors.text.primary,
         }}
       >
-        Analysis unavailable
+        {t('analysis.Analysis unavailable')}
       </Text>
     </View>
   );
@@ -183,7 +185,7 @@ return (
           },
         ]}
       >
-        AI Health Analysis
+        {t('analysis.title')}
       </Text>
 
       <ScrollView
@@ -278,7 +280,7 @@ return (
             },
           ]}
         >
-          Health Score
+          {t('analysis.Health Score')}
         </Text>
 
         <Text
@@ -338,7 +340,7 @@ return (
             },
           ]}
         >
-          Recommendations
+          {t('analysis.Recommendations')}
         </Text>
 
         {analysis.recommendations?.map(

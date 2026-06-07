@@ -155,7 +155,7 @@ export default function ActivityForm() {
                   value={activityType}
                   onChangeText={setActivityType}
                   style={styles.input}
-                  placeholder="Walk"
+                  placeholder={t("tracker.Walk")}
                   placeholderTextColor={colors.text.secondary}
                 />
 
@@ -177,7 +177,7 @@ export default function ActivityForm() {
                   onChangeText={setDurationValue}
                   style={styles.input}
                   keyboardType="numeric"
-                  placeholder="45 minutes"
+                  placeholder={t("tracker.45 minutes")}
                   placeholderTextColor={colors.text.secondary}
                 />
 

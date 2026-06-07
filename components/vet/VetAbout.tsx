@@ -8,6 +8,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface VetAboutProps {
   vet: {
@@ -28,10 +30,9 @@ export const VetAbout: React.FC<VetAboutProps> = ({
     spacing,
     typography,
   } = useTheme();
-
+  const { t } = useTranslation();
   const handlePhonePress = () => {
     if (!vet.phoneNumber) return;
-
     const phoneUrl = `tel:${vet.phoneNumber}`;
 
     Linking.canOpenURL(phoneUrl)
@@ -177,7 +178,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({
         gap: spacing.md,
       }}
     >
-      {/* ABOUT */}
+
       <View
         style={{
           backgroundColor:
@@ -210,7 +211,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({
             },
           ]}
         >
-          О специалисте
+          {t('vet.about')}
         </Text>
 
         <Text
@@ -225,28 +226,27 @@ export const VetAbout: React.FC<VetAboutProps> = ({
             },
           ]}
         >
-          {vet.about ||
-            'Информация отсутствует'}
+          {vet.about || t("vet.noInfo")}
         </Text>
       </View>
 
-      {/* CLINIC */}
+
       <InfoCard
         icon="business-outline"
-        title="Клиника"
+        title={t("vet.clinic")}
         value={
           vet.clinicName ||
-          'Не указано'
+          t("vet.notSpecified")
         }
       />
 
-      {/* ADDRESS */}
+
       <InfoCard
         icon="location-outline"
-        title="Адрес"
+        title={t("vet.address")}
         value={
           vet.address ||
-          'Не указан'
+          t("vet.notSpecified")
         }
         onPress={
           vet.address
@@ -255,13 +255,13 @@ export const VetAbout: React.FC<VetAboutProps> = ({
         }
       />
 
-      {/* PHONE */}
+
       <InfoCard
         icon="call-outline"
-        title="Телефон"
+        title={t("vet.phone")}
         value={
           vet.phoneNumber ||
-          'Не указан'
+          t("vet.notSpecified")
         }
         onPress={
           vet.phoneNumber
@@ -270,17 +270,17 @@ export const VetAbout: React.FC<VetAboutProps> = ({
         }
       />
 
-      {/* EDUCATION */}
+
       <InfoCard
         icon="school-outline"
-        title="Образование"
+        title={t("vet.education")}
         value={
           vet.education ||
-          'Не указано'
+          t("vet.notSpecified")
         }
       />
 
-      {/* LANGUAGES */}
+  
       {!!vet.languages?.length && (
         <View
           style={{
@@ -315,7 +315,7 @@ export const VetAbout: React.FC<VetAboutProps> = ({
               },
             ]}
           >
-            Языки общения
+            {t("vet.languages")}
           </Text>
 
           <View

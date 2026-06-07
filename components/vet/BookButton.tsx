@@ -5,9 +5,11 @@ import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface BookButtonProps {
-  userId: number;        // ← Изменено: теперь принимаем userId
+  userId: number;       
   specialistType: 'VET' | 'SERVICE';
   specialistName: string;
 }
@@ -19,12 +21,12 @@ export const BookButton: React.FC<BookButtonProps> = ({
 }) => {
   const { colors, typography, spacing } = useTheme();
   const router = useRouter();
-
+  const { t } = useTranslation();
   const handlePress = () => {
     router.push({
       pathname: '/book-appointment',
       params: {
-        specialistUserId: userId,        // ← Передаем userId
+        specialistUserId: userId,       
         specialistType: specialistType,
         specialistName: specialistName,
       },
@@ -53,7 +55,7 @@ export const BookButton: React.FC<BookButtonProps> = ({
           { color: colors.text.inverse, marginLeft: spacing.sm },
         ]}
       >
-        Записаться
+        {t('book.title')}
       </Text>
     </TouchableOpacity>
   );

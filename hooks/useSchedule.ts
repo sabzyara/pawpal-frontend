@@ -5,9 +5,9 @@ import { INITIAL_SCHEDULE } from '@/types/home_index';
 export const useSchedule = () => {
   const [schedule, setSchedule] = useState<ScheduleItem[]>(INITIAL_SCHEDULE);
   
-  // ✅ Изменено: теперь string в формате YYYY-MM-DD
+
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split('T')[0]  // например "2024-01-15"
+    new Date().toISOString().split('T')[0]  
   );
   
   const [refreshing, setRefreshing] = useState(false);
@@ -26,10 +26,10 @@ export const useSchedule = () => {
     setRefreshing(false);
   }, []);
 
-  // ✅ Фильтрация по строковой дате
+
   const filteredSchedule = schedule.filter(item => item.date === selectedDate);
   
-  // ✅ Подсчет предстоящих задач (сравнение строковых дат)
+
   const upcomingTasks = schedule.filter(item => !item.done && item.date >= selectedDate).length;
   
   const completedTasks = schedule.filter(item => item.done).length;
