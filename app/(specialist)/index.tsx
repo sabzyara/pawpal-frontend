@@ -1,6 +1,6 @@
-// app/(specialist)/index.tsx - ИСПРАВЛЕННАЯ ВЕРСИЯ
+// app/(specialist)/index.tsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,20 +9,21 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  Image,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthStore } from '@/store/authStore';
 import { useProfileStore } from '@/store/profileStore';
-import { HomeHeader } from '@/components/home/Header';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { appointmentApi, specialistService } from '@/services/appointmentApi';
 import type { AppointmentResponseDto, SpecialistInfo } from '@/services/appointmentApi';
 
-// ✅ Создаем отдельный тип для отображения (не расширяем оригинальный)
 interface DisplayAppointment {
   id: number;
   status: string;
@@ -31,10 +32,8 @@ interface DisplayAppointment {
   endTime?: string;
   petOwnerId?: number;
   petId?: number;
-  // Добавляем поля для отображения
   displayPetOwnerName: string;
   displayPetName: string;
-  // Оригинальные данные
   original: AppointmentResponseDto;
 }
 
@@ -51,7 +50,6 @@ export default function SpecialistHomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [createdCount, setCreatedCount] = useState(0);
 
-  // Загрузка информации о специалисте
   const loadSpecialistInfo = useCallback(async () => {
     if (!user?.id || !token) return;
     
@@ -65,7 +63,6 @@ export default function SpecialistHomeScreen() {
     }
   }, [user?.id, token]);
 
-  // Загрузка записей специалиста
   const loadAppointments = useCallback(async () => {
     if (!token) return;
 
@@ -77,7 +74,6 @@ export default function SpecialistHomeScreen() {
       
       const content = response.content || [];
       
-      // Преобразуем в DisplayAppointment
       const displayAppointments: DisplayAppointment[] = content.map((apt: AppointmentResponseDto) => ({
         id: apt.id,
         status: apt.status,
@@ -86,27 +82,22 @@ export default function SpecialistHomeScreen() {
         endTime: apt.endTime,
         petOwnerId: apt.petOwnerId,
         petId: apt.petId,
-        displayPetOwnerName: apt.petOwnerName || `Клиент #${apt.petOwnerId}`,
-        displayPetName: apt.petName || 'Питомец',
+        displayPetOwnerName: apt.petOwnerName || `Client #${apt.petOwnerId}`,
+        displayPetName: apt.petName || 'Pet',
         original: apt,
       }));
       
       setAppointments(displayAppointments);
       
-      // Подсчитываем количество ожидающих подтверждения
       const created = content.filter((apt: AppointmentResponseDto) => apt.status === 'CREATED').length;
       setCreatedCount(created);
     } catch (error: any) {
       console.error('Error loading appointments:', error);
-      if (error?.status === 403) {
-        console.log('Access denied to appointments');
-      }
       setAppointments([]);
       setCreatedCount(0);
     }
   }, [token]);
 
-  // Загрузка всех данных
   const loadData = useCallback(async () => {
     if (!token) return;
     
@@ -123,7 +114,6 @@ export default function SpecialistHomeScreen() {
     }
   }, [token, loadSpecialistInfo, loadAppointments]);
 
-  // Обновление данных (pull-to-refresh)
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadData();
@@ -133,7 +123,6 @@ export default function SpecialistHomeScreen() {
     setRefreshing(false);
   }, [loadData, user, fetchProfile]);
 
-  // Загрузка при фокусе на экране
   useFocusEffect(
     useCallback(() => {
       loadData();
@@ -150,15 +139,29 @@ export default function SpecialistHomeScreen() {
     if (profile?.serviceProvider?.firstName) {
       return `${profile.serviceProvider.firstName} ${profile.serviceProvider.lastName}`;
     }
-    return profile?.user?.email?.split('@')[0] || 'Специалист';
+    return profile?.user?.email?.split('@')[0] || 'Specialist';
+  };
+
+  const getAvatarUrl = () => {
+    return specialistInfo?.avatarUrl || 
+           profile?.veterinarian?.avatarUrl || 
+           profile?.serviceProvider?.avatarUrl || 
+           null;
   };
 
   const getSpecialistTypeLabel = () => {
-    if (specialistInfo?.specialistType === 'VET') return 'Ветеринар';
-    if (specialistInfo?.specialistType === 'SERVICE') return 'Сервис-провайдер';
-    if (profile?.veterinarian) return 'Ветеринар';
-    if (profile?.serviceProvider) return 'Сервис-провайдер';
-    return 'Специалист';
+    if (specialistInfo?.specialistType === 'VET') return 'Veterinarian';
+    if (specialistInfo?.specialistType === 'SERVICE') return 'Service Provider';
+    if (profile?.veterinarian) return 'Veterinarian';
+    if (profile?.serviceProvider) return 'Service Provider';
+    return 'Specialist';
+  };
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
   };
 
   const formatTime = (time?: string) => {
@@ -167,11 +170,11 @@ export default function SpecialistHomeScreen() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Дата не указана';
+    if (!dateString) return 'Date not set';
     try {
       return format(new Date(dateString), 'd MMMM', { locale: ru });
     } catch {
-      return 'Дата не указана';
+      return 'Date not set';
     }
   };
 
@@ -183,45 +186,39 @@ export default function SpecialistHomeScreen() {
   };
 
   const navigateToProfile = () => {
-    router.push({
-      pathname: '/specialist-profile',
-    });
+    router.push({ pathname: '/specialist-profile' });
   };
 
   const navigateToAllAppointments = () => {
-    router.push({
-      pathname: '/specialist_appointments'
-    });
+    router.push({ pathname: '/specialist_appointments' });
   };
 
-  // Подтверждение записи
   const handleConfirmAppointment = async (id: number) => {
     try {
       await appointmentApi.confirmAppointment(id);
-      Alert.alert('Успех', 'Запись подтверждена');
+      Alert.alert('Success', 'Appointment confirmed');
       await loadAppointments();
     } catch (error: any) {
-      Alert.alert('Ошибка', error?.message || 'Не удалось подтвердить запись');
+      Alert.alert('Error', error?.message || 'Failed to confirm appointment');
     }
   };
 
-  // Отмена записи специалистом
   const handleCancelBySpecialist = async (id: number) => {
     Alert.alert(
-      'Отмена записи',
-      'Укажите причину отмены',
+      'Cancel Appointment',
+      'Are you sure you want to cancel this appointment?',
       [
-        { text: 'Отмена', style: 'cancel' },
+        { text: 'No', style: 'cancel' },
         {
-          text: 'Отменить',
+          text: 'Yes, Cancel',
           style: 'destructive',
           onPress: async () => {
             try {
-              await appointmentApi.cancelAppointment(id, 'Отменено специалистом');
-              Alert.alert('Успех', 'Запись отменена');
+              await appointmentApi.cancelAppointment(id, 'Cancelled by specialist');
+              Alert.alert('Success', 'Appointment cancelled');
               await loadAppointments();
             } catch (error: any) {
-              Alert.alert('Ошибка', error?.message || 'Не удалось отменить запись');
+              Alert.alert('Error', error?.message || 'Failed to cancel appointment');
             }
           }
         }
@@ -232,23 +229,33 @@ export default function SpecialistHomeScreen() {
   const statusColors: Record<string, string> = {
     CREATED: '#FF9800',
     CONFIRMED: '#2196F3',
-    COMPLETED: '#4CAF50',
-    CANCELLED_BY_USER: '#F44336',
-    CANCELLED_BY_SPECIALIST: '#F44336',
-    NO_SHOW: '#9E9E9E',
+    COMPLETED: '#10B981',
+    CANCELLED_BY_USER: '#DC2626',
+    CANCELLED_BY_SPECIALIST: '#DC2626',
+    NO_SHOW: '#6B7280',
   };
 
   const statusLabels: Record<string, string> = {
-    CREATED: 'Ожидает',
-    CONFIRMED: 'Подтвержден',
-    COMPLETED: 'Завершен',
-    CANCELLED_BY_USER: 'Отменен клиентом',
-    CANCELLED_BY_SPECIALIST: 'Отменен вами',
-    NO_SHOW: 'Не явка',
+    CREATED: 'Pending',
+    CONFIRMED: 'Confirmed',
+    COMPLETED: 'Completed',
+    CANCELLED_BY_USER: 'Cancelled by Client',
+    CANCELLED_BY_SPECIALIST: 'Cancelled by You',
+    NO_SHOW: 'No Show',
+  };
+
+  const statusIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
+    CREATED: 'time-outline',
+    CONFIRMED: 'checkmark-circle-outline',
+    COMPLETED: 'checkmark-done-circle-outline',
+    CANCELLED_BY_USER: 'close-circle-outline',
+    CANCELLED_BY_SPECIALIST: 'close-circle-outline',
+    NO_SHOW: 'person-remove-outline',
   };
 
   const renderAppointmentCard = ({ item }: { item: DisplayAppointment }) => {
     const statusColor = statusColors[item.status] || colors.text.secondary;
+    const statusIcon = statusIcons[item.status as keyof typeof statusIcons] || 'calendar-outline';
     const isCreated = item.status === 'CREATED';
     const isConfirmed = item.status === 'CONFIRMED';
 
@@ -258,52 +265,70 @@ export default function SpecialistHomeScreen() {
         onPress={() => navigateToAppointment(item.id)}
         activeOpacity={0.7}
         style={{
-          backgroundColor: colors.card.default,
-          borderRadius: 20,
+          backgroundColor: colors.card?.default || colors.background.secondary,
+          borderRadius: 24,
           padding: spacing.md,
-          marginBottom: spacing.sm,
+          marginBottom: spacing.md,
           borderWidth: 1,
-          borderColor: colors.border.light,
+          borderColor: colors.border?.light || '#E5E7EB',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 2,
         }}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Header with name and status */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <View style={{ flex: 1 }}>
-            <Text style={[typography.body1SemiBold, { color: colors.text.primary }]}>
+            <Text style={[typography.body1SemiBold, { color: colors.text.primary, fontSize: 16 }]}>
               {item.displayPetOwnerName}
             </Text>
-            <Text style={[typography.caption, { color: colors.text.secondary }]}>
-              🐾 {item.displayPetName}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              <Ionicons name="paw-outline" size={14} color={colors.primary.main} />
+              <Text style={[typography.caption, { color: colors.text.secondary }]}>
+                {item.displayPetName}
+              </Text>
+            </View>
           </View>
+          
           <View
             style={{
-              backgroundColor: statusColor + '20',
-              paddingHorizontal: spacing.sm,
-              paddingVertical: spacing.xs,
-              borderRadius: 12,
+              backgroundColor: statusColor + '15',
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              borderWidth: 1,
+              borderColor: statusColor + '30',
             }}
           >
-            <Text style={{ color: statusColor, fontSize: 12, fontWeight: '600' }}>
+            <Ionicons name={statusIcon} size={12} color={statusColor} />
+            <Text style={{ color: statusColor, fontSize: 11, fontWeight: '600' }}>
               {statusLabels[item.status] || item.status}
             </Text>
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.sm }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Ionicons name="calendar-outline" size={14} color={colors.text.secondary} />
-            <Text style={[typography.caption, { color: colors.text.secondary }]}>
+        {/* Date and time */}
+        <View style={{ flexDirection: 'row', gap: spacing.md, marginTop: spacing.md, flexWrap: 'wrap' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.background.tertiary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 }}>
+            <Ionicons name="calendar-outline" size={14} color={colors.primary.main} />
+            <Text style={[typography.caption, { color: colors.text.secondary, fontSize: 12 }]}>
               {formatDate(item.date)}
             </Text>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Ionicons name="time-outline" size={14} color={colors.text.secondary} />
-            <Text style={[typography.caption, { color: colors.text.secondary }]}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.background.tertiary, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 }}>
+            <Ionicons name="time-outline" size={14} color={colors.primary.main} />
+            <Text style={[typography.caption, { color: colors.text.secondary, fontSize: 12 }]}>
               {formatTime(item.startTime)} - {formatTime(item.endTime)}
             </Text>
           </View>
         </View>
 
+        {/* Action buttons */}
         {(isCreated || isConfirmed) && (
           <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md }}>
             {isCreated && (
@@ -311,60 +336,92 @@ export default function SpecialistHomeScreen() {
                 onPress={() => handleConfirmAppointment(item.id)}
                 style={{
                   flex: 1,
-                  paddingVertical: spacing.sm,
+                  paddingVertical: 10,
                   alignItems: 'center',
-                  backgroundColor: colors.success?.main || '#4CAF50',
-                  borderRadius: 12,
+                  backgroundColor: '#10B981',
+                  borderRadius: 16,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 6,
                 }}
               >
-                <Text style={{ color: '#FFF', fontSize: 13, fontWeight: '600' }}>Подтвердить</Text>
+                <Ionicons name="checkmark-outline" size={18} color="#FFF" />
+                <Text style={{ color: '#FFF', fontSize: 13, fontWeight: '600' }}>Confirm</Text>
               </TouchableOpacity>
             )}
+            
             <TouchableOpacity
               onPress={() => navigateToAppointment(item.id)}
               style={{
-                flex: 1,
-                paddingVertical: spacing.sm,
+                flex: isCreated ? 1 : 2,
+                paddingVertical: 10,
                 alignItems: 'center',
                 backgroundColor: colors.background.tertiary,
-                borderRadius: 12,
+                borderRadius: 16,
                 borderWidth: 1,
-                borderColor: colors.border.light,
+                borderColor: colors.border?.light || '#E5E7EB',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                gap: 6,
               }}
             >
-              <Text style={{ color: colors.text.primary, fontSize: 13 }}>Подробнее</Text>
+              <Ionicons name="eye-outline" size={18} color={colors.text.secondary} />
+              <Text style={{ color: colors.text.primary, fontSize: 13, fontWeight: '500' }}>Details</Text>
             </TouchableOpacity>
+            
             {isCreated && (
               <TouchableOpacity
                 onPress={() => handleCancelBySpecialist(item.id)}
                 style={{
-                  paddingVertical: spacing.sm,
-                  paddingHorizontal: spacing.md,
+                  paddingVertical: 10,
+                  paddingHorizontal: 16,
                   alignItems: 'center',
-                  backgroundColor: colors.error?.main || '#F44336',
-                  borderRadius: 12,
+                  backgroundColor: '#DC2626',
+                  borderRadius: 16,
                 }}
               >
-                <Ionicons name="close-outline" size={18} color="#FFF" />
+                <Ionicons name="close-outline" size={20} color="#FFF" />
               </TouchableOpacity>
             )}
           </View>
+        )}
+        
+        {!isCreated && !isConfirmed && item.status !== 'COMPLETED' && (
+          <TouchableOpacity
+            onPress={() => navigateToAppointment(item.id)}
+            style={{
+              marginTop: spacing.md,
+              paddingVertical: 10,
+              alignItems: 'center',
+              backgroundColor: colors.background.tertiary,
+              borderRadius: 16,
+              borderWidth: 1,
+              borderColor: colors.border?.light || '#E5E7EB',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              gap: 6,
+            }}
+          >
+            <Ionicons name="information-circle-outline" size={18} color={colors.text.secondary} />
+            <Text style={{ color: colors.text.primary, fontSize: 13, fontWeight: '500' }}>View Details</Text>
+          </TouchableOpacity>
         )}
       </TouchableOpacity>
     );
   };
 
-  // Проверка авторизации
   if (!token) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.secondary }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: spacing.xl }}>
-          <Ionicons name="lock-closed-outline" size={64} color={colors.text.tertiary} />
-          <Text style={[typography.h4, { color: colors.text.primary, marginTop: spacing.md }]}>
-            Требуется авторизация
+          <View style={{ backgroundColor: colors.background.tertiary, padding: 24, borderRadius: 60, marginBottom: 24 }}>
+            <Ionicons name="lock-closed-outline" size={64} color={colors.primary.main} />
+          </View>
+          <Text style={[typography.h4, { color: colors.text.primary, marginTop: spacing.md, textAlign: 'center' }]}>
+            Authentication Required
           </Text>
           <Text style={[typography.body2, { color: colors.text.secondary, textAlign: 'center', marginTop: spacing.sm }]}>
-            Пожалуйста, войдите в аккаунт
+            Please log in to continue
           </Text>
         </View>
       </SafeAreaView>
@@ -373,25 +430,75 @@ export default function SpecialistHomeScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.secondary }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: colors.text.secondary }}>Загрузка...</Text>
+          <ActivityIndicator size="large" color={colors.primary.main} />
+          <Text style={[typography.body2, { color: colors.text.secondary, marginTop: spacing.md }]}>Loading...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   const completedCount = appointments.filter(a => a.status === 'COMPLETED').length;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(getDisplayName())}&background=E3275B&color=fff`;
+  const avatarUrl = getAvatarUrl();
+  const greeting = getGreeting();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.secondary }}>
-      <HomeHeader
-        greeting="Здравствуйте"
-        userName={getDisplayName()}
-        avatarUrl={specialistInfo?.avatarUrl || profile?.veterinarian?.avatarUrl || profile?.serviceProvider?.avatarUrl || null}
-        notificationCount={0}
-        onNotificationPress={() => router.push('/notifications')}
-      />
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      {/* Header */}
+      <View style={{ 
+        flexDirection: 'row', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        paddingHorizontal: spacing.md, 
+        paddingVertical: spacing.md,
+        backgroundColor: colors.background.primary,
+      }}>
+        <View>
+          <Text style={[typography.caption, { color: colors.text.secondary, fontSize: 14 }]}>
+            {greeting} 👋
+          </Text>
+          <Text style={[typography.h4, { color: colors.text.primary, fontWeight: '700', marginTop: 2 }]}>
+            {getDisplayName()}
+          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#10B981' }} />
+            <Text style={[typography.caption, { color: colors.text.secondary, fontSize: 12 }]}>
+              {getSpecialistTypeLabel()}
+            </Text>
+          </View>
+        </View>
+        
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity 
+            onPress={() => router.push('/notifications')}
+            style={{ 
+              width: 42, 
+              height: 42, 
+              borderRadius: 21, 
+              backgroundColor: colors.background.tertiary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Feather name="bell" size={20} color={colors.text.primary} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={navigateToProfile}>
+            <Image
+              source={{ uri: avatarUrl || fallbackAvatar }}
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                borderWidth: 2,
+                borderColor: colors.primary.main,
+              }}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -404,48 +511,7 @@ export default function SpecialistHomeScreen() {
           />
         }
       >
-        <View style={{ padding: spacing.md }}>
-
-          {/* Welcome Card */}
-          <View
-            style={{
-              backgroundColor: colors.primary.main,
-              borderRadius: 24,
-              padding: spacing.lg,
-              marginBottom: spacing.lg,
-            }}
-          >
-            <Text style={{ color: colors.text.inverse, fontSize: 14, opacity: 0.9 }}>
-              {getSpecialistTypeLabel()}
-            </Text>
-            <Text style={{ color: colors.text.inverse, fontSize: 28, fontWeight: '700', marginTop: 4 }}>
-              {getDisplayName()}
-            </Text>
-            <View style={{ flexDirection: 'row', marginTop: spacing.md, gap: spacing.md }}>
-              <TouchableOpacity
-                onPress={navigateToProfile}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: spacing.sm,
-                  borderRadius: 20,
-                }}
-              >
-                <Text style={{ color: colors.text.inverse }}>📅 Управление</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={navigateToAllAppointments}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  paddingHorizontal: spacing.md,
-                  paddingVertical: spacing.sm,
-                  borderRadius: 20,
-                }}
-              >
-                <Text style={{ color: colors.text.inverse }}>📋 Все записи</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        <View style={{ padding: spacing.md, paddingTop: 0 }}>
 
           {/* Stats Cards */}
           <View style={{ flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg }}>
@@ -453,18 +519,28 @@ export default function SpecialistHomeScreen() {
               onPress={() => router.push('/specialist_appointments?status=CREATED')}
               style={{
                 flex: 1,
-                backgroundColor: colors.card.default,
-                borderRadius: 20,
+                backgroundColor: colors.card?.default || colors.background.secondary,
+                borderRadius: 24,
                 padding: spacing.md,
                 borderWidth: 1,
-                borderColor: colors.border.light,
+                borderColor: colors.border?.light || '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 8,
+                elevation: 2,
               }}
             >
-              <Text style={{ fontSize: 32, fontWeight: '700', color: colors.primary.main }}>
-                {createdCount}
-              </Text>
-              <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                Ожидают подтверждения
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary.main + '15', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="time-outline" size={24} color={colors.primary.main} />
+                </View>
+                <Text style={{ fontSize: 32, fontWeight: '700', color: colors.primary.main }}>
+                  {createdCount}
+                </Text>
+              </View>
+              <Text style={[typography.caption, { color: colors.text.secondary, fontSize: 13 }]}>
+                Pending Appointments
               </Text>
             </TouchableOpacity>
             
@@ -472,50 +548,123 @@ export default function SpecialistHomeScreen() {
               onPress={() => router.push('/specialist_appointments?status=COMPLETED')}
               style={{
                 flex: 1,
-                backgroundColor: colors.card.default,
-                borderRadius: 20,
+                backgroundColor: colors.card?.default || colors.background.secondary,
+                borderRadius: 24,
                 padding: spacing.md,
                 borderWidth: 1,
-                borderColor: colors.border.light,
+                borderColor: colors.border?.light || '#E5E7EB',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 8,
+                elevation: 2,
               }}
             >
-              <Text style={{ fontSize: 32, fontWeight: '700', color: colors.success?.main || '#4CAF50' }}>
-                {completedCount}
-              </Text>
-              <Text style={[typography.caption, { color: colors.text.secondary }]}>
-                Завершенных приемов
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#10B98115', alignItems: 'center', justifyContent: 'center' }}>
+                  <Ionicons name="checkmark-done-circle-outline" size={24} color="#10B981" />
+                </View>
+                <Text style={{ fontSize: 32, fontWeight: '700', color: '#10B981' }}>
+                  {completedCount}
+                </Text>
+              </View>
+              <Text style={[typography.caption, { color: colors.text.secondary, fontSize: 13 }]}>
+                Completed Visits
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Recent Appointments */}
-          <View style={{ marginBottom: spacing.md }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
-              <Text style={[typography.h4, { color: colors.text.primary }]}>
-                Последние записи
-              </Text>
-              <TouchableOpacity onPress={navigateToAllAppointments}>
-                <Text style={{ color: colors.primary.main, fontSize: 14 }}>Все →</Text>
+          {/* Quick Actions */}
+          <View style={{ flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg }}>
+            <TouchableOpacity
+              onPress={navigateToProfile}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                backgroundColor: colors.primary.main,
+                paddingVertical: 14,
+                borderRadius: 20,
+                ...(Platform.OS === 'ios' ? { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 } : { elevation: 4 }),
+              }}
+            >
+              <Ionicons name="calendar-outline" size={20} color="#FFF" />
+              <Text style={{ color: '#FFF', fontSize: 15, fontWeight: '600' }}>Manage Schedule</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={navigateToAllAppointments}
+              style={{
+                flex: 1,
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                backgroundColor: colors.card?.default || colors.background.secondary,
+                paddingVertical: 14,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: colors.border?.light || '#E5E7EB',
+              }}
+            >
+              <Ionicons name="list-outline" size={20} color={colors.primary.main} />
+              <Text style={{ color: colors.text.primary, fontSize: 15, fontWeight: '500' }}>All Appointments</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Recent Appointments Section */}
+          <View style={{ marginBottom: spacing.xl }}>
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              marginBottom: spacing.md,
+              paddingHorizontal: 4,
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Ionicons name="calendar-clear-outline" size={22} color={colors.primary.main} />
+                <Text style={[typography.h4, { color: colors.text.primary, fontWeight: '600' }]}>
+                  Recent Appointments
+                </Text>
+              </View>
+              <TouchableOpacity 
+                onPress={navigateToAllAppointments}
+                style={{ 
+                  flexDirection: 'row', 
+                  alignItems: 'center', 
+                  gap: 4,
+                  backgroundColor: colors.background.tertiary,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 20,
+                }}
+              >
+                <Text style={{ color: colors.primary.main, fontSize: 13, fontWeight: '500' }}>See All</Text>
+                <Ionicons name="arrow-forward-outline" size={14} color={colors.primary.main} />
               </TouchableOpacity>
             </View>
 
             {appointments.length === 0 ? (
               <View
                 style={{
-                  backgroundColor: colors.card.default,
-                  borderRadius: 20,
+                  backgroundColor: colors.card?.default || colors.background.secondary,
+                  borderRadius: 24,
                   padding: spacing.xl,
                   alignItems: 'center',
                   borderWidth: 1,
-                  borderColor: colors.border.light,
+                  borderColor: colors.border?.light || '#E5E7EB',
                 }}
               >
-                <Ionicons name="calendar-outline" size={48} color={colors.text.tertiary} />
-                <Text style={[typography.body2, { color: colors.text.secondary, marginTop: spacing.md }]}>
-                  Нет записей
+                <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: colors.background.tertiary, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md }}>
+                  <Ionicons name="calendar-outline" size={40} color={colors.text.tertiary} />
+                </View>
+                <Text style={[typography.body1, { color: colors.text.primary, marginBottom: 4 }]}>
+                  No Appointments
                 </Text>
-                <Text style={[typography.caption, { color: colors.text.tertiary }]}>
-                  Новые записи появятся здесь
+                <Text style={[typography.caption, { color: colors.text.tertiary, textAlign: 'center' }]}>
+                  New appointments will appear here
                 </Text>
               </View>
             ) : (

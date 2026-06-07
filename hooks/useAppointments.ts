@@ -178,10 +178,8 @@ const enrichSingleAppointment = async (appointment: any): Promise<EnrichedAppoin
       const response = await api.get(`/pet-management/api/pets/pet/${appointment.petId}/full`);
       const pet = response.data;
       
-      // ✅ Логируем для отладки
       console.log(`🐾 Pet ${appointment.petId} data:`, JSON.stringify(pet, null, 2));
       
-      // ✅ Пробуем разные варианты полей
       const petData = {
         name: pet.petName || pet.name || "Unknown",
         species: pet.petType || pet.species || pet.type || "Unknown",

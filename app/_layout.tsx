@@ -9,7 +9,7 @@ import "./i18n";
 function LoadingScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#4CAF50" />
+      <ActivityIndicator size="large" color="#E3275B" />
     </View>
   );
 }

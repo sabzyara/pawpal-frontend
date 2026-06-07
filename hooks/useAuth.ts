@@ -5,7 +5,17 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Role, User } from '@/types/profile';
 import { RegisterData } from '@/types/auth';
 
-// ✅ Типизированная функция
+const ROUTES = {
+  ADMIN_MAIN: '/(admin)/admin-main',
+  SPECIALIST_MAIN: '/(specialist)',
+  OWNER_MAIN: '/(owner)',
+  COMPLETE_PROFILE: '/complete_profile',
+  COMPLETE_VET: '/complete_vet',
+  COMPLETE_SERVICE: '/complete_service',
+  LOGIN: '/(auth)/login',
+} as const;
+
+
 const extractRoleString = (role: Role | string | { name: string } | undefined): string => {
   if (!role) return '';
   
@@ -20,23 +30,25 @@ const extractRoleString = (role: Role | string | { name: string } | undefined): 
   return '';
 };
 
-// ✅ Хелперы для маршрутов с правильной типизацией
-const getMainRouteByRole = (role: string): '/admin-main' | '/specialist-profile' | '/' => {
+const getMainRouteByRole = (role: string): typeof ROUTES[keyof typeof ROUTES] => {
   switch (role) {
-    case Role.ADMIN: return '/admin-main';
+    case Role.ADMIN: 
+      return ROUTES.ADMIN_MAIN;
     case Role.VET:
-    case Role.SERVICE: return '/specialist-profile';
+    case Role.SERVICE: 
+      return ROUTES.SPECIALIST_MAIN;
     case Role.OWNER:
-    default: return '/';
+    default: 
+      return ROUTES.OWNER_MAIN;
   }
 };
 
-const getCompleteRouteByRole = (role: string): '/complete_profile' | '/complete_vet' | '/complete_service' => {
+const getCompleteRouteByRole = (role: string): typeof ROUTES.COMPLETE_PROFILE | typeof ROUTES.COMPLETE_VET | typeof ROUTES.COMPLETE_SERVICE => {
   switch (role) {
-    case Role.OWNER: return '/complete_profile';
-    case Role.VET: return '/complete_vet';
-    case Role.SERVICE: return '/complete_service';
-    default: return '/complete_profile';
+    case Role.OWNER: return ROUTES.COMPLETE_PROFILE;
+    case Role.VET: return ROUTES.COMPLETE_VET;
+    case Role.SERVICE: return ROUTES.COMPLETE_SERVICE;
+    default: return ROUTES.COMPLETE_PROFILE;
   }
 };
 
@@ -112,19 +124,16 @@ export const useLoginWithRedirect = () => {
       console.log('User role after login:', roleString);
       
       // Админ сразу на админку
-      if (roleString === Role.ADMIN) {
-        router.replace('/admin-main');
-        return true;
-      }
+     if (roleString === Role.ADMIN) {
+      router.replace(ROUTES.ADMIN_MAIN); 
+      return true;
+}
       
-      // ✅ Проверяем наличие профиля
       try {
         await fetchProfile(user);
-        // Профиль есть - на главный маршрут
         console.log('✅ Profile exists, redirecting to main');
         router.replace(getMainRouteByRole(roleString));
       } catch (error: any) {
-        // ✅ Профиля нет - на заполнение
         if (error?.response?.status === 404) {
           console.log('🆕 Profile not found, redirecting to completion');
           const completeRoute = getCompleteRouteByRole(roleString);
@@ -143,7 +152,6 @@ export const useLoginWithRedirect = () => {
   }, [login, fetchProfile, router]);
 };
 
-// ✅ Логаут с редиректом
 export const useLogoutWithRedirect = () => {
   const logout = useAuthStore((state) => state.logout);
   const clearProfile = useProfileStore((state) => state.clearProfile);
@@ -156,7 +164,6 @@ export const useLogoutWithRedirect = () => {
   }, [logout, clearProfile, router]);
 };
 
-// ✅ Защита маршрутов
 export const useProtectedRoute = (allowedRoles?: Role[], requireProfileComplete?: boolean) => {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
@@ -238,13 +245,10 @@ export const useRegisterWithRedirect = () => {
       
       const roleString = extractRoleString(user.role);
       
-      // Проверяем, есть ли уже профиль
       try {
         await fetchProfile(user);
-        // Профиль уже есть - на главную
         router.replace(getMainRouteByRole(roleString));
       } catch (error: any) {
-        // Профиля нет - на заполнение
         if (error?.response?.status === 404) {
           router.replace(getCompleteRouteByRole(roleString));
         } else {
