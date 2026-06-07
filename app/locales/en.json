@@ -145,7 +145,8 @@
     "title": "My Appointments",
     "subtitle": "Manage your upcoming visits",
     "noAppointmentsDescription": "Book an appointment with a vet or specialist for your pet",
-    "bookAppointment": "Book Appointment"
+    "bookAppointment": "Book Appointment",
+    "noAppointments": "No Appointments"
 
   },
   "addReminder": {

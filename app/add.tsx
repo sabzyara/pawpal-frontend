@@ -194,7 +194,7 @@ export default function AddPetScreen() {
             <Feather name="arrow-left" size={24} color={colors.text.primary} />
           </TouchableOpacity>
 
-          <Text style={styles.title}>t("addPet.title")</Text>
+          <Text style={styles.title}> {t("addPet.title")}</Text>
         </View>
 
         <ScrollView>
@@ -208,7 +208,7 @@ export default function AddPetScreen() {
               }}
               style={{ width: 100, height: 100, borderRadius: 50 }}
             />
-            <Text style={{ marginTop: 8 }}>t("addPet.addPhoto")</Text>
+            <Text style={{ marginTop: 8 }}> {t("addPet.addPhoto")}</Text>
           </TouchableOpacity>
 
 

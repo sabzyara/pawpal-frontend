@@ -131,7 +131,6 @@
   "userOrRoleMissing": "Пайдаланушы немесе рөл жоқ"
 },
   "appointment": {
-    "noAppointments": "Сізде ешқандай кездесулер жоқ",
     "upcomingAppointments": "Келесі кездесулер",
     "pastAppointments": "Өткен кездесулер",
     "cancel": "Кездесуді болдырмау",
@@ -149,7 +148,8 @@
     "title": "Кездесулер",
     "subtitle": "Келесі кездесулерді басқару",
     "noAppointmentsDescription": "Ветеринарға немесе маманға жазылыңыз",
-    "bookAppointment": "Кездесуге жазылу"
+    "bookAppointment": "Кездесуге жазылу",
+    "noAppointments": "Жазылулар жоқ"
   },
   "addReminder": {
     "Error": "Қате",

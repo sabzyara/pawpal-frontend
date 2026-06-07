@@ -85,8 +85,8 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
   Alert.alert(
-    "Logout",
-    "Are you sure you want to logout?",
+  t("specialists.error"),
+  t("specialists.incompleteData"), 
     [
       { text: "Cancel", style: "cancel" },
       { 

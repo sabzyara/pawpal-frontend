@@ -147,7 +147,8 @@
       "title": "Мои записи",
       "subtitle": "Управление предстоящими визитами",
       "noAppointmentsDescription": "Запишитесь к ветеринару или специалисту для вашего питомца",
-      "bookAppointment": "Записаться"
+      "bookAppointment": "Записаться",
+      "noAppointments": "Нет записей"
 
   },
   "addReminder": {
