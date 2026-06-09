@@ -33,7 +33,8 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
   onConfirm,
   loading,
 }) => {
-  const { colors, typography } = useTheme();
+  const { colors, typography, theme } = useTheme(); 
+  const isDarkMode = theme === 'dark';
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('ru-RU', {
@@ -81,20 +82,20 @@ export const BookingSummary: React.FC<BookingSummaryProps> = ({
 
       {/* Детали записи */}
       <View
-        style={{
-          backgroundColor: colors.card.default,
-          borderRadius: 20,
-          padding: 16,
-          marginBottom: 20,
-          ...(colors.card.default === '#FFFFFF' && {
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
-            shadowRadius: 3,
-            elevation: 2,
-          }),
-        }}
-      >
+      style={{
+        backgroundColor: colors.card.default,
+        borderRadius: 20,
+        padding: 16,
+        marginBottom: 20,
+        ...(!isDarkMode && {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 3,
+          elevation: 2,
+        }),
+      }}
+    >
         <Text style={[typography.body1SemiBold, { color: colors.text.primary, marginBottom: 16 }]}>
           Детали приема
         </Text>

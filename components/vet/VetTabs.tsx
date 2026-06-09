@@ -9,7 +9,6 @@ import { useTheme } from '@/hooks/useTheme';
 import { useTranslation } from "react-i18next";
 import "@/app/i18n";
 
-
 type TabType =
   | 'about'
   | 'availability'
@@ -24,24 +23,7 @@ interface VetTabsProps {
   isOwner?: boolean;
 }
 
-const tabLabels: Record<TabType, string> = {
-  about: t("tabs.about"),
-  availability: t("tabs.availability"),
-  reviews: t("tabs.reviews"),
-  edit: t("tabs.edit"),
-  manage: t("tabs.manage"),
-};
-
-const tabIcons: Record<
-  TabType,
-  keyof typeof Ionicons.glyphMap
-> = {
-  about: 'person-outline',
-  availability: 'calendar-outline',
-  reviews: 'star-outline',
-  edit: 'create-outline',
-  manage: 'settings-outline',
-};
+// Убираем tabLabels и tabIcons отсюда
 
 export const VetTabs: React.FC<VetTabsProps> = ({
   active,
@@ -55,6 +37,27 @@ export const VetTabs: React.FC<VetTabsProps> = ({
     spacing,
   } = useTheme();
   const { t } = useTranslation();
+
+  // Перемещаем tabLabels внутрь компонента, после вызова useTranslation
+  const tabLabels: Record<TabType, string> = {
+    about: t("tabs.about"),
+    availability: t("tabs.availability"),
+    reviews: t("tabs.reviews"),
+    edit: t("tabs.edit"),
+    manage: t("tabs.manage"),
+  };
+
+  const tabIcons: Record<
+    TabType,
+    keyof typeof Ionicons.glyphMap
+  > = {
+    about: 'person-outline',
+    availability: 'calendar-outline',
+    reviews: 'star-outline',
+    edit: 'create-outline',
+    manage: 'settings-outline',
+  };
+
   const displayTabs: TabType[] =
     React.useMemo(() => {
       if (isOwner) {

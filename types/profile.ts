@@ -50,7 +50,7 @@ export interface Veterinarian {
 }
 
 export interface ServiceProvider {
-  serviceProviderId: number;
+  serviceId: number;
   userId: number;
   firstName: string;
   lastName: string;

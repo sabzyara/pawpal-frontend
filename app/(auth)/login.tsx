@@ -1,7 +1,7 @@
 // app/(auth)/login.tsx - исправленная версия
 import { useTheme } from '@/hooks/useTheme';
 import { useLoginWithRedirect } from '@/hooks/useAuth';
-import { useAuthStore } from '@/store/authStore'; // ✅ Добавить
+import { useAuthStore } from '@/store/authStore'; 
 import { createStyles } from '@/styles/loginStyles';
 import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';

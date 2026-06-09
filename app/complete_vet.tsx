@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   View,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  SafeAreaView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useProfileStore } from '@/store/profileStore';
@@ -116,7 +117,7 @@ export default function CompleteVetScreen() {
             text: 'Перейти в профиль', 
             onPress: () => {
               console.log('🔄 Redirecting to specialist profile...');
-              router.replace('/specialist-profile');
+              router.replace('/(specialist)/profile');
             }
           }
         ]
@@ -149,6 +150,7 @@ export default function CompleteVetScreen() {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: colors.background.primary }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -361,18 +363,6 @@ export default function CompleteVetScreen() {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="image-outline" size={20} color={colors.primary.main} style={styles.inputIcon} />
-            <TextInput
-              placeholder="URL фотографии"
-              placeholderTextColor={colors.text.tertiary}
-              value={avatarUrl}
-              onChangeText={setAvatarUrl}
-              style={styles.inputWithIcon}
-              autoCapitalize="none"
-            />
-          </View>
-
           {/* Кнопка сохранения */}
           <TouchableOpacity 
             style={[
@@ -397,5 +387,6 @@ export default function CompleteVetScreen() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
