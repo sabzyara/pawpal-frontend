@@ -126,7 +126,7 @@ export const createGlobalStyles = (theme: 'light' | 'dark') => {
       ...Typography.button,
     },
     
-    // Text styles
+
     textPrimary: {
       color: colors.text.primary,
     },

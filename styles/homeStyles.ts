@@ -86,7 +86,6 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     fontWeight: '600',
   },
 
-  // ========== CALENDAR SECTION ==========
   calendarSection: {
     marginBottom: 24,
   },
@@ -134,7 +133,6 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     borderRadius: 2,
   },
 
-  // ========== PETS SECTION ==========
 
   scheduleDate: {
     fontSize: 11,
@@ -214,7 +212,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     fontWeight: '500',
   },
 
-  // ========== SCHEDULE SECTION ==========
+
   scheduleSection: {
     marginBottom: 24,
   },
@@ -315,7 +313,7 @@ export const createHomeStyles = (colors: ThemeColors) => StyleSheet.create({
     fontSize: 14,
   },
 
-  // ========== LEARN CARD ==========
+
   learnCard: {
     marginHorizontal: 20,
     marginTop: 8,

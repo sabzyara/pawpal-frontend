@@ -1,6 +1,6 @@
 // app/(auth)/register.tsx
 import { useTheme } from '@/hooks/useTheme';
-import { useRegisterWithRedirect } from '@/hooks/useAuth'; // ✅ Создадим этот хук
+import { useRegisterWithRedirect } from '@/hooks/useAuth'; 
 import { createStyles } from '@/styles/registerStyles';
 import { Role } from '@/types/profile';
 import { router } from 'expo-router';
@@ -19,7 +19,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from "@expo/vector-icons";
 
-// ✅ Типизированные маршруты
+
 type CompleteProfileRoute = '/complete_profile' | '/complete_vet' | '/complete_service';
 
 const getCompleteProfileRoute = (role: Role): CompleteProfileRoute => {
@@ -40,7 +40,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  // ✅ Используем хук
+  
   const { register, isLoading, error, clearError } = useRegisterWithRedirect();
 
   const roles = [
@@ -64,7 +64,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    // ✅ Хук сам обработает редирект
+
     const success = await register({ email, password, role: selectedRole });
     
     if (!success && error) {
@@ -72,7 +72,7 @@ export default function RegisterScreen() {
     }
   };
 
-  // Шаг 1: Выбор роли
+
   if (step === 'role') {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
@@ -96,7 +96,7 @@ export default function RegisterScreen() {
     );
   }
 
-  // Шаг 2: Форма регистрации
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background.primary }}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={registerStyles.container}>

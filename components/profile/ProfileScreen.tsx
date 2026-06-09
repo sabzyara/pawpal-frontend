@@ -1,12 +1,14 @@
+import '@/app/i18n';
 import { useTheme } from '@/hooks/useTheme';
+import { useAuthStore } from '@/store/authStore'; 
 import { useProfileStore } from '@/store/profileStore';
-import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
 import { profileStyles } from '@/styles/profileScreenStyles';
 import { Role } from '@/types/profile';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Dimensions,
@@ -23,23 +25,23 @@ const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const styles = profileStyles(colors);
   const router = useRouter();
   
-  // ✅ ИСПРАВЛЕНО: убраны loading, error, logout из profileStore
+
   const { profile, fetchProfile } = useProfileStore();
-  const user = useAuthStore((state) => state.user); // ✅ ДОБАВЛЕНО для authUser
-  const logout = useAuthStore((state) => state.logout); // ✅ ДОБАВЛЕНО из authStore
+  const user = useAuthStore((state) => state.user); 
+  const logout = useAuthStore((state) => state.logout);
   
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true); // ✅ ДОБАВЛЕНО локальное состояние
-  const [error, setError] = useState<string | null>(null); // ✅ ДОБАВЛЕНО локальное состояние
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null); 
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
-        // ✅ ИСПРАВЛЕНО: передан user
         if (user) {
           await fetchProfile(user);
         }
@@ -51,7 +53,7 @@ export default function ProfileScreen() {
       }
     };
     load();
-  }, [user]); // ✅ ДОБАВЛЕНА зависимость от user
+  }, [user]);
 
   useEffect(() => {
     if (!profile) return;
@@ -74,7 +76,7 @@ export default function ProfileScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // ✅ ИСПРАВЛЕНО: передан user
+
     if (user) {
       await fetchProfile(user);
     }
@@ -83,8 +85,8 @@ export default function ProfileScreen() {
 
   const handleLogout = () => {
   Alert.alert(
-    "Logout",
-    "Are you sure you want to logout?",
+  t("specialists.error"),
+  t("specialists.incompleteData"), 
     [
       { text: "Cancel", style: "cancel" },
       { 
@@ -115,7 +117,7 @@ export default function ProfileScreen() {
   };
 
   const handleMyAppointments = () => {
-    router.push("/my_appointments");
+    router.push("/appointments");
   };
 
   const handleSettings = () => {
@@ -140,15 +142,15 @@ export default function ProfileScreen() {
   const getRoleName = (): string => {
     switch (profile?.user.role) {
       case Role.OWNER:
-        return "Pet Owner";
+        return t("profile.petOwner");
       case Role.VET:
-        return "Veterinarian";
+        return t("profile.veterinarian");
       case Role.SERVICE:
-        return "Service Provider";
+        return t("profile.serviceProvider");
       case Role.ADMIN:
-        return "Administrator";
+        return t("profile.administrator");
       default:
-        return "User";
+        return t("profile.user");
     }
   };
 
@@ -179,7 +181,7 @@ export default function ProfileScreen() {
       return profile.serviceProvider.avatarUrl;
     }
 
-    // fallback
+
     const seed = getDisplayName() || "user";
     return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=FF6B6B&color=fff&size=150`;
   };
@@ -216,14 +218,14 @@ export default function ProfileScreen() {
   const renderOwnerInfo = () => {
     const owner = profile?.petOwner;
     const infoItems = [
-      { icon: "user", label: "Username", value: owner?.username || "Not specified" },
-      { icon: "phone", label: "Phone", value: owner?.phoneNumber || "Not specified" },
-      { icon: "map-pin", label: "Address", value: owner?.address || "Not specified" },
+      { icon: "user", label: t("profile.username"), value: owner?.username || "Not specified" },
+      { icon: "phone", label: t("profile.phone"), value: owner?.phoneNumber || "Not specified" },
+      { icon: "map-pin", label: t("profile.address"), value: owner?.address || "Not specified" },
     ];
 
     return (
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Personal Information</Text>
+        <Text style={styles.sectionTitle}>{t("profile.personalInfo")}</Text>
         {infoItems.map((item, index) => (
           <View key={index} style={styles.infoCard}>
             <View style={styles.infoIcon}>
@@ -242,16 +244,16 @@ export default function ProfileScreen() {
   const renderVetInfo = () => {
     const vet = profile?.veterinarian;
     const infoItems = [
-      { icon: "user", label: "Full Name", value: `${vet?.firstName || ''} ${vet?.lastName || ''}`.trim() || "Not specified" },
-      { icon: "phone", label: "Phone", value: vet?.phoneNumber || "Not specified" },
-      { icon: "award", label: "License Number", value: vet?.licenseNumber || "Not specified" },
-      { icon: "home", label: "Clinic", value: vet?.clinicName || "Not specified" },
-      { icon: "clock", label: "Experience", value: `${vet?.experienceYears || 0} years` },
+      { icon: "user", label: t("profile.fullName"), value: `${vet?.firstName || ''} ${vet?.lastName || ''}`.trim() || "Not specified" },
+      { icon: "phone", label: t("profile.phone"), value: vet?.phoneNumber || "Not specified" },
+      { icon: "award", label: t("profile.licenseNumber"), value: vet?.licenseNumber || "Not specified" },
+      { icon: "home", label: t("profile.clinic"), value: vet?.clinicName || "Not specified" },
+      { icon: "clock", label: t("profile.experience"), value: `${vet?.experienceYears || 0} years` },
     ];
 
     return (
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Professional Information</Text>
+        <Text style={styles.sectionTitle}>{t("profile.professionalInfo")}</Text>
         {infoItems.map((item, index) => (
           <View key={index} style={styles.infoCard}>
             <View style={styles.infoIcon}>
@@ -270,14 +272,14 @@ export default function ProfileScreen() {
   const renderServiceInfo = () => {
     const service = profile?.serviceProvider;
     const infoItems = [
-      { icon: "user", label: "Full Name", value: `${service?.firstName || ''} ${service?.lastName || ''}`.trim() || "Not specified" },
-      { icon: "phone", label: "Phone", value: service?.phoneNumber || "Not specified" },
-      { icon: "briefcase", label: "Service Category", value: service?.serviceCategory || "Not specified" },
+      { icon: "user", label: t("profile.fullName"), value: `${service?.firstName || ''} ${service?.lastName || ''}`.trim() || "Not specified" },
+      { icon: "phone", label: t("profile.phone"), value: service?.phoneNumber || "Not specified" },
+      { icon: "briefcase", label: t("profile.serviceCategory"), value: service?.serviceCategory || "Not specified" },
     ];
 
     return (
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Service Information</Text>
+        <Text style={styles.sectionTitle}>{t("profile.serviceInfo")}</Text>
         {infoItems.map((item, index) => (
           <View key={index} style={styles.infoCard}>
             <View style={styles.infoIcon}>
@@ -295,13 +297,13 @@ export default function ProfileScreen() {
 
   const renderAdminInfo = () => {
     const infoItems = [
-      { icon: "shield", label: "Role", value: "Administrator" },
+      { icon: "shield", label: "Role", value: t("profile.administrator") },
       { icon: "mail", label: "Email", value: profile?.user.email || "Not specified" },
     ];
 
     return (
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Admin Information</Text>
+        <Text style={styles.sectionTitle}>{t("profile.adminInfo")}</Text>
         {infoItems.map((item, index) => (
           <View key={index} style={styles.infoCard}>
             <View style={styles.infoIcon}>
@@ -322,7 +324,7 @@ export default function ProfileScreen() {
       case Role.OWNER:
         return (
           <View style={styles.actionsSection}>
-            <Text style={styles.sectionTitle}>My Pets</Text>
+            <Text style={styles.sectionTitle}>{t("profile.myPets")}</Text>
             <TouchableOpacity style={styles.actionCard} onPress={handleMyPets}>
               <LinearGradient
                 colors={colors.primary.gradient}
@@ -333,8 +335,8 @@ export default function ProfileScreen() {
                 <View style={styles.actionLeft}>
                   <MaterialCommunityIcons name="paw" size={24} color="#FFF" />
                   <View style={styles.actionTextContainer}>
-                    <Text style={styles.actionTitle}>My Pets</Text>
-                    <Text style={styles.actionSubtitle}>Manage your furry friends</Text>
+                    <Text style={styles.actionTitle}>{t("profile.myPets")}</Text>
+                    <Text style={styles.actionSubtitle}>{t("profile.managePets")}</Text>
                   </View>
                 </View>
                 <Feather name="chevron-right" size={20} color={colors.text.tertiary} />
@@ -351,8 +353,8 @@ export default function ProfileScreen() {
                 <View style={styles.actionLeft}>
                   <Feather name="calendar" size={24} color="#FFF" />
                   <View style={styles.actionTextContainer}>
-                    <Text style={styles.actionTitle}>Appointments</Text>
-                    <Text style={styles.actionSubtitle}>View your booking history</Text>
+                    <Text style={styles.actionTitle}>{t("profile.appointmentsTitle")}</Text>
+                    <Text style={styles.actionSubtitle}>{t("profile.appointmentsHistory")}</Text>
                   </View>
                 </View>
                 <Feather name="chevron-right" size={20} color={colors.text.tertiary} />
@@ -365,7 +367,7 @@ export default function ProfileScreen() {
       case Role.SERVICE:
         return (
           <View style={styles.actionsSection}>
-            <Text style={styles.sectionTitle}>Work</Text>
+            <Text style={styles.sectionTitle}>{t("profile.work")}</Text>
             <TouchableOpacity style={styles.actionCard} onPress={handleMyAppointments}>
               <LinearGradient
                 colors={colors.primary.gradient}
@@ -376,8 +378,8 @@ export default function ProfileScreen() {
                 <View style={styles.actionLeft}>
                   <Feather name="briefcase" size={24} color="#FFF" />
                   <View style={styles.actionTextContainer}>
-                    <Text style={styles.actionTitle}>My Schedule</Text>
-                    <Text style={styles.actionSubtitle}>Manage client appointments</Text>
+                    <Text style={styles.actionTitle}>{t("profile.mySchedule")}</Text>
+                    <Text style={styles.actionSubtitle}>{t("profile.manageAppointments")}</Text>
                   </View>
                 </View>
                 <Feather name="chevron-right" size={20} color="#FFF" />
@@ -396,7 +398,7 @@ export default function ProfileScreen() {
       <View style={styles.centerContainer}>
         <LinearGradient colors={colors.primary.gradient} style={styles.loadingGradient}>
           <MaterialCommunityIcons name="paw" size={48} color="#FFF" />
-          <Text style={styles.loadingText}>Loading profile...</Text>
+          <Text style={styles.loadingText}>{t("profile.loadingProfile")}</Text>
         </LinearGradient>
       </View>
     );
@@ -410,7 +412,7 @@ export default function ProfileScreen() {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity 
             style={styles.retryButton} 
-            // ✅ ИСПРАВЛЕНО: обернуто в стрелочную функцию
+
             onPress={() => {
               if (user) {
                 fetchProfile(user);
@@ -419,7 +421,7 @@ export default function ProfileScreen() {
           >
             <LinearGradient colors={colors.primary.gradient} style={styles.retryGradient}>
               <Feather name="refresh-cw" size={20} color="#FFF" />
-              <Text style={styles.retryButtonText}>Try Again</Text>
+              <Text style={styles.retryButtonText}>{t("profile.tryAgain")}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -457,7 +459,6 @@ export default function ProfileScreen() {
             borderColor: colors.border.medium,
           }}
         >
-          {/* АВАТАР */}
           <Image
             source={{ uri: getAvatarUrl() }}
             style={{
@@ -468,7 +469,6 @@ export default function ProfileScreen() {
             }}
           />
 
-          {/* ИНФА СПРАВА */}
           <View style={{ flex: 1 }}>
             <Text
               style={{
@@ -492,18 +492,16 @@ export default function ProfileScreen() {
         </View>
 
 
-        {/* Role Specific Information */}
         {profile?.user.role === Role.OWNER && renderOwnerInfo()}
         {profile?.user.role === Role.VET && renderVetInfo()}
         {profile?.user.role === Role.SERVICE && renderServiceInfo()}
         {profile?.user.role === Role.ADMIN && renderAdminInfo()}
 
-        {/* Role Specific Actions */}
+
         {renderRoleSpecificActions()}
 
-        {/* Settings Section */}
         <View style={styles.actionsSection}>
-          <Text style={styles.sectionTitle}>Settings</Text>
+          <Text style={styles.sectionTitle}>{t("profile.settings")}</Text>
           
           <TouchableOpacity style={styles.settingItem} onPress={handleEditProfile}>
             <View style={styles.settingLeft}>
@@ -511,8 +509,8 @@ export default function ProfileScreen() {
                 <Feather name="edit-2" size={18} color="#FFF" />
               </LinearGradient>
               <View>
-                <Text style={styles.settingTitle}>Edit Profile</Text>
-                <Text style={styles.settingSubtitle}>Update your personal information</Text>
+                <Text style={styles.settingTitle}>{t("profile.editProfile")}</Text>
+                <Text style={styles.settingSubtitle}>{t("profile.updateProfile")}</Text>
               </View>
             </View>
             <Feather name="chevron-right" size={20} color="#CCC" />
@@ -524,8 +522,8 @@ export default function ProfileScreen() {
                 <Feather name="settings" size={18} color="#FFF" />
               </LinearGradient>
               <View>
-                <Text style={styles.settingTitle}>Settings</Text>
-                <Text style={styles.settingSubtitle}>Notifications, language & more</Text>
+                <Text style={styles.settingTitle}>{t("profile.settings")}</Text>
+                <Text style={styles.settingSubtitle}>{t("profile.settingsDescription")}</Text>
               </View>
             </View>
             <Feather name="chevron-right" size={20} color="#CCC" />
@@ -537,8 +535,8 @@ export default function ProfileScreen() {
                 <Feather name="log-out" size={18} color="#FFF" />
               </LinearGradient>
               <View>
-                <Text style={[styles.settingTitle, styles.logoutText]}>Logout</Text>
-                <Text style={styles.settingSubtitle}>Sign out from your account</Text>
+                <Text style={[styles.settingTitle, styles.logoutText]}>{t("profile.logout")}</Text>
+                <Text style={styles.settingSubtitle}>{t("profile.logoutDescription")}</Text>
               </View>
             </View>
             <Feather name="chevron-right" size={20} color="#CCC" />

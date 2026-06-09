@@ -3,7 +3,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL, APPOINTMENT_SERVICE_URL } from "../constants/api";
 
-// Основной API через gateway
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -11,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// ✅ Прямой API для appointment-service (без gateway)
+
 export const appointmentApiClient = axios.create({
   baseURL: APPOINTMENT_SERVICE_URL,
   headers: {
@@ -37,7 +37,7 @@ const getTokenFromStorage = async (): Promise<string | null> => {
   }
 };
 
-// Интерсептор для основного API (через gateway)
+
 api.interceptors.request.use(
   async (config) => {
     try {
@@ -67,7 +67,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Интерсептор для appointment API (прямой)
+
 appointmentApiClient.interceptors.request.use(
   async (config) => {
     try {
@@ -91,7 +91,7 @@ appointmentApiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Интерсептор для основного API (ответы)
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -117,7 +117,7 @@ api.interceptors.response.use(
   }
 );
 
-// ✅ Интерсептор для appointment API (ответы)
+
 appointmentApiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -127,7 +127,7 @@ appointmentApiClient.interceptors.response.use(
       data: error.response?.data
     });
     
-    // Если 401 - очищаем токен
+
     if (error?.response?.status === 401) {
       await AsyncStorage.removeItem("auth-storage");
     }

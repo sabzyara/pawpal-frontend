@@ -9,7 +9,6 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     backgroundColor: colors.background.primary,
   },
 
-  // Loading & Error States
   centerContainer: {
     flex: 1,
     justifyContent: "center",
@@ -54,7 +53,7 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     fontWeight: "600",
   },
 
-  // Header Section
+
   headerContainer: {
     alignItems: "center",
     marginBottom: 24,
@@ -130,7 +129,7 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     marginTop: 4,
   },
 
-  // Stats Section
+
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -173,7 +172,6 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Information Sections
   infoSection: {
     paddingHorizontal: 20,
     marginBottom: 28,
@@ -222,7 +220,7 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.text.primary,
   },
 
-  // Action Cards
+ 
   actionsSection: {
     paddingHorizontal: 20,
     marginBottom: 28,
@@ -257,7 +255,6 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     opacity: 0.9,
   },
 
-  // Settings Items
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -302,7 +299,7 @@ export const profileStyles = (colors: ThemeColors) => StyleSheet.create({
     color: colors.primary.main,
   },
 
-  // Bottom Spacing
+
   bottomSpacing: {
     height: 40,
   },

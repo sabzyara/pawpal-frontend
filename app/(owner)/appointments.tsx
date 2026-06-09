@@ -1,5 +1,4 @@
 // app/my_appointments.tsx
-
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -19,6 +18,8 @@ import { useOwnerAppointments } from '@/hooks/useAppointments';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { AppointmentStatus } from '@/types/appointment.types';
+import '@/app/i18n';
+import { useTranslation } from 'react-i18next';
 
 const statusColors: Record<AppointmentStatus, string> = {
   CREATED: '#FF9800',
@@ -49,6 +50,7 @@ const statusIcons: Record<AppointmentStatus, keyof typeof Ionicons.glyphMap> = {
 
 export default function MyAppointmentsScreen() {
   const { colors, typography, spacing } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState<AppointmentStatus | undefined>();
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -183,7 +185,7 @@ export default function MyAppointmentsScreen() {
   };
 
   const renderAppointmentCard = ({ item }: { item: any }) => {
-    const canCancel = (item.status === 'CREATED' || item.status === 'CONFIRMED') && cancelAppointment;
+    const canCancel = (item.status === t('appointment.CREATED') || item.status === t('appointment.CONFIRMED')) && cancelAppointment;
     const statusColor = statusColors[item.status as AppointmentStatus] || colors.text.secondary;
     const statusIcon = statusIcons[item.status as AppointmentStatus] || 'calendar-outline';
     const isCancelled = item.status === 'CANCELLED_BY_USER' || item.status === 'CANCELLED_BY_SPECIALIST';

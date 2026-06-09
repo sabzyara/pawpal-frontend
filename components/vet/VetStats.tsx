@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface VetStatsProps {
   vet: {
@@ -13,7 +15,7 @@ interface VetStatsProps {
 
 export const VetStats: React.FC<VetStatsProps> = ({ vet }) => {
   const { colors, spacing, typography } = useTheme();
-
+  const { t } = useTranslation();
   const StatCard = ({
     icon,
     value,
@@ -88,21 +90,21 @@ export const VetStats: React.FC<VetStatsProps> = ({ vet }) => {
       <StatCard
         icon="star"
         value={vet.rating.toFixed(1)}
-        label="Рейтинг"
+        label={t("vstats.rating")}
         color="#FFB800"
       />
 
       <StatCard
         icon="paw"
         value={vet.patientsCount}
-        label="Клиенты"
+        label={t("stats.clients")}
         color={colors.primary.main}
       />
 
       <StatCard
         icon="school"
         value={vet.experienceYears}
-        label="Лет опыта"
+        label={t("stats.experience")}
         color={colors.success.main}
       />
     </View>

@@ -20,10 +20,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import api from "@/services/api";
+import "./i18n";
+import {useTranslation} from "react-i18next";
+
 
 export default function AddReminderScreen() {
   const { colors } = useTheme();
-
+  const { t } = useTranslation();
   const registerStyles = createStyles(colors);
   const { profile } =
   useProfileStore();
@@ -65,8 +68,8 @@ const handleCreateReminder = async () => {
     ) {
 
       Alert.alert(
-        "Error",
-        "Fill all fields"
+        t("addReminder.Error"),
+        t("addReminder.Fill all fields")
       );
 
       return;
@@ -105,8 +108,8 @@ const handleCreateReminder = async () => {
     );
 
     Alert.alert(
-      "Success",
-      "Reminder created"
+      t("addReminder.Success"),
+      t("addReminder.Reminder created")
     );
 
     router.back();
@@ -124,8 +127,8 @@ const handleCreateReminder = async () => {
     );
 
     Alert.alert(
-      "Error",
-      "Failed to create reminder"
+      t("addReminder.Error"),
+      t("addReminder.Fill all fields")
     );
   }
 };
@@ -154,7 +157,6 @@ const handleCreateReminder = async () => {
           keyboardShouldPersistTaps="handled"
         >
 
-          {/* HEADER */}
 
           <View
             style={{
@@ -175,7 +177,7 @@ const handleCreateReminder = async () => {
                     colors.text.secondary,
                 }}
               >
-                ← Back
+                {t("addReminder.← Back")}
               </Text>
             </TouchableOpacity>
 
@@ -188,7 +190,7 @@ const handleCreateReminder = async () => {
                 },
               ]}
             >
-              Add Reminder
+              {t("addReminder.title")}
             </Text>
 
             <Text
@@ -200,11 +202,10 @@ const handleCreateReminder = async () => {
                 },
               ]}
             >
-              Schedule pet reminders
+              {t("addReminder.subtitle")}
             </Text>
           </View>
 
-          {/* TYPE */}
 
           <Text
             style={[
@@ -214,7 +215,7 @@ const handleCreateReminder = async () => {
               },
             ]}
           >
-            Reminder Type
+            {t("addReminder.Reminder Type")}
           </Text>
 
           <View
@@ -261,7 +262,6 @@ const handleCreateReminder = async () => {
             ))}
           </View>
 
-          {/* TITLE */}
 
           <View
             style={registerStyles.inputGroup}
@@ -269,7 +269,7 @@ const handleCreateReminder = async () => {
             <Text
               style={registerStyles.label}
             >
-              Title
+              {t("addReminder.Title")}
             </Text>
 
             <TextInput
@@ -283,7 +283,6 @@ const handleCreateReminder = async () => {
             />
           </View>
 
-          {/* MESSAGE */}
 
           <View
             style={registerStyles.inputGroup}
@@ -291,7 +290,7 @@ const handleCreateReminder = async () => {
             <Text
               style={registerStyles.label}
             >
-              Message
+              {t("addReminder.Message")}
             </Text>
 
             <TextInput
@@ -313,7 +312,6 @@ const handleCreateReminder = async () => {
             />
           </View>
 
-          {/* DATE */}
 
           <View
             style={registerStyles.inputGroup}
@@ -321,7 +319,7 @@ const handleCreateReminder = async () => {
             <Text
               style={registerStyles.label}
             >
-              Date
+              {t("addReminder.Date")}
             </Text>
 
             <TextInput
@@ -335,7 +333,6 @@ const handleCreateReminder = async () => {
             />
           </View>
 
-          {/* TIME */}
 
           <View
             style={registerStyles.inputGroup}
@@ -343,7 +340,7 @@ const handleCreateReminder = async () => {
             <Text
               style={registerStyles.label}
             >
-              Time
+              {t("addReminder.Time")}
             </Text>
 
             <TextInput
@@ -357,7 +354,6 @@ const handleCreateReminder = async () => {
             />
           </View>
 
-          {/* BUTTON */}
 
           <TouchableOpacity
             style={[
@@ -373,7 +369,7 @@ const handleCreateReminder = async () => {
                 registerStyles.registerButtonText
               }
             >
-              Create Reminder
+              {t("addReminder.createReminder")}
             </Text>
           </TouchableOpacity>
 

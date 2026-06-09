@@ -52,7 +52,7 @@ const getCompleteRouteByRole = (role: string): typeof ROUTES.COMPLETE_PROFILE | 
   }
 };
 
-// ✅ Базовые селекторы
+
 export const useCurrentUser = (): User | null => {
   return useAuthStore((state) => state.user);
 };
@@ -69,7 +69,7 @@ export const useAuthError = (): string | null => {
   return useAuthStore((state) => state.error);
 };
 
-// ✅ Роли пользователя
+
 export const useUserRole = () => {
   const user = useAuthStore((state) => state.user);
   const roleString = extractRoleString(user?.role);
@@ -86,7 +86,7 @@ export const useUserRole = () => {
   }), [user, roleString]);
 };
 
-// ✅ Действия
+
 export const useAuthActions = () => {
   const login = useAuthStore((state) => state.login);
   const register = useAuthStore((state) => state.register);
@@ -103,7 +103,7 @@ export const useAuthActions = () => {
   }), [login, register, logout, fetchCurrentUser, clearError]);
 };
 
-// ✅ Логин с редиректом
+
 export const useLoginWithRedirect = () => {
   const login = useAuthStore((state) => state.login);
   const fetchProfile = useProfileStore((state) => state.fetchProfile);
@@ -179,28 +179,28 @@ export const useProtectedRoute = (allowedRoles?: Role[], requireProfileComplete?
   useEffect(() => {
     if (isLoading) return;
     
-    // Не авторизован
+
     if (!token || !user) {
       router.replace('/(auth)/login');
       return;
     }
     
-    // Проверка ролей
+
     if (allowedRoles && allowedRoles.length > 0) {
       const userRole = user.role;
       const hasAllowedRole = allowedRoles.some(allowedRole => allowedRole === userRole);
       
       if (!hasAllowedRole) {
         const roleString = extractRoleString(userRole);
-        router.replace(getMainRouteByRole(roleString)); // ✅ Теперь тип правильный
+        router.replace(getMainRouteByRole(roleString)); 
         return;
       }
     }
     
-    // Проверка заполненности профиля
+
     if (requireProfileComplete && !hasProfile && user) {
       const roleString = extractRoleString(user.role);
-      router.replace(getCompleteRouteByRole(roleString)); // ✅ Теперь тип правильный
+      router.replace(getCompleteRouteByRole(roleString)); 
       return;
     }
   }, [isLoading, token, user, allowedRoles, router, requireProfileComplete, hasProfile]);
@@ -222,7 +222,7 @@ export const useProtectedRoute = (allowedRoles?: Role[], requireProfileComplete?
   };
 };
 
-// hooks/useAuth.ts - добавить после useLoginWithRedirect
+
 
 export const useRegisterWithRedirect = () => {
   const register = useAuthStore((state) => state.register);
@@ -271,7 +271,7 @@ export const useRegisterWithRedirect = () => {
   };
 };
 
-// ✅ Дополнительный хук для прав доступа
+
 export const usePermissions = () => {
   const user = useAuthStore((state) => state.user);
   const roleString = extractRoleString(user?.role);

@@ -11,10 +11,9 @@ import {
   UserStatus
 
 } from '@/types/profile';
+import i18n from '@/app/i18n';
 
 
-
-// ✅ Типизируем ответы API
 type ApiResponse = PetOwner | Veterinarian | ServiceProvider;
 
 interface ProfileStore {
@@ -28,12 +27,14 @@ interface ProfileStore {
   clearProfile: () => void;
 }
 
+
+
 const extractRoleString = (authUser: User | null): string => {
   if (!authUser?.role) {
-    throw new Error('User or role is missing');
+    throw new Error(i18n.t('profile.userOrRoleMissing'));
   }
   
-  // ✅ Возвращаем значение enum как строку
+
   return authUser.role as string;
 };
 
@@ -50,7 +51,7 @@ const getProfileEndpoint = (roleString: string): string => {
   }
 };
 
-// ✅ Улучшенное разбиение имени с регулярным выражением
+
 const splitFullName = (fullName: string): { firstName: string; lastName: string } => {
   const parts = fullName?.trim().split(/\s+/) || [];
   const firstName = parts[0] || '';
@@ -58,7 +59,7 @@ const splitFullName = (fullName: string): { firstName: string; lastName: string 
   return { firstName, lastName };
 };
 
-// ✅ Типизированная трансформация данных под ваши DTO
+
 const transformProfileData = (
   roleString: Role, 
   data: CompleteProfileData
@@ -99,7 +100,7 @@ const transformProfileData = (
   }
 };
 
-// ✅ Типизированное обновление профиля в сторе
+
 const updateProfileInStore = (
   currentProfile: UserProfile | null,
   authUser: User,
@@ -123,7 +124,7 @@ const updateProfileInStore = (
   return profileData;
 };
 
-// ✅ Хелпер для получения текущего username из профиля
+
 const getCurrentUsername = (profile: UserProfile | null, roleString: Role): string => {
   if (!profile) return '';
   
@@ -141,7 +142,7 @@ const getCurrentUsername = (profile: UserProfile | null, roleString: Role): stri
   }
 };
 
-// ✅ Хелпер для получения текущего phoneNumber
+
 const getCurrentPhoneNumber = (profile: UserProfile | null): string => {
   if (!profile) return '';
   return profile.petOwner?.phoneNumber || 
@@ -149,7 +150,7 @@ const getCurrentPhoneNumber = (profile: UserProfile | null): string => {
          profile.serviceProvider?.phoneNumber || '';
 };
 
-// ✅ Хелпер для получения текущего address
+
 const getCurrentAddress = (profile: UserProfile | null): string => {
   if (!profile) return '';
   return profile.petOwner?.address || 
@@ -162,7 +163,7 @@ export const useProfileStore = create<ProfileStore>((set, get) => ({
   isLoading: false,
   error: null,
 
-  // store/profileStore.ts
+
 fetchProfile: async (authUser) => {
   if (!authUser) {
     console.log("❌ fetchProfile: no authUser");
@@ -173,7 +174,7 @@ fetchProfile: async (authUser) => {
   set({ isLoading: true, error: null });
   
   try {
-    // ✅ extractRoleString теперь возвращает строку
+
     const roleString = extractRoleString(authUser);
     console.log(`📝 Fetching profile for role: ${roleString}`);
     
@@ -182,7 +183,7 @@ fetchProfile: async (authUser) => {
     
     console.log('✅ Profile fetch response:', response.status);
     
-    // ✅ Но для updateProfileInStore нужно передавать Role
+
     const profileData = updateProfileInStore(null, authUser, authUser.role, response.data);
     set({ profile: profileData, isLoading: false, error: null });
     
@@ -242,7 +243,7 @@ fetchProfile: async (authUser) => {
       const roleString = authUser.role;
       const endpoint = getProfileEndpoint(roleString);
       
-      // Формируем финальные данные
+
       const finalData: CompleteProfileData = {
         username: data.username || getCurrentUsername(currentProfile, roleString),
         phoneNumber: data.phoneNumber || getCurrentPhoneNumber(currentProfile),

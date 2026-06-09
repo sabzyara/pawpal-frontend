@@ -21,6 +21,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import "./i18n";
+import { useTranslation } from "react-i18next";
+
 
 interface PetFormData {
   name: string;
@@ -33,7 +36,7 @@ interface PetFormData {
 }
 
 export default function AddPetScreen() {
-  
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<PetFormData>({
     name: "",
     species: "",
@@ -51,14 +54,14 @@ export default function AddPetScreen() {
   const [loading, setLoading] = useState(false);
 
   const speciesList = [
-    { key: "dog", label: "Dog 🐶" },
-    { key: "cat", label: "Cat 🐱" },
-    { key: "fish", label: "Fish 🐟" },
-    { key: "hamster", label: "Hamster 🐹" },
-    { key: "parrot", label: "Parrot 🦜" },
-    { key: "rabbit", label: "Rabbit 🐰" },
-    { key: "turtle", label: "Turtle 🐢" },
-    { key: "other", label: "Other 🐾" },
+    { key: "dog", label: t("addPet.dog") },
+    { key: "cat", label: t("addPet.cat") },
+    { key: "fish", label: t("addPet.fish") },
+    { key: "hamster", label: t("addPet.hamster") },
+    { key: "parrot", label: t("addPet.parrot") },
+    { key: "rabbit", label: t("addPet.rabbit") },
+    { key: "turtle", label: t("addPet.turtle") },
+    { key: "other", label: t("addPet.other") },
   ];
 
   const handleInputChange = (field: keyof PetFormData, value: string) => {
@@ -80,7 +83,7 @@ export default function AddPetScreen() {
     handleInputChange("breed", "");
 
     if (value === "dog" || value === "cat") {
-      loadBreeds(value); // API
+      loadBreeds(value); 
     } else {
       setBreeds([]); 
     }
@@ -95,7 +98,7 @@ export default function AddPetScreen() {
   }
 };
 
-  // 📸 выбрать фото
+  
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -107,17 +110,17 @@ export default function AddPetScreen() {
     }
   };
 
-  // 💾 сохранить
+
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      Alert.alert("Error", "Введите имя питомца");
+      Alert.alert(t("addPet.Error"), t("addPet.Please fill in all fields"));
       return;
     }
 
     try {
       setLoading(true);
 
-      // 1. создаём питомца
+
       const res = await api.post("/pet-management/api/pets", {
         name: formData.name,
         species: formData.species,
@@ -130,7 +133,7 @@ export default function AddPetScreen() {
 
       const petId = res.data.id;
 
-      // 2. загружаем фото
+
       if (image) {
         const formDataImg = new FormData();
 
@@ -151,14 +154,14 @@ export default function AddPetScreen() {
         );
       }
 
-      Alert.alert("Success 🎉", "Питомец добавлен", [
+      Alert.alert(t("addPet.Success"), t("addPet.Pet added successfully"), [
         { text: "OK", onPress: () => router.back() },
       ]);
 
     } catch (e: any) {
       console.log("ERROR:", e?.response?.data);
 
-      Alert.alert("Ошибка", "Не удалось создать питомца");
+      Alert.alert(t("addPet.Error"), t("addPet.Error creating pet"));
     } finally {
       setLoading(false);
     }
@@ -185,18 +188,17 @@ export default function AddPetScreen() {
     >
       <SafeAreaView style={styles.container}>
         
-        {/* HEADER */}
+      
         <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 20 }}>
           <TouchableOpacity onPress={() => router.back()}>
             <Feather name="arrow-left" size={24} color={colors.text.primary} />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Add Pet</Text>
+          <Text style={styles.title}> {t("addPet.title")}</Text>
         </View>
 
         <ScrollView>
 
-          {/* 📸 PHOTO */}
           <TouchableOpacity onPress={pickImage} style={{ alignItems: "center", marginBottom: 20 }}>
             <Image
               source={{
@@ -206,19 +208,18 @@ export default function AddPetScreen() {
               }}
               style={{ width: 100, height: 100, borderRadius: 50 }}
             />
-            <Text style={{ marginTop: 8 }}>Add photo</Text>
+            <Text style={{ marginTop: 8 }}> {t("addPet.addPhoto")}</Text>
           </TouchableOpacity>
 
-          {/* INPUTS */}
+
           <TextInput
-            placeholder="Name"
+            placeholder={t("addPet.name")}
             placeholderTextColor={colors.text.tertiary}
             value={formData.name}
             onChangeText={(v) => handleInputChange("name", v)}
             style={styles.input}
           />
 
-          {/* SPECIES SELECT */}
           <TouchableOpacity
             style={styles.selectBox}
             onPress={() => setSpeciesModalVisible(true)}
@@ -232,7 +233,7 @@ export default function AddPetScreen() {
             >
               {formData.species
                 ? speciesList.find((s) => s.key === formData.species)?.label
-                : "Select species"}
+                : t("addPet.selectSpecies")}
             </Text>
 
             <Feather
@@ -241,7 +242,6 @@ export default function AddPetScreen() {
               color={colors.text.secondary}
             />
 
-            {/* SPECIES MODAL */}
             <Modal visible={speciesModalVisible} animationType="slide">
               <SafeAreaView
                 style={{
@@ -250,7 +250,6 @@ export default function AddPetScreen() {
                   padding: 20,
                 }}
               >
-                {/* HEADER */}
                 <View
                   style={{
                     flexDirection: "row",
@@ -276,7 +275,7 @@ export default function AddPetScreen() {
                       color: colors.text.primary,
                     }}
                   >
-                    Select Species
+                    {t("addPet.selectSpecies")}
                   </Text>
                 </View>
 
@@ -319,9 +318,6 @@ export default function AddPetScreen() {
             </Modal>
           </TouchableOpacity>
 
-          {/* BREED SELECT */}
-
-          {/* BREED FIELD */}
           {formData.species === "dog" ||
           formData.species === "cat" ? (
             <>
@@ -336,7 +332,7 @@ export default function AddPetScreen() {
                       : colors.text.tertiary,
                   }}
                 >
-                  {formData.breed || "Select breed"}
+                  {formData.breed || t("addPet.selectBreed")}
                 </Text>
 
                 <Feather
@@ -345,7 +341,7 @@ export default function AddPetScreen() {
                   color={colors.text.secondary}
                 />
 
-                {/* BREED MODAL */}
+             
                 <Modal visible={dropdownVisible} animationType="slide">
                   <SafeAreaView
                     style={{
@@ -354,7 +350,6 @@ export default function AddPetScreen() {
                       padding: 20,
                     }}
                   >
-                    {/* HEADER */}
                     <View
                       style={{
                         flexDirection: "row",
@@ -380,20 +375,19 @@ export default function AddPetScreen() {
                           color: colors.text.primary,
                         }}
                       >
-                        Select Breed
+                        {t("addPet.selectBreed")}
                       </Text>
                     </View>
 
-                    {/* SEARCH */}
                     <TextInput
-                      placeholder="Search breed..."
+                      placeholder={t("addPet.searchBreed")}
                       placeholderTextColor={colors.text.tertiary}
                       value={search}
                       onChangeText={setSearch}
                       style={styles.input}
                     />
 
-                    {/* LIST */}
+
                     <FlatList
                       data={filteredBreeds}
                       keyExtractor={(item) => item.id}
@@ -427,7 +421,7 @@ export default function AddPetScreen() {
             </>
           ) : formData.species ? (
             <TextInput
-              placeholder="Breed"
+              placeholder={t("addPet.breed")}
               placeholderTextColor={colors.text.tertiary}
               value={formData.breed}
               onChangeText={(v) => handleInputChange("breed", v)}
@@ -436,7 +430,6 @@ export default function AddPetScreen() {
           ) : null}
           
 
-          {/* GENDER */}
           <View style={{ flexDirection: "row", gap: 10, marginBottom: 12 }}>
             <TouchableOpacity
               style={[
@@ -452,7 +445,7 @@ export default function AddPetScreen() {
                     : styles.genderText
                 }
               >
-                Male
+                {t("addPet.male")}
               </Text>
             </TouchableOpacity>
 
@@ -470,13 +463,13 @@ export default function AddPetScreen() {
                     : styles.genderText
                 }
               >
-                Female
+                {t("addPet.female")}
               </Text>
             </TouchableOpacity>
           </View>
 
           <TextInput
-            placeholder="Age"
+            placeholder={t("addPet.age")}
             placeholderTextColor={colors.text.tertiary}
             keyboardType="numeric"
             value={formData.age}
@@ -485,7 +478,7 @@ export default function AddPetScreen() {
           />
 
           <TextInput
-            placeholder="Weight"
+            placeholder={t("addPet.weight")}
             placeholderTextColor={colors.text.tertiary}
             keyboardType="numeric"
             value={formData.weight}
@@ -494,14 +487,14 @@ export default function AddPetScreen() {
           />
 
           <TextInput
-            placeholder="Health status"
+            placeholder={t("addPet.healthStatus")}
             placeholderTextColor={colors.text.tertiary}
             value={formData.healthStatus}
             onChangeText={(v) => handleInputChange("healthStatus", v)}
             style={styles.input}
           />
 
-          {/* SAVE */}
+
           <TouchableOpacity onPress={handleSave} disabled={loading}>
             <LinearGradient
               colors={colors.primary.gradient}
@@ -511,7 +504,7 @@ export default function AddPetScreen() {
                 <ActivityIndicator color={colors.text.inverse} />
               ) : (
                 <Text style={{ color: "#fff", fontWeight: "600" }}>
-                  Add Pet
+                  {t("addPet.addPet")}
                 </Text>
               )}
             </LinearGradient>

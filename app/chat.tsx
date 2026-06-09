@@ -23,6 +23,9 @@ import { useProfileStore }
 from "@/store/profileStore";
 import AsyncStorage
 from "@react-native-async-storage/async-storage";
+import "./i18n";
+import { useTranslation } from "react-i18next";
+
 
 type Message = {
   id: string;
@@ -33,7 +36,7 @@ type Message = {
 export default function ChatScreen() {
   const { colors } = useTheme();
   const styles = createStyles(colors);
-
+  const { t } = useTranslation();
   const token = useAuthStore((s) => s.token);
   const { profile } =
   useProfileStore();
@@ -42,14 +45,13 @@ export default function ChatScreen() {
   const [showPicker, setShowPicker] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const [messages, setMessages] = useState<Message[]>([
-    { id: "1", text: "Hi! I am your AI assistant 🐾", isUser: false },
+    { id: "1", text: t("chat.hiImYourAIAssistant"), isUser: false },
   ]);
 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   
 
-  // 🐾 загрузка петов
   useEffect(() => {
     const load = async () => {
       try {
@@ -98,7 +100,7 @@ const sendMessage = async () => {
     isUser: true,
   };
 
-  // СРАЗУ показываем сообщение пользователя
+
   setMessages(prev => [...prev, userMsg]);
 
   setInput("");
@@ -194,7 +196,7 @@ console.log("DATA:", data);
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* HEADER */}
+
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={24} color={colors.text.primary} />
@@ -202,7 +204,7 @@ console.log("DATA:", data);
           <Text style={styles.title}>PawPal AI 🐾</Text>
         </View>
 
-        {/* CHAT */}
+
        <FlatList
   ref={flatListRef}
   data={messages}
@@ -216,10 +218,9 @@ console.log("DATA:", data);
   }
 />
 
-        {/* INPUT */}
         <View style={styles.inputRow}>
           
-          {/* 🐾 PET ICON */}
+
           <TouchableOpacity onPress={() => setShowPicker(true)}>
             <Image
               source={{
@@ -234,7 +235,7 @@ console.log("DATA:", data);
           <TextInput
             value={input}
             onChangeText={setInput}
-            placeholder="Ask about your pet..."
+            placeholder={t("chat.askAboutYourPet")}
             placeholderTextColor="#888"
             style={styles.input}
           />
@@ -244,11 +245,10 @@ console.log("DATA:", data);
           </TouchableOpacity>
         </View>
 
-        {/* 🐾 MODAL PICKER */}
         <Modal visible={showPicker} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modal}>
-              <Text style={styles.modalTitle}>Select Pet</Text>
+              <Text style={styles.modalTitle}>{t("chat.selectPet")}</Text>
 
               <FlatList
                 horizontal

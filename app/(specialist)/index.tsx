@@ -513,7 +513,7 @@ export default function SpecialistHomeScreen() {
       >
         <View style={{ padding: spacing.md, paddingTop: 0 }}>
 
-          {/* Stats Cards */}
+
           <View style={{ flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg }}>
             <TouchableOpacity
               onPress={() => router.push('/specialist_appointments?status=CREATED')}

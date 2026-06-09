@@ -11,6 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { useTheme } from '@/hooks/useTheme';
 import Donut from '@/components/tracker/Donut';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface PetTracker {
   petId: number;
@@ -30,7 +32,7 @@ export default function MiniTrackerCard({
   onPress,
 }: Props) {
   const { colors } = useTheme();
-
+  const { t } = useTranslation();
   return (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -57,7 +59,7 @@ export default function MiniTrackerCard({
             color: colors.text.primary,
           }}
         >
-          Tracker
+          {t('tracker.title')}
         </Text>
 
         <Ionicons

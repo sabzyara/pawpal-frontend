@@ -15,12 +15,12 @@ const getIconName = (type: ScheduleItem['type']): MaterialIconName => {
     vet: 'medical-bag',
     walk: 'dog',
     medication: 'pill',
-    grooming: 'scissors-cutting',  // ✅ исправлено на существующую иконку
+    grooming: 'scissors-cutting',  
   };
   return iconMap[type];
 };
 
-// ✅ Функция для форматирования даты
+
 const formatDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
@@ -61,7 +61,6 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
 
-  // ✅ Пустое состояние с кнопкой "Add Task"
   if (schedule.length === 0) {
     return (
       <View style={styles.scheduleSection}>
@@ -76,7 +75,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
         <View style={styles.emptyState}>
           <Feather name="calendar" size={48} color={colors.border.medium} />
           <Text style={styles.emptyStateText}>No tasks scheduled</Text>
-          {onAddTaskPress && (  // ✅ проверка наличия обработчика
+          {onAddTaskPress && (  
             <TouchableOpacity style={styles.addTaskButton} onPress={onAddTaskPress}>
               <Text style={styles.addTaskText}>+ Add Task</Text>
             </TouchableOpacity>
@@ -100,7 +99,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
       {schedule.map((item) => {
         const isCompleted = item.done;
         const iconName = getIconName(item.type);
-        const formattedDate = formatDate(item.date);  // ✅ форматируем дату
+        const formattedDate = formatDate(item.date); 
         
         return (
           <TouchableOpacity
@@ -135,7 +134,7 @@ export const ScheduleSection: React.FC<ScheduleSectionProps> = ({
                     {item.title}
                   </Text>
                   
-                  {/* ✅ Добавлено отображение даты */}
+
                   <Text style={styles.scheduleDate}>
                     <Feather name="calendar" size={12} color="#FFF" /> {formattedDate}
                   </Text>

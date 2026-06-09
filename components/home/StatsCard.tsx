@@ -4,6 +4,8 @@ import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface StatsCardsProps {
   totalPets: number;
@@ -17,24 +19,24 @@ export const StatsCards: React.FC<StatsCardsProps> = ({
   pendingTasks,
 }) => {
   const { colors } = useTheme();
-
+  const { t } = useTranslation();
   const stats = [
     {
       icon: <MaterialCommunityIcons name="paw" size={28} color="#FFF" />,
       number: totalPets,
-      label: "Total Pets",
+      label: t("stats.Total Pets"),
       gradient: ["#FF6B6B", "#FF8E8E"] as [string, string],
     },
     {
       icon: <Feather name="check-circle" size={28} color="#FFF" />,
       number: completedTasks,
-      label: "Completed",
+      label: t("stats.Completed"),
       gradient: ["#4ECDC4", "#6BE4DC"] as [string, string],
     },
     {
       icon: <Feather name="clock" size={28} color="#FFF" />,
       number: pendingTasks,
-      label: "Pending",
+      label: t("stats.Pending"),
       gradient: ["#FFE66D", "#FFED9E"] as [string, string],
     },
   ];
