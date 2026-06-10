@@ -14,7 +14,7 @@ export const addPetStyles = StyleSheet.create({
     flex: 1,
   },
 
-  // Header
+
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -52,7 +52,7 @@ export const addPetStyles = StyleSheet.create({
     paddingBottom: 40,
   },
 
-  // Avatar Section
+
   avatarSection: {
     alignItems: "center",
     marginTop: 20,
@@ -86,7 +86,7 @@ export const addPetStyles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  // Welcome Card
+
   welcomeCard: {
     marginHorizontal: 20,
     marginBottom: 24,
@@ -113,7 +113,7 @@ export const addPetStyles = StyleSheet.create({
     textAlign: "center",
   },
 
-  // Form Section
+
   formSection: {
     backgroundColor: "#FFF",
     marginHorizontal: 20,
@@ -181,7 +181,6 @@ export const addPetStyles = StyleSheet.create({
     flex: 1,
   },
 
-  // Gender Selection
   genderContainer: {
     flexDirection: "row",
     gap: 12,
@@ -230,7 +229,7 @@ export const addPetStyles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // Buttons
+
   buttonContainer: {
     flexDirection: "row",
     gap: 12,

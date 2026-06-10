@@ -22,7 +22,7 @@ interface VetResponseDto {
 }
 
 interface ServiceProviderResponseDto {
-  serviceProviderId: number;
+  serviceId: number;
   userId: number;
   firstName: string;
   lastName: string;
@@ -45,7 +45,7 @@ export interface SpecialistInfo {
   specialistType: SpecialistType;
   userId: number;          
   vetId?: number;           
-  serviceProviderId?: number; 
+  serviceId?: number; 
   firstName: string;
   lastName: string;
   fullName: string;         
@@ -78,7 +78,7 @@ class SpecialistService {
     const providerInfo = await this.fetchServiceProviderByUserId(userId);
     if (providerInfo) {
       this.cache.set(cacheKey, providerInfo);
-      this.cache.set(`serviceProviderId_${providerInfo.serviceProviderId!}`, providerInfo);
+      this.cache.set(`serviceId_${providerInfo.serviceId!}`, providerInfo);
       return providerInfo;
     }
 
@@ -102,7 +102,7 @@ class SpecialistService {
   private async fetchServiceProviderByUserId(userId: number): Promise<SpecialistInfo | null> {
     try {
       const response = await api.get<ServiceProviderResponseDto>(`/specialist-service/service-providers/user/${userId}`);
-      if (response.data?.serviceProviderId) {
+      if (response.data?.serviceId) {
         return this.mapServiceProviderToSpecialistInfo(response.data);
       }
     } catch (error: any) {
@@ -133,7 +133,7 @@ class SpecialistService {
       specialistId: data.userId,
       specialistType: 'SERVICE',
       userId: data.userId,
-      serviceProviderId: data.serviceProviderId,
+      serviceId: data.serviceId,
       firstName: data.firstName,
       lastName: data.lastName,
       fullName: `${data.firstName} ${data.lastName}`,
@@ -218,11 +218,11 @@ class SpecialistService {
 
     try {
       const response = await api.get<ServiceProviderResponseDto>('/specialist-service/service-providers/me');
-      if (response.data?.serviceProviderId) {
+      if (response.data?.serviceId) {
         const info = this.mapServiceProviderToSpecialistInfo(response.data);
         this.currentSpecialistCache = info;
         this.cache.set(`userId_${response.data.userId}`, info);
-        this.cache.set(`serviceProviderId_${response.data.serviceProviderId}`, info);
+        this.cache.set(`serviceId_${response.data.serviceId}`, info);
         return info;
       }
     } catch (error: any) {

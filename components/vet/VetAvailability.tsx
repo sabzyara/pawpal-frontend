@@ -15,6 +15,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface DateItem {
   day: number;
@@ -38,7 +40,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
   const colors = theme.colors;
   const spacing = theme.spacing;
   const typography = theme.typography;
-
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -49,14 +51,13 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [infoError, setInfoError] = useState<string | null>(null);
 
-  // Загружаем информацию о специалисте
+
   useEffect(() => {
     if (isAuthenticated && userId) {
       loadSpecialistInfo();
     }
   }, [userId, isAuthenticated]);
 
-  // Загружаем слоты при выборе даты
   useEffect(() => {
     if (selectedDate && isAuthenticated && specialistInfo) {
       loadAvailableSlots();
@@ -167,8 +168,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
     return date.toDateString() === today.toDateString();
   };
 
-  // ✅ Все даты от сегодня и дальше доступны для выбора
-  // Бэкенд сам вернет пустой массив слотов, если их нет
+
   const isDateAvailable = (date: Date): boolean => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -184,7 +184,13 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
     return `${hours}:${minutes}`;
   };
 
-  const weekDays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
+  const weekDays = [  t("calendar.mon"),
+  t("calendar.tue"),
+  t("calendar.wed"),
+  t("calendar.thu"),
+  t("calendar.fri"),
+  t("calendar.sat"),
+  t("calendar.sun"),];
   const calendarDays = generateCalendarDays();
 
   const handleSelectTime = (
@@ -199,7 +205,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
     }
   };
 
-  // Проверка авторизации
+
   if (!isAuthenticated) {
     return (
       <View
@@ -223,7 +229,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             { color: colors.text.primary, marginTop: spacing.sm },
           ]}
         >
-          Авторизуйтесь для записи
+          {t("availability.loginRequired")}
         </Text>
         <Text
           style={[
@@ -235,7 +241,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             },
           ]}
         >
-          Войдите в аккаунт, чтобы записаться на прием
+          {t("availability.loginDescription")}
         </Text>
       </View>
     );
@@ -251,7 +257,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             { color: colors.text.secondary, marginTop: spacing.xs },
           ]}
         >
-          Загрузка информации...
+          {t("availability.loadingInfo")}
         </Text>
       </View>
     );
@@ -283,7 +289,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             },
           ]}
         >
-          {!specialistInfo ? "Специалист не найден" : "Ошибка загрузки"}
+          {!specialistInfo ? t("availability.specialistNotFound") : t("availability.loadingError")}
         </Text>
         <Text
           style={[
@@ -295,7 +301,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             },
           ]}
         >
-          {infoError || "Пользователь не зарегистрирован как специалист"}
+          {infoError || t("availability.specialistNotRegistered")}
         </Text>
       </View>
     );
@@ -314,10 +320,10 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
             { color: colors.text.primary, marginBottom: spacing.xs },
           ]}
         >
-          Выберите дату и время
+          {t("availability.selectDateTime")}
         </Text>
         <Text style={[typography.body2, { color: colors.text.secondary }]}>
-          Выберите удобную дату и время для приема
+          {t("availability.selectDateTimeDescription")}
         </Text>
       </View>
 
@@ -455,7 +461,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
               { color: colors.text.primary, marginBottom: spacing.md },
             ]}
           >
-            Выберите время
+            {t("availability.selectTime")}
           </Text>
 
           {loading ? (
@@ -484,7 +490,7 @@ export const VetAvailability: React.FC<VetAvailabilityProps> = ({
                   { color: colors.text.secondary, marginTop: spacing.xs },
                 ]}
               >
-                Нет доступных слотов на эту дату
+                {t("availability.noSlots")}
               </Text>
             </View>
           ) : (

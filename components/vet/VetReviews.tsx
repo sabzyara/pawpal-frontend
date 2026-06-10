@@ -19,6 +19,8 @@ import {
 import { useTheme } from '@/hooks/useTheme';
 
 import api from '@/services/api';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface Review {
   reviewId: string;
@@ -40,7 +42,7 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
   type = 'vet',
 }) => {
   const { colors, spacing, typography } = useTheme();
-
+  const { t } = useTranslation();
   const [text, setText] = useState('');
   const [rating, setRating] = useState(5);
   const [loading, setLoading] = useState(true);
@@ -111,7 +113,7 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
       await loadReviews();
     } catch (error) {
       console.log(error);
-      Alert.alert('Error', 'Failed to post review');
+      Alert.alert(t('reviews.error'), t('reviews.postError'));
     } finally {
       setPosting(false);
     }
@@ -216,7 +218,6 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
 
   return (
     <View style={{ gap: spacing.md }}>
-      {/* 1. КРАСИВЫЙ ЗАГОЛОВОК С БЕЙДЖЕМ */}
       <View
         style={{
           flexDirection: 'row',
@@ -230,7 +231,7 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
             { color: colors.text.primary },
           ]}
         >
-          Отзывы
+          {t("reviews.title")}
         </Text>
 
         <View
@@ -252,7 +253,7 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
         </View>
       </View>
 
-      {/* 2. ФОРМА ОТЗЫВА КАК КАРТОЧКА */}
+
       <View
         style={{
           backgroundColor: colors.card.default,
@@ -276,10 +277,10 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
             },
           ]}
         >
-          Ваша оценка
+          {t("reviews.yourRating")}
         </Text>
 
-        {/* 3. ИКОНКИ ВМЕСТО ТЕКСТОВЫХ ЗВЁЗД */}
+
         <View
           style={{
             flexDirection: 'row',
@@ -305,7 +306,7 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
         <TextInput
           value={text}
           onChangeText={setText}
-          placeholder="Напишите ваш отзыв..."
+          placeholder={t("reviews.writeReview")}
           placeholderTextColor={colors.text.tertiary}
           multiline
           numberOfLines={4}
@@ -342,13 +343,12 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
                 { color: colors.text.inverse },
               ]}
             >
-              Оставить отзыв
+              {t("reviews.leaveReview")}
             </Text>
           )}
         </TouchableOpacity>
       </View>
 
-      {/* 4. КРАСИВОЕ ПУСТОЕ СОСТОЯНИЕ */}
       {!reviews.length && !loading && (
         <View
           style={{
@@ -371,7 +371,7 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
               },
             ]}
           >
-            Пока нет отзывов
+            {t("reviews.noReviews")}
           </Text>
 
           <Text
@@ -383,12 +383,11 @@ export const VetReviews: React.FC<VetReviewsProps> = ({
               },
             ]}
           >
-            Станьте первым, кто оставит отзыв
+            {t("reviews.beFirst")}
           </Text>
         </View>
       )}
 
-      {/* СПИСОК ОТЗЫВОВ */}
       <FlatList
         data={reviews}
         renderItem={renderReview}

@@ -4,14 +4,14 @@ import { useAuthStore } from '@/store/authStore';
 import { CompleteProfileData, PetOwner, Veterinarian, ServiceProvider, UserProfile , User } from '@/types/profile';
 
 interface UseProfileReturn {
-  // Сырые данные
+
   profile: UserProfile | null;
   user: User | null;
   petOwner: PetOwner | undefined;
   veterinarian: Veterinarian | undefined;
   serviceProvider: ServiceProvider | undefined;
   
-  // Состояния
+
   isLoading: boolean;
   error: string | null;
   hasProfile: boolean;
@@ -57,7 +57,7 @@ export const useProfile = (): UseProfileReturn => {
   
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   
-  // ============ АВТОМАТИЧЕСКАЯ ЗАГРУЗКА ПРОФИЛЯ ============
+
   
   useEffect(() => {
     if (isAuthenticated && user && !profile && !isLoading && !hasAttemptedLoad) {
@@ -70,7 +70,7 @@ export const useProfile = (): UseProfileReturn => {
     setHasAttemptedLoad(false);
   }, [user?.id]);
   
-  // ============ ФЛАГИ СОСТОЯНИЯ ============
+
   
   const hasProfile = useMemo(
     () => !!(profile?.petOwner || profile?.veterinarian || profile?.serviceProvider),
@@ -82,7 +82,7 @@ export const useProfile = (): UseProfileReturn => {
     [isAuthenticated, user, hasProfile, isLoading, error]
   );
   
-  // ============ УНИФИЦИРОВАННЫЙ ГЕТТЕР ============
+
   
   const getProfileData = useCallback(() => {
     if (profile?.petOwner) return { type: 'OWNER' as const, data: profile.petOwner };
@@ -91,7 +91,7 @@ export const useProfile = (): UseProfileReturn => {
     return null;
   }, [profile]);
   
-  // ============ УДОБНЫЕ ГЕТТЕРЫ ============
+
   
   const getDisplayName = useCallback((): string => {
     const profileData = getProfileData();
@@ -104,7 +104,7 @@ export const useProfile = (): UseProfileReturn => {
       return profileData.data.username || '';
     }
     
-    // VET или SERVICE
+
     const data = profileData.data as Veterinarian | ServiceProvider;
     const firstName = data.firstName || '';
     const lastName = data.lastName || '';
@@ -122,7 +122,7 @@ export const useProfile = (): UseProfileReturn => {
       return profileData.data.username || '';
     }
     
-    // VET или SERVICE
+
     const data = profileData.data as Veterinarian | ServiceProvider;
     return `${data.firstName || ''} ${data.lastName || ''}`.trim();
   }, [getProfileData]);
@@ -190,7 +190,7 @@ export const useProfile = (): UseProfileReturn => {
       };
     }
     
-    // VET или SERVICE
+
     const data = profileData.data as Veterinarian | ServiceProvider;
     return {
       firstName: data.firstName || '',
@@ -261,7 +261,7 @@ export const useProfile = (): UseProfileReturn => {
     return (profileData.data as Veterinarian | ServiceProvider).reviewsCount || 0;
   }, [getProfileData]);
   
-  // ============ ДЕЙСТВИЯ ============
+
   
   const saveProfile = useCallback(async (data: CompleteProfileData): Promise<boolean> => {
     if (!user) {
@@ -270,7 +270,7 @@ export const useProfile = (): UseProfileReturn => {
     }
     const success = await createProfile(user, data);
     if (success) {
-      setHasAttemptedLoad(false); // Сбрасываем флаг, чтобы перезагрузить
+      setHasAttemptedLoad(false); 
     }
     return success;
   }, [createProfile, user]);
@@ -290,23 +290,22 @@ export const useProfile = (): UseProfileReturn => {
     }
   }, [fetchProfile, user]);
   
-  // ============ ВОЗВРАТ ============
+
   
   return {
-    // Сырые данные
+
     profile,
     user,
     petOwner: profile?.petOwner,
     veterinarian: profile?.veterinarian,
     serviceProvider: profile?.serviceProvider,
     
-    // Состояния
+
     isLoading,
     error,
     hasProfile,
     needsProfileCompletion,
-    
-    // Геттеры
+
     getDisplayName,
     getUsername,
     getPhoneNumber,
@@ -325,7 +324,7 @@ export const useProfile = (): UseProfileReturn => {
     getPatientsCount,
     getReviewsCount,
     
-    // Действия
+
     saveProfile,
     editProfile,
     refetch,

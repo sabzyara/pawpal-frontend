@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 export const useGreeting = () => {
-  const [greeting, setGreeting] = useState('');
   const [userName] = useState('Pet Parent');
+  const {t} = useTranslation();
 
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good Morning');
-    else if (hour < 17) setGreeting('Good Afternoon');
-    else setGreeting('Good Evening');
-  }, []);
+  const hour = new Date().getHours();
+
+  const greeting =
+    hour < 12
+      ? t('gr.goodMorning')
+      : hour < 17
+      ? t('gr.goodAfternoon')
+      : t('gr.goodEvening');
 
   return { greeting, userName };
 };

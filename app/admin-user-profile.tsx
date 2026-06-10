@@ -1,7 +1,7 @@
 import { useTheme } from "@/hooks/useTheme";
 import api from "@/services/api";
 import { router, useLocalSearchParams } from "expo-router";
-import { ArrowLeft, PawPrint, Trash2, User } from "lucide-react-native";
+import { ArrowLeft, PawPrint, User } from "lucide-react-native";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -374,14 +374,6 @@ const fetchProfile = async () => {
           <Edit3 size={18} color="#fff" />
           <Text style={styles.btnText}>Edit User</Text>
         </TouchableOpacity> */}
-
-        <TouchableOpacity
-          style={styles.deleteBtn}
-          onPress={deleteUser}
-        >
-          <Trash2 size={18} color="#fff" />
-          <Text style={styles.btnText}>Delete User</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

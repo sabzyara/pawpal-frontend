@@ -8,6 +8,8 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/hooks/useTheme';
+import "@/app/i18n";
+import { useTranslation } from 'react-i18next';
 
 interface VetHeaderProps {
   vet: {
@@ -27,6 +29,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
   type = 'vet',
 }) => {
   const { colors, typography, spacing } = useTheme();
+  const { t } = useTranslation();
   const router = useRouter();
 
   return (
@@ -35,7 +38,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
         marginBottom: spacing.lg,
       }}
     >
-      {/* Back */}
+
       <TouchableOpacity
         onPress={() => router.back()}
         style={{
@@ -55,7 +58,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
         />
       </TouchableOpacity>
 
-      {/* Main Card */}
+
       <View
         style={{
           backgroundColor: colors.card.default,
@@ -73,7 +76,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
           elevation: 5,
         }}
       >
-        {/* Avatar */}
+
         <Image
           source={{
             uri:
@@ -90,7 +93,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
           }}
         />
 
-        {/* Name */}
+
         <Text
           style={[
             typography.h3,
@@ -104,7 +107,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
           {vet.firstName} {vet.lastName}
         </Text>
 
-        {/* Type */}
+
         <View
           style={{
             marginTop: spacing.sm,
@@ -121,12 +124,12 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
             }}
           >
             {type === 'vet'
-              ? '🐾 Veterinarian'
-              : '✂️ Service Provider'}
+                ? t("vetHeader.veterinarian")
+                : t("vetHeader.serviceProvider")}
           </Text>
         </View>
 
-        {/* Specialty */}
+
         {vet.specialty && (
           <Text
             style={[
@@ -142,7 +145,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
           </Text>
         )}
 
-        {/* Verified */}
+
         <View
           style={{
             flexDirection: 'row',
@@ -163,7 +166,7 @@ export const VetHeader: React.FC<VetHeaderProps> = ({
               fontWeight: '500',
             }}
           >
-            Verified Specialist
+            {t("vetHeader.verifiedSpecialist")}
           </Text>
         </View>
       </View>

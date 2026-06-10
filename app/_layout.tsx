@@ -13,7 +13,11 @@ function LoadingScreen() {
   
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+<<<<<<< HEAD
       <ActivityIndicator color={colors.text.inverse} />
+=======
+      <ActivityIndicator size="large" color="#E3275B" />
+>>>>>>> 10a7ed855c8615006cbc60f507ee9059125765b7
     </View>
   );
 }
@@ -32,18 +36,15 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false }}>
-        {/* Группы маршрутов - ВАЖНО: порядок имеет значение */}
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(owner)" options={{ headerShown: false }} />
         <Stack.Screen name="(specialist)" options={{ headerShown: false }} />
         <Stack.Screen name="(admin)" options={{ headerShown: false }} />
 
-        {/* Страницы заполнения профиля */}
         <Stack.Screen name="complete_profile" options={{ headerShown: false }} />
         <Stack.Screen name="complete_vet" options={{ headerShown: false }} />
         <Stack.Screen name="complete_service" options={{ headerShown: false }} />
 
-        {/* Модальные окна */}
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         <Stack.Screen
           name="nutrition-form"

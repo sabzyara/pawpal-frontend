@@ -87,7 +87,6 @@ export default function VetProfileScreen() {
         const response = await api.get(endpoint);
         responseData = response.data;
       } else {
-        // Загружаем профиль по userId (из auth)
         if (type === 'service') {
           endpoint = `/specialist-service/service-providers/user/${id}`;
         } else {
@@ -98,10 +97,9 @@ export default function VetProfileScreen() {
         responseData = response.data;
       }
 
-      // Нормализуем данные профиля
       const profileData: SpecialistProfile = {
         id: Number(type === 'service' 
-          ? responseData.serviceProviderId || responseData.serviceId || responseData.id 
+          ? responseData.serviceId || responseData.serviceId || responseData.id 
           : responseData.vetId || responseData.id),
         userId: responseData.userId || 0,
         firstName: responseData.firstName || '',
@@ -130,7 +128,6 @@ export default function VetProfileScreen() {
       
       setProfile(profileData);
       
-      // Проверяем, владелец ли профиля (сравниваем userId из профиля с текущим пользователем)
       const isProfileOwner = currentUser?.id === profileData.userId;
       setIsOwner(isProfileOwner);
       
@@ -204,7 +201,6 @@ export default function VetProfileScreen() {
     return true;
   }, [profile, isOwner, id]);
 
-  // Состояние загрузки
   if (loading) {
     return (
       <View
@@ -304,7 +300,7 @@ export default function VetProfileScreen() {
 
           {tab === 'availability' && (
             <VetAvailability
-              userId={profile.userId}  // ✅ передаем userId (41)
+              userId={profile.userId}  
               specialistType={getSpecialistType()}
             />
           )}
@@ -326,7 +322,7 @@ export default function VetProfileScreen() {
 
           {tab === 'manage' && isOwner && (
             <VetManage
-              userId={profile.userId}  // ✅ передаем userId (41)
+              userId={profile.userId}  
               onDelete={handleDeleteProfile}
             />
           )}

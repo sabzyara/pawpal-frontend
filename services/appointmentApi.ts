@@ -37,7 +37,7 @@ export type {
 
 export type { SpecialistInfo } from './specialistService';
 
-// ============ КАСТОМНЫЕ ОШИБКИ ============
+
 
 export class NetworkError extends Error {
   constructor(message: string) {
@@ -67,13 +67,13 @@ export class ConflictError extends Error {
   }
 }
 
-// ============ КОНСТАНТЫ ============
+
 
 const APPOINTMENTS_URL = '/appointments';
 const SCHEDULES_URL = '/schedules';
 const SLOTS_URL = '/slots';
 
-// ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+
 
 const buildQueryString = (params: Record<string, any>): string => {
   const searchParams = new URLSearchParams();
@@ -109,7 +109,7 @@ const handleAxiosError = (error: any): never => {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// ============ APPOINTMENT API ============
+
 
 export const appointmentApi = {
   createAppointment: async (data: AppointmentCreateDto): Promise<AppointmentResponseDto> => {
@@ -248,7 +248,6 @@ export const appointmentApi = {
     const response = await appointmentApiClient.get<string>(`${APPOINTMENTS_URL}/${id}/recommendations`);
     return response.data;
   } catch (error: any) {
-    // ✅ 400 означает, что рекомендации еще не добавлены (статус не COMPLETED)
     if (error?.response?.status === 400 || error?.response?.status === 404) {
       console.log(`ℹ️ No recommendations yet for appointment ${id}`);
       return null;
@@ -268,7 +267,7 @@ export const appointmentApi = {
   },
 };
 
-// ============ TIME SLOT API ============
+
 
 export const timeSlotApi = {
   getAvailableSlotsBySpecialistId: async (
@@ -448,7 +447,6 @@ export const timeSlotApi = {
   },
 };
 
-// ============ SCHEDULE API ============
 
 export const scheduleApi = {
   createSchedule: async (data: SpecialistScheduleCreateDto, retryCount: number = 0): Promise<SpecialistScheduleResponse> => {
@@ -521,17 +519,17 @@ export const scheduleApi = {
       const response = await appointmentApiClient.get<SpecialistScheduleResponse[]>(`${SCHEDULES_URL}/specialist/${specialistId}`);
       return response.data;
     } catch (error: any) {
-      // ✅ Специальная обработка для 403 ошибки
+
       if (error?.response?.status === 403) {
         console.warn('⚠️ Access denied to schedules, returning empty array');
-        // Возвращаем пустой массив вместо ошибки
+
         return [];
       }
       throw handleAxiosError(error);
     }
   },
 
-  // ✅ ИСПРАВЛЕННЫЙ МЕТОД с обработкой 403
+
   getSchedulesByUserId: async (userId: number): Promise<{
     schedules: SpecialistScheduleResponse[];
     specialistInfo: SpecialistInfo;
@@ -607,6 +605,6 @@ export const scheduleApi = {
 
 export { specialistService } from './specialistService';
 
-// ============ DEFAULT EXPORT ============
+
 
 export default appointmentApi;

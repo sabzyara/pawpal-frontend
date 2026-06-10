@@ -11,7 +11,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert } from "react-native";
 
-// ============ ТИПЫ ============
+
 
 export type UseAppointmentsMode = "owner" | "specialist" | "details";
 
@@ -76,7 +76,6 @@ export interface UseAppointmentsReturn {
   ) => Promise<AppointmentResponseDto>;
 }
 
-// ============ КЭШИ ============
 
 interface UserData {
   firstName: string;
@@ -96,7 +95,6 @@ const specialistInfoCache = new Map<string, SpecialistInfo>();
 
 let activeHooksCount = 0;
 
-// ============ ФУНКЦИИ ОБОГАЩЕНИЯ ============
 
 const getSpecialistInfo = async (
   specialistId: number,
@@ -178,10 +176,8 @@ const enrichSingleAppointment = async (appointment: any): Promise<EnrichedAppoin
       const response = await api.get(`/pet-management/api/pets/pet/${appointment.petId}/full`);
       const pet = response.data;
       
-      // ✅ Логируем для отладки
       console.log(`🐾 Pet ${appointment.petId} data:`, JSON.stringify(pet, null, 2));
       
-      // ✅ Пробуем разные варианты полей
       const petData = {
         name: pet.petName || pet.name || "Unknown",
         species: pet.petType || pet.species || pet.type || "Unknown",
@@ -194,7 +190,7 @@ const enrichSingleAppointment = async (appointment: any): Promise<EnrichedAppoin
       petBreed = petData.breed;
     } catch (error) {
       console.error(`Failed to load pet ${appointment.petId}:`, error);
-      // ✅ Устанавливаем значения по умолчанию
+
       petName = "Питомец";
       petType = "Не указан";
       petBreed = "";
@@ -355,7 +351,7 @@ const enrichAppointmentsBatch = async (
   }
 };
 
-// ============ ОЧИСТКА КЭША ============
+
 
 export const clearAppointmentsCache = () => {
   userCache.clear();
@@ -364,7 +360,7 @@ export const clearAppointmentsCache = () => {
   activeHooksCount = 0;
 };
 
-// ============ ОСНОВНОЙ ХУК ============
+
 
 export const useAppointments = (
   config: UseAppointmentsConfig,
@@ -397,7 +393,7 @@ export const useAppointments = (
   const [appointment, setAppointment] = useState<EnrichedAppointment | null>(null);
   const [recommendations, setRecommendations] = useState<string | null>(null);
 
-  // ============ УПРАВЛЕНИЕ АКТИВНЫМИ ХУКАМИ ============
+
   
   useEffect(() => {
     activeHooksCount++;
@@ -430,7 +426,7 @@ export const useAppointments = (
     }
   }, []);
 
-  // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА OWNER ============
+
 
   const loadOwnerAppointments = useCallback(
     async (page: number = 0, shouldRefresh: boolean = false) => {
@@ -497,7 +493,7 @@ export const useAppointments = (
     [filtersKey, pageSize, handleError, updateIfMounted]
   );
 
-  // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА SPECIALIST ============
+
 
   const loadSpecialistAppointments = useCallback(
     async (shouldRefresh: boolean = false) => {
@@ -564,7 +560,7 @@ export const useAppointments = (
     [filtersKey, handleError, updateIfMounted]
   );
 
-  // ============ ЗАГРУЗКА ДЛЯ РЕЖИМА DETAILS ============
+
 
   const loadAppointmentDetails = useCallback(async () => {
     if (!appointmentId || appointmentId === 0) return;
@@ -602,7 +598,7 @@ export const useAppointments = (
     }
   }, [appointmentId, handleError, updateIfMounted]);
 
-  // ============ ОБЩИЕ ДЕЙСТВИЯ ============
+
 
   const refresh = useCallback(() => {
     switch (mode) {
@@ -624,7 +620,7 @@ export const useAppointments = (
     }
   }, [mode, hasMore, loading, refreshing, currentPage, loadOwnerAppointments]);
 
-  // ============ ДЕЙСТВИЯ ДЛЯ ВЛАДЕЛЬЦА ============
+
 
   const cancelAppointment = useCallback(
     async (id: number, reason: string): Promise<boolean> => {
@@ -655,7 +651,7 @@ export const useAppointments = (
     [updateIfMounted]
   );
 
-  // ============ ДЕЙСТВИЯ ДЛЯ СПЕЦИАЛИСТА ============
+
 
   const confirmAppointment = useCallback(
     async (id: number): Promise<AppointmentResponseDto> => {
@@ -761,7 +757,7 @@ export const useAppointments = (
     [updateIfMounted]
   );
 
-  // ============ ДЕЙСТВИЯ ДЛЯ ДЕТАЛЕЙ ============
+
 
   const updateAppointment = useCallback(
     async (data: AppointmentUpdateDto): Promise<AppointmentResponseDto> => {
@@ -780,7 +776,7 @@ export const useAppointments = (
     [appointmentId, updateIfMounted]
   );
 
-  // ============ АВТОЗАГРУЗКА ============
+
   
   useEffect(() => {
     if (autoLoad) {
@@ -798,7 +794,7 @@ export const useAppointments = (
     }
   }, [mode, appointmentId, filtersKey, autoLoad]);
 
-  // ============ БАЗОВЫЙ РЕТУРН ============
+
 
   const baseReturn: UseAppointmentsReturn = {
     loading: loading || enriching,
@@ -807,7 +803,7 @@ export const useAppointments = (
     refresh,
   };
 
-  // ============ РЕТУРН ДЛЯ OWNER ============
+
 
   if (mode === "owner") {
     return {
@@ -821,7 +817,7 @@ export const useAppointments = (
     };
   }
 
-  // ============ РЕТУРН ДЛЯ SPECIALIST ============
+
 
   if (mode === "specialist") {
     return {
@@ -840,7 +836,7 @@ export const useAppointments = (
     };
   }
 
-  // ============ РЕТУРН ДЛЯ DETAILS ============
+
 
   return {
     ...baseReturn,
@@ -850,7 +846,7 @@ export const useAppointments = (
   };
 };
 
-// ============ УДОБНЫЕ ОБЕРТКИ ============
+
 
 export const useOwnerAppointments = (filters?: AppointmentFilters) => {
   const stableFilters = useMemo(() => filters, [

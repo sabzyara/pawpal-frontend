@@ -54,24 +54,24 @@ export const Colors = {
       secondary: '#F4AEC1',
       accent: '#EE819F',
     },
-    // ✅ ДОБАВЛЕННЫЕ ЦВЕТА
+
     error: {
-      main: '#DC2626',      // Красный для ошибок
+      main: '#DC2626',     
       light: '#FEE2E2',
       dark: '#B91C1C',
     },
     success: {
-      main: '#10B981',      // Зеленый для успеха
+      main: '#10B981',      
       light: '#D1FAE5',
       dark: '#059669',
     },
     warning: {
-      main: '#F59E0B',      // Желтый для предупреждений
+      main: '#F59E0B',     
       light: '#FEF3C7',
       dark: '#D97706',
     },
     info: {
-      main: '#E3275B',      // Ваш основной цвет для информации
+      main: '#E3275B',     
       light: '#EE819F',
       dark: '#B01946',
     },
@@ -130,7 +130,7 @@ export const Colors = {
       secondary: '#3A0CA3',
       accent: '#9D4EDD',
     },
-    // ✅ ДОБАВЛЕННЫЕ ЦВЕТА
+
     error: {
       main: '#EF4444',
       light: '#FEE2E2',
@@ -147,7 +147,7 @@ export const Colors = {
       dark: '#F59E0B',
     },
     info: {
-      main: '#9D4EDD',      // Ваш secondary цвет для информации
+      main: '#9D4EDD',      
       light: '#C084FC',
       dark: '#7B2CBF',
     },

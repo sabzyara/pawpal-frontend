@@ -6,11 +6,12 @@ import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { createHomeStyles } from '../../styles/homeStyles';
 
+
 interface HomeHeaderProps {
   greeting: string;
   userName: string;
   notificationCount: number;
-  avatarUrl?: string | null; // 🔥 добавили
+  avatarUrl?: string | null; 
   onNotificationPress?: () => void;
 }
 
@@ -24,7 +25,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
 
-  // fallback если нет аватара
+
   const fallbackAvatar = `https://ui-avatars.com/api/?name=${userName}&background=E3275B&color=fff`;
 
   return (

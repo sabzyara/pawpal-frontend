@@ -1,9 +1,7 @@
 import { CalendarSection } from '@/components/home/Calendar';
 import { FloatingChatButton } from '@/components/home/FloatingChatButton';
 import { HomeHeader } from '@/components/home/Header';
-import { LearnCard } from '@/components/home/LearnCard';
 import { PetsSection } from '@/components/home/PetsList';
-import { ScheduleSection } from '@/components/home/ScheduleSection';
 
 import { useGreeting } from '@/hooks/useGreeting';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -23,11 +21,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import MiniAiCard from '@/components/home/MiniAiCard';
 import MiniTrackerCard from '@/components/home/MiniTrackerCard';
-// 🔥 ВАЖНО
+
 import { useProfileStore } from '@/store/profileStore';
-import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
+import { useAuthStore } from '@/store/authStore'; 
 
-
+import '@/app/i18n';
+import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
@@ -37,7 +36,7 @@ import {
 export default function HomeScreen() {
   const { colors } = useTheme();
   const styles = createHomeStyles(colors);
-
+  const { t } = useTranslation();
   const { greeting } = useGreeting();
 
   const {
@@ -52,7 +51,7 @@ export default function HomeScreen() {
 
   useNotifications(filteredSchedule);
 
-  // 🔥 ПЕТЫ
+
   const [pets, setPets] = useState<any[]>([]);
   
   const [
@@ -143,16 +142,16 @@ const [showAI, setShowAI] =
 };
 
 
-  // ✅ ИЗМЕНЕНО: убран authUser из profileStore, добавлен user из authStore
+
   const { profile, fetchProfile } = useProfileStore();
   const user = useAuthStore((state) => state.user);
 
-  // 🔄 ОБНОВЛЕНИЕ
+
 useFocusEffect(
   useCallback(() => {
     fetchPets();
 
-    // ✅ ИЗМЕНЕНО: передаем user вместо authUser
+
     if (user) {
       fetchProfile(user);
     }
@@ -160,11 +159,11 @@ useFocusEffect(
     fetchNotifications();
 
     loadHomeSettings();
-    // ✅ ИЗМЕНЕНО: зависимость от user вместо authUser
+
   }, [profile, user])
 );
 
-  // 🧠 ИМЯ
+
   const getDisplayName = () => {
     if (profile?.petOwner?.username) return profile.petOwner.username;
 
@@ -179,7 +178,7 @@ useFocusEffect(
     return profile?.user?.email?.split("@")[0] || "User";
   };
 
-  // handlers
+
   const handlePetPress = (id: number) => {
     router.push({ pathname: "/pet", params: { id } });
   };
@@ -339,7 +338,6 @@ useEffect(() => {
             onRefresh={() => {
               onRefresh();
               fetchPets();
-              // ✅ ИЗМЕНЕНО: передаем user вместо authUser
               if (user) {
                 fetchProfile(user);
               }

@@ -84,7 +84,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     useState<SpecialistScheduleCreateDto>(getDefaultFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Функция загрузки ID специалиста
+  
   const loadSpecialistId = useCallback(async () => {
     const targetUserId = initialUserId || user?.id;
 
@@ -123,7 +123,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     }
   }, [isAuthenticated, isSpecialist, loadSpecialistId]);
 
-  // Загрузка данных для редактирования
+
   useEffect(() => {
     if (initialData) {
       setFormData(initialData);
@@ -131,7 +131,6 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     }
   }, [initialData]);
 
-  // Проверка прав доступа
   useEffect(() => {
     if (!isAuthenticated) {
       Alert.alert("Ошибка", "Необходимо авторизоваться");
@@ -146,7 +145,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     }
   }, [isAuthenticated, isSpecialist, onCancel]);
 
-  // Проверка, были ли изменения
+
   const hasChanges = useCallback((): boolean => {
     if (!initialFormData && !isEdit) return false;
     if (isEdit && initialFormData) {
@@ -223,7 +222,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
           newErrors.breakEnd = "Окончание перерыва должно быть позже начала";
         }
 
-        // Проверка минимальной длительности перерыва (15 минут)
+
         const breakStartMinutes = parseInt(formData.breakStart.split(':')[0]) * 60 + parseInt(formData.breakStart.split(':')[1]);
         const breakEndMinutes = parseInt(formData.breakEnd.split(':')[0]) * 60 + parseInt(formData.breakEnd.split(':')[1]);
         const breakDuration = breakEndMinutes - breakStartMinutes;
@@ -286,7 +285,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
         return;
       }
 
-      // Проверяем, что specialistId загружен
+
       if (!formData.specialistId || formData.specialistId === 0) {
         Alert.alert("Ошибка", "Не удалось загрузить ID специалиста. Попробуйте обновить страницу.");
         return;
@@ -314,7 +313,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
         await scheduleApi.createSchedule(scheduleData);
         Alert.alert("Успех", "Расписание успешно создано");
 
-        // Сброс формы только для создания (не для редактирования)
+
         setFormData((prev) => ({
           ...getDefaultFormData(),
           specialistId: prev.specialistId,
@@ -327,7 +326,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     } catch (error: any) {
       console.error("Error:", error?.response?.data);
       
-      // Специфичная обработка ошибок
+
       if (error?.response?.status === 409) {
         Alert.alert(
           "Конфликт",
@@ -345,7 +344,7 @@ export const ScheduleForm: React.FC<ScheduleFormProps> = ({
     }
   };
 
-  // Проверка авторизации
+
   if (!isAuthenticated) {
     return (
       <View style={{ padding: spacing.lg, alignItems: "center" }}>

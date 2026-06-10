@@ -37,10 +37,390 @@
     "Duration": "Ұзақтығы",
     "Track your pet’s daily activity": "Үй жануарыңыздың күнделікті белсенділігін қадағалаңыз",
     "Nutrition Tracker": "Тамақтану трекері",
-    "Activity Tracker": "Белсенділік трекері"
+    "Activity Tracker": "Белсенділік трекері",
+    "Walk": "Жаяу жүру",
+    "45 minutes": "45 минут",
+    "title": "Трекер"
   },
   "calendar":{
     "title": "Күнтізбе",
-    "days": ["Жс", "Дс", "Сс", "Ср", "Бс", "Жм", "Сб"]
-  }
+    "days": ["Жс", "Дс", "Сс", "Ср", "Бс", "Жм", "Сб"],
+    "mon": "Дс",
+    "tue": "Сс",
+    "wed": "Ср",
+    "thu": "Бс",
+    "fri": "Жм",
+    "sat": "Сб",
+    "sun": "Жс"
+  },
+  "analysis": {
+    "title": "AI талдауы",
+    "addPet": "AI талдауын пайдалану үшін алдымен үй жануарыңызды қосыңыз",
+    "Analysis unavailable": "Талдау қол жетімді емес",
+    "Health Score": "Денсаулық көрсеткіші",
+    "Recommendations": "Ұсыныстар"
+  },
+  "login":{
+    "error": "Қате",
+    "Please fill in all fields": "Барлық өрістерді толтырыңыз"
+  },
+  "profile": {
+  "logout": "Шығу",
+  "confirmLogout": "Шынымен шығуды қалайсыз ба?",
+  "cancel": "Бас тарту",
+
+  "petOwner": "Үй жануарының иесі",
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Қызмет көрсетуші",
+  "administrator": "Әкімші",
+  "user": "Пайдаланушы",
+
+  "pets": "Жануарлар",
+  "appointments": "Жазылулар",
+  "rating": "Рейтинг",
+  "patients": "Пациенттер",
+  "years": "Тәжірибе жылдары",
+  "services": "Қызметтер",
+  "satisfaction": "Қанағаттану",
+  "role": "Рөл",
+  "access": "Қолжетімділік",
+
+  "personalInfo": "Жеке ақпарат",
+  "professionalInfo": "Кәсіби ақпарат",
+  "serviceInfo": "Қызмет туралы ақпарат",
+  "adminInfo": "Әкімші ақпараты",
+
+  "username": "Пайдаланушы аты",
+  "phone": "Телефон",
+  "address": "Мекенжай",
+  "fullName": "Толық аты-жөні",
+  "licenseNumber": "Лицензия нөмірі",
+  "clinic": "Клиника",
+  "experience": "Тәжірибе",
+  "serviceCategory": "Қызмет санаты",
+  "email": "Email",
+
+  "notSpecified": "Көрсетілмеген",
+
+  "myPets": "Менің жануарларым",
+  "managePets": "Жануарларыңызды басқару",
+
+  "appointmentsTitle": "Жазылулар",
+  "appointmentsHistory": "Жазылу тарихы",
+
+  "work": "Жұмыс",
+  "mySchedule": "Менің кестем",
+  "manageAppointments": "Клиент жазылуларын басқару",
+
+  "settings": "Баптаулар",
+  "editProfile": "Профильді өңдеу",
+  "updateProfile": "Жеке ақпаратты жаңарту",
+
+  "settingsDescription": "Хабарламалар, тіл және т.б.",
+
+  "logoutDescription": "Аккаунттан шығу",
+
+  "loadingProfile": "Профиль жүктелуде...",
+  "tryAgain": "Қайталау",
+
+  "failedToLoad": "Профильді жүктеу мүмкін болмады",
+  "userNotAuthorized": "Пайдаланушы авторизацияланбаған",
+  "failedToLoadProfile": "Профильді жүктеу мүмкін болмады",
+  "failedToCreateProfile": "Профиль құру мүмкін болмады",
+  "failedToUpdateProfile": "Профильді жаңарту мүмкін болмады",
+  "userOrRoleMissing": "Пайдаланушы немесе рөл жоқ"
+},
+  "appointment": {
+    "upcomingAppointments": "Келесі кездесулер",
+    "pastAppointments": "Өткен кездесулер",
+    "cancel": "Кездесуді болдырмау",
+    "cancelReasonPlaceholder": "Болдырмау себебін енгізіңіз",
+    "confirmCancel": "Кездесуді болдырмау",
+    "noDate": "Дата көрсетілмеген",
+    "all": "Барлығы",
+    "appointment": "Кездесу",
+    "CREATED": "Жасалды",
+    "CONFIRMED": "Расталды",
+    "specialist": "Специалист",
+    "noPetName": "Жануар аты көрсетілмеген",
+    "ownerNotes": "Жеке ескертулер",
+    "cancelappointment": "Кездесуді болдырмау",
+    "title": "Кездесулер",
+    "subtitle": "Келесі кездесулерді басқару",
+    "noAppointmentsDescription": "Ветеринарға немесе маманға жазылыңыз",
+    "bookAppointment": "Кездесуге жазылу",
+    "noAppointments": "Жазылулар жоқ"
+  },
+  "addReminder": {
+    "Error": "Қате",
+    "Fill all fields": "Барлық өрістерді толтырыңыз",
+    "Success": "Сәтті",
+    "Reminder created": "Еске салғыш жасалды",
+    "← Back": "← Артқа",
+    "title": "Еске салғыш қосу",
+    "subtitle": "Үй жануарларыңызға еске салғыштар жоспарлау",
+    "Reminder Type": "Еске салғыш түрі",
+    "Title": "Атауы",
+    "Message": "Хабарлама",
+    "Date": "Күні",
+    "Time": "Уақыты",
+    "createReminder": "Еске салғыш жасау"
+  },
+  "addPet": {
+    "dog": "Ит 🐶",
+    "cat": "Мысық 🐱",
+    "fish": "Балық 🐟",
+    "hamster": "Хомяк 🐹",
+    "parrot": "Попугай 🦜",
+    "rabbit": "Кролик 🐰",
+    "turtle": "Черепаха 🐢",
+    "other": "Басқа 🐾",
+    "Please fill in all fields": "Барлық өрістерді толтырыңыз",
+    "Error creating pet": "Питомецті жасау кезінде ошибка",
+    "Pet added successfully": "Питомец успешно добавлен",
+    "Error": "Қате",
+    "Success": "Сәтті",
+    "title": "Питомец қосу",
+    "addPhoto": "Фото қосу",
+    "male": "Еркек",
+    "female": "Әйел",
+    "age": "Жасы", 
+    "weight": "Салмағы",
+    "healthStatus": "Денсаулық жағдайы",
+    "addPet": "Питомец қосу",
+    "breed": "Тұр",
+    "selectBreed": "Тұрды таңдаңыз",
+    "searchBreed": "Тұрды іздеу..."
+  },
+  "chat": {
+    "hiImYourAIAssistant": "Сәлем! Мен сіздің AI көмекшіңізбін 🐾",
+    "selectPet": "Питомец таңдаңыз",
+    "askAboutYourPet": "Питомеціңіз туралы сұраңыз...",
+    "aiAnalysis": "AI талдауы"
+  },
+  "pets": {
+    "title": "Менің үй жануарларым",
+    "addFirstPet": "Бірінші питомеціңізді қосыңыз 🐾"
+  },
+  "stats": {
+    "Total Pets": "Барлық питомецтер",
+    "Completed": "Аяқталған",
+    "Pending": "Күтуде"
+  },
+  "book":{
+    "title": "Кездесуге жазылу"
+  },
+"vet": {
+  "about": "Маман жайлы",
+  "clinic": "Клиника",
+  "address": "Мекенжай",
+  "phone": "Телефон",
+  "education": "Білімі",
+  "languages": "Қарым-қатынас тілдері",
+  "noInfo": "Ақпарат жоқ",
+  "notSpecified": "Көрсетілмеген"
+},
+"availability": {
+  "loginRequired": "Жазылу үшін жүйеге кіріңіз",
+  "loginDescription": "Қабылдауға жазылу үшін аккаунтқа кіріңіз",
+  "loadingInfo": "Ақпарат жүктелуде...",
+  "specialistNotFound": "Маман табылмады",
+  "loadingError": "Жүктеу қатесі",
+  "specialistNotRegistered": "Пайдаланушы маман ретінде тіркелмеген",
+  "selectDateTime": "Күн мен уақытты таңдаңыз",
+  "selectDateTimeDescription": "Қабылдау үшін ыңғайлы күн мен уақытты таңдаңыз",
+  "selectTime": "Уақытты таңдаңыз",
+  "noSlots": "Бұл күнге бос уақыт жоқ",
+  "selected": "Таңдалды"
+},
+"editProfile": {
+  "success": "Сәтті",
+  "profileUpdated": "Профиль сәтті жаңартылды",
+  "avatarUpdated": "Аватар сәтті жаңартылды",
+  "error": "Қате",
+  "updateFailed": "Профильді жаңарту мүмкін болмады",
+  "avatarFailed": "Аватарды жүктеу мүмкін болмады",
+
+  "changePhoto": "Суретті өзгерту",
+
+  "basicInfo": "Негізгі ақпарат",
+  "firstName": "Аты",
+  "lastName": "Тегі",
+  "phone": "Телефон",
+  "city": "Қала",
+  "address": "Мекенжай",
+
+  "professionalInfo": "Кәсіби ақпарат",
+  "experience": "Тәжірибе (жыл)",
+  "education": "Білімі",
+  "clinic": "Клиника",
+  "license": "Лицензия",
+  "serviceCategory": "Қызмет санаты",
+
+  "about": "Өзі туралы",
+  "aboutPlaceholder": "Өз тәжірибеңіз, мамандануыңыз және жұмыс тәсіліңіз туралы айтып беріңіз...",
+
+  "serviceCost": "Қызмет құны",
+  "visitPrice": "Бір қабылдау бағасы (₸)",
+
+  "saveChanges": "Өзгерістерді сақтау"
+},
+"vetHeader": {
+  "veterinarian": "🐾 Ветеринар",
+  "serviceProvider": "✂️ Қызмет көрсетуші",
+  "verifiedSpecialist": "Тексерілген маман"
+},
+"manage": {
+  "error": "Қате",
+  "success": "Сәтті",
+
+  "loadingSpecialist": "Маман туралы ақпарат жүктелуде...",
+  "specialistNotFound": "Маман профилі табылмады",
+  "specialistNotFoundMessage": "ID {{id}} пайдаланушысы маман ретінде тіркелмеген",
+
+  "noAccess": "Бұл профильді басқаруға құқығыңыз жоқ",
+  "noAccessMessage": "Тек профиль иесі кесте мен слоттарды басқара алады",
+
+  "specialistId": "Жүйедегі маман ID",
+  "specialistType": "Маман түрі",
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Қызмет көрсетуші",
+
+  "specialistCabinet": "Маман кабинеті",
+  "specialistCabinetDescription": "Кесте мен слоттарды басқару",
+
+  "schedule": "Кесте",
+  "scheduleDescription": "Жұмыс күндерін баптау",
+
+  "slots": "Слоттар",
+  "slotsDescription": "Жазылу уақытын басқару",
+
+  "scheduleSaved": "Кесте сақталды",
+
+  "account": "Аккаунт",
+  "accountDescription": "Баптаулар мен қолжетімділікті басқару",
+
+  "settings": "Баптаулар",
+  "logout": "Аккаунттан шығу",
+  "logoutTitle": "Аккаунттан шығу",
+  "logoutConfirm": "Шынымен аккаунттан шыққыңыз келе ме?",
+  "logoutFailed": "Шығу мүмкін болмады",
+
+  "deleteProfile": "Профильді жою",
+  "deleteTitle": "Профильді жою",
+  "deleteConfirm": "Маман профилін жойғыңыз келетініне сенімдісіз бе? Бұл әрекетті қайтару мүмкін емес.",
+  "deleteUnavailable": "Жою функциясы қолжетімсіз",
+  "deleteSuccess": "Маман профилі жойылды",
+
+  "cancel": "Бас тарту",
+  "delete": "Жою",
+  "exit": "Шығу",
+
+  "specialistProfileNotFound": "Маман профилін табу мүмкін болмады. Пайдаланушы маман ретінде тіркелгеніне көз жеткізіңіз."
+},
+"reviews": {
+  "title": "Пікірлер",
+  "yourRating": "Сіздің бағаңыз",
+  "writeReview": "Пікіріңізді жазыңыз...",
+  "leaveReview": "Пікір қалдыру",
+
+  "noReviews": "Әзірге пікір жоқ",
+  "beFirst": "Бірінші болып пікір қалдырыңыз",
+
+  "anonymous": "Аноним",
+
+  "loadError": "Пікірлерді жүктеу мүмкін болмады",
+  "postError": "Пікір қалдыру мүмкін болмады",
+  "error": "Қате"
+},
+"vstats": {
+  "rating": "Рейтинг",
+  "clients": "Клиенттер",
+  "experience": "Жыл тәжірибе"
+},
+"tabs": {
+  "about": "Өзі туралы",
+  "availability": "Кесте",
+  "reviews": "Пікірлер",
+  "edit": "Өңдеу",
+  "manage": "Кабинет"
+},
+"slots": {
+  "error": "Қате",
+  "success": "Сәтті",
+  "confirmation": "Растау",
+
+  "loadingSpecialist": "Маман туралы ақпарат жүктелуде...",
+  "specialistNotFound": "Маман табылмады",
+  "specialistNotFoundDescription": "Пайдаланушы ветеринар немесе қызмет көрсетуші екеніне көз жеткізіңіз",
+
+  "specialistType": "Маман түрі",
+  "specialistId": "Маман ID",
+
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Қызмет көрсетуші",
+
+  "blockReasonRequired": "Бұғаттау себебін көрсетіңіз",
+
+  "slotBlocked": "Слот бұғатталды",
+  "slotUnblocked": "Слот бұғаттан шығарылды",
+
+  "blockFailed": "Слотты бұғаттау мүмкін болмады",
+  "unblockFailed": "Слотты бұғаттан шығару мүмкін болмады",
+
+  "unblockQuestion": "Осы слотты бұғаттан шығару керек пе?",
+
+  "cannotGeneratePast": "Өткен күндер үшін слот жасауға болмайды",
+
+  "regenerateTitle": "Растау",
+  "regenerateQuestion": "Бұл әрекет таңдалған күндегі барлық слоттарды жойып, жаңаларын жасайды. Жалғастыру керек пе?",
+
+  "slotsGenerated": "Слоттар сәтті құрылды",
+  "generateFailed": "Слоттарды құру мүмкін болмады",
+
+  "regenerateSlots": "Слоттарды қайта құру",
+  "generateSlots": "Слоттарды құру",
+
+  "noSlots": "Бұл күнге слоттар жоқ",
+
+  "pastSlot": "⏰ Өткен слот",
+  "cannotEdit": "Өзгертуге болмайды",
+
+  "available": "Қолжетімді",
+  "booked": "Брондалған",
+  "blocked": "Бұғатталған",
+
+  "block": "Бұғаттау",
+  "unblock": "Бұғаттан шығару",
+
+  "blockReason": "Бұғаттау себебі",
+  "blockPlaceholder": "Мысалы: үзіліс, аурухана, демалыс және т.б.",
+
+  "cancel": "Бас тарту",
+  "continue": "Жалғастыру"
+},
+"gr": {
+  "goodMorning": "Қайырлы таң",
+  "goodAfternoon": "Қайырлы күн",
+  "goodEvening": "Қайырлы кеш"
+},
+"specialists": {
+  "title": "Маман табу",
+  "availableCount": "{{count}} маман қолжетімді",
+
+  "veterinarian": "Ветеринар",
+  "serviceProvider": "Қызмет көрсетуші",
+
+  "privatePractice": "Жеке тәжірибе",
+  "addressNotSpecified": "Мекенжай көрсетілмеген",
+  "mobileService": "Көшпелі қызмет",
+  "locationOnBooking": "Мекенжай жазылғаннан кейін қолжетімді болады",
+
+  "error": "Қате",
+  "loadFailed": "Мамандарды жүктеу мүмкін болмады",
+  "incompleteData": "Маман туралы мәлімет толық емес",
+
+  "emptyTitle": "Мамандар табылмады",
+  "emptyDescription": "Сүзгілерді немесе іздеу сұранысын өзгертіп көріңіз"
+}
 }

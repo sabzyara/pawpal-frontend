@@ -16,6 +16,9 @@ import { useTheme } from '@/hooks/useTheme';
 import { Ionicons } from '@expo/vector-icons';
 import { timeSlotApi, specialistService } from '@/services/appointmentApi';
 import type { TimeSlot } from '@/services/appointmentApi';
+import "@/app/i18n";
+import { useTranslation } from "react-i18next";
+
 
 interface SlotManagementProps {
   userId: number;
@@ -29,6 +32,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
   isOwner = false,
 }) => {
   const { colors, typography, spacing } = useTheme();
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,13 +44,13 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
   const [loadingSpecialist, setLoadingSpecialist] = useState(true);
   const [regenerating, setRegenerating] = useState(false);
   
-  // ✅ Для отмены запросов
+
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     loadSpecialistInfo();
     
-    // ✅ Очистка при размонтировании
+
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -59,7 +63,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
       loadSlots();
     }
     
-    // ✅ Отменяем предыдущий запрос при смене даты
+ 
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -79,8 +83,8 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
     } catch (error) {
       console.error('Error loading specialist info:', error);
       Alert.alert(
-        'Ошибка',
-        'Не удалось найти профиль специалиста. Убедитесь, что пользователь является специалистом.'
+        t('slots.error'),
+        t('slots.specialistNotFoundDescription')
       );
     } finally {
       setLoadingSpecialist(false);
@@ -90,7 +94,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
   const loadSlots = async () => {
     if (!specialistInfo) return;
     
-    // ✅ Отменяем предыдущий запрос
+
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -106,14 +110,14 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
         formattedDate
       );
       
-      // ✅ Сортируем слоты по времени
+
       const sortedSlots = (slotsData || []).sort((a, b) => 
         a.startTime.localeCompare(b.startTime)
       );
       
       setSlots(sortedSlots);
     } catch (error: any) {
-      // ✅ Игнорируем ошибки отмены
+
       if (error?.name === 'AbortError' || error?.message === 'canceled') {
         return;
       }
@@ -140,7 +144,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
 
   const handleBlockSlot = async () => {
     if (!selectedSlot || !blockReason.trim()) {
-      Alert.alert('Ошибка', 'Укажите причину блокировки');
+      Alert.alert(t('slots.error'), t('slots.blockReasonRequired'));
       return;
     }
     
@@ -150,29 +154,29 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
       setShowBlockModal(false);
       setBlockReason('');
       setSelectedSlot(null);
-      Alert.alert('Успех', 'Слот заблокирован');
+      Alert.alert(t('slots.success'), t('slots.slotBlocked'));
     } catch (error: any) {
       console.error('Error blocking slot:', error);
-      Alert.alert('Ошибка', error?.message || 'Не удалось заблокировать слот');
+      Alert.alert(t('slots.error'), error?.message || t('slots.blockFailed'));
     }
   };
 
   const handleUnblockSlot = async (slotId: number) => {
     Alert.alert(
-      'Подтверждение',
-      'Разблокировать этот слот?',
+      t('slots.confirmation'),
+      t('slots.unblockQuestion'),
       [
-        { text: 'Отмена', style: 'cancel' },
+        { text: t('slots.cancel'), style: 'cancel' },
         {
-          text: 'Разблокировать',
+          text: t('slots.unblock'),
           onPress: async () => {
             try {
               await timeSlotApi.unblockSlot(slotId);
               await loadSlots();
-              Alert.alert('Успех', 'Слот разблокирован');
+              Alert.alert(t('slots.success'), t('slots.slotUnblocked'));
             } catch (error: any) {
               console.error('Error unblocking slot:', error);
-              Alert.alert('Ошибка', error?.message || 'Не удалось разблокировать слот');
+              Alert.alert(t('slots.error'), error?.message || t('slots.unblockFailed'));
             }
           },
         },
@@ -183,21 +187,21 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
   const handleRegenerateSlots = async () => {
     if (!specialistInfo) return;
     
-    // Проверка, что дата не прошедшая
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (selectedDate < today) {
-      Alert.alert('Ошибка', 'Нельзя генерировать слоты на прошедшие даты');
+      Alert.alert(t('slots.error'), t('slots.cannotGeneratePast'));
       return;
     }
     
     Alert.alert(
-      'Подтверждение',
-      'Это действие удалит все существующие слоты на выбранную дату и создаст новые. Продолжить?',
+      t('slots.confirmation'),
+      t('slots.regenerateQuestion'),
       [
-        { text: 'Отмена', style: 'cancel' },
+        { text: t('slots.cancel'), style: 'cancel' },
         {
-          text: 'Продолжить',
+          text: t('slots.continue'),
           onPress: async () => {
             try {
               setRegenerating(true);
@@ -205,10 +209,10 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
               
               await timeSlotApi.regenerateSlotsByUserId(userId, formattedDate);
               await loadSlots();
-              Alert.alert('Успех', 'Слоты успешно сгенерированы');
+              Alert.alert(t('slots.success'), t('slots.slotsGenerated'));
             } catch (error: any) {
               console.error('Error regenerating slots:', error);
-              Alert.alert('Ошибка', error?.message || 'Не удалось сгенерировать слоты');
+              Alert.alert(t('slots.error'), error?.message || t('slots.generateFailed'));
             } finally {
               setRegenerating(false);
             }
@@ -243,11 +247,10 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
     setSelectedDate(newDate);
   };
 
-  // ✅ Улучшенные функции цветов с fallback значениями
   const getSlotStatusColor = (status: string) => {
     switch (status) {
       case 'AVAILABLE':
-        return '#4CAF50'; // ✅ Явное значение вместо colors.success
+        return '#4CAF50'; 
       case 'BOOKED':
         return '#F44336';
       case 'BLOCKED':
@@ -260,17 +263,17 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
   const getSlotStatusText = (status: string) => {
     switch (status) {
       case 'AVAILABLE':
-        return 'Доступен';
+        return t('slots.available');
       case 'BOOKED':
-        return 'Забронирован';
+        return t('slots.booked');
       case 'BLOCKED':
-        return 'Заблокирован';
+        return t('slots.blocked');
       default:
         return status;
     }
   };
 
-  // ✅ Проверка, прошедший ли слот
+
   const isSlotPast = (slot: TimeSlot) => {
     const [hours, minutes] = slot.startTime.split(':');
     const slotDateTime = new Date(selectedDate);
@@ -283,7 +286,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
       <View style={{ padding: spacing.xl, alignItems: 'center' }}>
         <ActivityIndicator size="large" color={colors.primary.main} />
         <Text style={[typography.body2, { color: colors.text.secondary, marginTop: spacing.md }]}>
-          Загрузка информации о специалисте...
+          {t('slots.loadingSpecialist')}
         </Text>
       </View>
     );
@@ -299,10 +302,10 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
       }}>
         <Ionicons name="alert-circle-outline" size={48} color="#F44336" />
         <Text style={[typography.body1, { color: colors.text.primary, marginTop: spacing.md, textAlign: 'center' }]}>
-          Специалист не найден
+          {t("slots.specialistNotFound")}
         </Text>
         <Text style={[typography.caption, { color: colors.text.secondary, marginTop: spacing.xs, textAlign: 'center' }]}>
-          Убедитесь, что пользователь является ветеринаром или сервис-провайдером
+          {t('slots.specialistNotFoundDescription')}
         </Text>
       </View>
     );
@@ -321,7 +324,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
       }
     >
       <View style={{ padding: spacing.md }}>
-        {/* Информация о специалисте */}
+     
         <View style={{ 
           backgroundColor: colors.card.default, 
           borderRadius: spacing.md, 
@@ -331,14 +334,14 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
           borderColor: colors.border.light 
         }}>
           <Text style={[typography.body2, { color: colors.text.secondary }]}>
-            Тип специалиста: {specialistInfo.specialistType === 'VET' ? 'Ветеринар' : 'Сервис-провайдер'}
+            {t("slots.specialistType")} {specialistInfo.specialistType === 'VET' ? t('slots.veterinarian') : t('slots.serviceProvider')}
           </Text>
           <Text style={[typography.caption, { color: colors.text.tertiary, marginTop: spacing.xs }]}>
-            ID специалиста: {specialistInfo.specialistId}
+            {t("slots.specialistId")} {specialistInfo.specialistId}
           </Text>
         </View>
 
-        {/* Выбор даты */}
+
         <View style={{ 
           flexDirection: 'row', 
           justifyContent: 'space-between', 
@@ -373,7 +376,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* Кнопка регенерации - ТОЛЬКО ДЛЯ ВЛАДЕЛЬЦА */}
+
         {isOwner && (
           <TouchableOpacity
             onPress={handleRegenerateSlots}
@@ -391,13 +394,13 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
               <ActivityIndicator color={colors.text.inverse} />
             ) : (
               <Text style={[typography.button, { color: colors.text.inverse }]}>
-                Сгенерировать слоты заново
+                {t("slots.regenerateSlots")}
               </Text>
             )}
           </TouchableOpacity>
         )}
 
-        {/* Список слотов */}
+
         {loading ? (
           <View style={{ padding: spacing.xl, alignItems: 'center' }}>
             <ActivityIndicator size="large" color={colors.primary.main} />
@@ -411,7 +414,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
           }}>
             <Ionicons name="calendar-outline" size={48} color={colors.text.secondary} />
             <Text style={[typography.body1, { color: colors.text.primary, marginTop: spacing.md }]}>
-              Нет слотов на эту дату
+              {t("slots.noSlots")}
             </Text>
             {isOwner && (
               <TouchableOpacity 
@@ -419,7 +422,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
                 style={{ marginTop: spacing.md }}
                 disabled={regenerating}
               >
-                <Text style={{ color: colors.primary.main }}>Сгенерировать слоты</Text>
+                <Text style={{ color: colors.primary.main }}>{t('slots.generateSlots')}</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -448,11 +451,11 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
           {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
         </Text>
         
-        {/* Индикатор прошедшего времени */}
+
         {isPast && !isBooked && (
           <View style={{ marginTop: spacing.xs }}>
             <Text style={[typography.caption, { color: colors.text.tertiary }]}>
-              ⏰ Прошедший слот
+              {t("slots.pastSlot")}
             </Text>
           </View>
         )}
@@ -469,7 +472,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
           </Text>
         </View>
 
-        {/* Кнопка блокировки - ТОЛЬКО ДЛЯ ВЛАДЕЛЬЦА и ТОЛЬКО ДЛЯ ДОСТУПНЫХ слотов */}
+
         {isOwner && isAvailable && !isPast && (
           <TouchableOpacity 
             onPress={() => { 
@@ -484,13 +487,13 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
               borderRadius: spacing.xs 
             }}
           >
-            <Text style={{ color: colors.primary.main, fontSize: 12 }}>
-              Заблокировать
+        1      <Text style={{ color: colors.primary.main, fontSize: 12 }}>
+              {t("slots.block")}
             </Text>
           </TouchableOpacity>
         )}
 
-        {/* Кнопка разблокировки - ТОЛЬКО ДЛЯ ВЛАДЕЛЬЦА и ТОЛЬКО ДЛЯ ЗАБЛОКИРОВАННЫХ слотов */}
+
         {isOwner && isBlocked && !isPast && (
           <TouchableOpacity 
             onPress={() => handleUnblockSlot(slot.id)} 
@@ -503,15 +506,15 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
             }}
           >
             <Text style={{ color: colors.primary.main, fontSize: 12 }}>
-              Разблокировать
+              {t('slots.unblock')}
             </Text>
           </TouchableOpacity>
         )}
         
-        {/* Индикатор, что прошедший слот нельзя модифицировать */}
+
         {isPast && (isAvailable || isBlocked) && (
           <Text style={[typography.caption, { color: colors.text.tertiary, marginTop: spacing.xs, textAlign: 'center' }]}>
-            Недоступен для изменений
+            {t("slots.cannotEdit")}
           </Text>
         )}
       </View>
@@ -520,7 +523,7 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
 </View>
         )}
 
-        {/* Модальное окно для блокировки */}
+
         <Modal 
           visible={showBlockModal} 
           transparent 
@@ -540,13 +543,13 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
               width: '80%' 
             }}>
               <Text style={[typography.h4, { color: colors.text.primary, marginBottom: spacing.md }]}>
-                Причина блокировки
+                {t("slots.blockReason")}
               </Text>
               
               <TextInput
                 value={blockReason}
                 onChangeText={setBlockReason}
-                placeholder="Например: перерыв, больничный, отпуск и т.д."
+                placeholder={t("slots.blockPlaceholder")}
                 placeholderTextColor={colors.text.tertiary}
                 multiline
                 style={{ 
@@ -569,13 +572,13 @@ export const SlotManagement: React.FC<SlotManagementProps> = ({
               }}>
                 <TouchableOpacity onPress={() => setShowBlockModal(false)}>
                   <Text style={[typography.body1, { color: colors.text.secondary }]}>
-                    Отмена
+                    {t("slots.cancel")}
                   </Text>
                 </TouchableOpacity>
                 
                 <TouchableOpacity onPress={handleBlockSlot}>
                   <Text style={[typography.body1SemiBold, { color: colors.primary.main }]}>
-                    Заблокировать
+                    {t("slots.blocked")}
                   </Text>
                 </TouchableOpacity>
               </View>

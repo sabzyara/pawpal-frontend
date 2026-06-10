@@ -1,5 +1,3 @@
-// components/list/VetCard.tsx - ИСПРАВЛЕННАЯ ВЕРСИЯ
-
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useTheme } from '@/hooks/useTheme';
@@ -8,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 interface VetCardProps {
   vet: {
     id: string;
-    userId: number;  // ← ДОБАВЛЕНО
+    userId: number;
     firstName: string;
     lastName: string;
     avatarUrl: string;
@@ -21,13 +19,14 @@ interface VetCardProps {
     clinicName: string;
     isAvailableToday: boolean;
     address: string;
-    specialistType?: 'VET' | 'SERVICE';  // ← ДОБАВЛЕНО (опционально)
+    specialistType?: 'VET' | 'SERVICE';
   };
   onPress: () => void;
 }
 
 export const VetCard: React.FC<VetCardProps> = ({ vet, onPress }) => {
-  const { colors, spacing, typography } = useTheme();
+  const { colors, spacing, typography, theme } = useTheme(); 
+  const isDarkMode = theme === 'dark'; 
 
   return (
     <TouchableOpacity
@@ -38,7 +37,7 @@ export const VetCard: React.FC<VetCardProps> = ({ vet, onPress }) => {
         borderRadius: 28, 
         padding: 20, 
         marginBottom: 16, 
-        ...(colors.card.default === '#FFFFFF' && {
+        ...(!isDarkMode && {
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,

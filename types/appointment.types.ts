@@ -109,7 +109,7 @@ export interface Page<T> {
 export interface TimeSlot {
   id: number;
   specialistId: number;
-  specialistType: SpecialistType; // Исправлено: теперь не string, а SpecialistType
+  specialistType: SpecialistType; 
   date: string;
   startTime: string;
   endTime: string;

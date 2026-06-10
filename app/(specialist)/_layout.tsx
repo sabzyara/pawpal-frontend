@@ -100,7 +100,7 @@ export default function SpecialistTabs() {
       />
 
       <Tabs.Screen
-        name="specialist-profile"
+        name="profile"
         options={{
           title: "Profile",
 
