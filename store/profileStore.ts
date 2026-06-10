@@ -1,16 +1,14 @@
-import { create } from 'zustand';
 import api from '@/services/api';
-import { 
-  UserProfile, 
-  CompleteProfileData, 
-  Role,
-  User,
+import {
+  CompleteProfileData,
   PetOwner,
-  Veterinarian,
+  Role,
   ServiceProvider,
-  UserStatus
-
+  User,
+  UserProfile,
+  Veterinarian
 } from '@/types/profile';
+import { create } from 'zustand';
 
 
 
@@ -45,6 +43,8 @@ const getProfileEndpoint = (roleString: string): string => {
       return '/specialist-service/veterinarians/me';
     case Role.SERVICE:
       return '/specialist-service/service-providers/me';
+    case Role.ADMIN:
+      return '/user-service/admin/profile';
     default:
       throw new Error(`Unknown role: ${roleString}`);
   }

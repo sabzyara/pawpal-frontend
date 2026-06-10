@@ -1,15 +1,19 @@
 // app/_layout.tsx
-import { Stack } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useEffect } from "react";
+import { useTheme } from "@/hooks/useTheme";
 import { useAuthStore } from "@/store/authStore";
-import { View, ActivityIndicator } from "react-native";
+import { Stack } from "expo-router";
+import { useEffect } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./i18n";
 
 function LoadingScreen() {
+
+  const { colors } = useTheme();
+  
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#4CAF50" />
+      <ActivityIndicator color={colors.text.inverse} />
     </View>
   );
 }

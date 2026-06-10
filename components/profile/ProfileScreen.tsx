@@ -1,6 +1,6 @@
 import { useTheme } from '@/hooks/useTheme';
-import { useProfileStore } from '@/store/profileStore';
 import { useAuthStore } from '@/store/authStore'; // ✅ ДОБАВЛЕНО
+import { useProfileStore } from '@/store/profileStore';
 import { profileStyles } from '@/styles/profileScreenStyles';
 import { Role } from '@/types/profile';
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -69,6 +69,9 @@ export default function ProfileScreen() {
     if (role === Role.SERVICE && !profile.serviceProvider) {
       router.replace('/complete_service');
     }
+    // if (role === Role.ADMIN) {
+    //   router.replace('/profile');
+    // }
 
   }, [profile]);
 
@@ -385,7 +388,10 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         );
-      
+
+      case Role.ADMIN:
+        return null;
+
       default:
         return null;
     }
